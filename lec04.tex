@@ -1,0 +1,340 @@
+\documentclass[11pt]{article}
+
+\usepackage{fullpage}
+\usepackage{times}
+\usepackage{hyperref,microtype,pdfsync}
+\usepackage{amsmath,amsfonts,amssymb,amsthm}
+\usepackage{fancyhdr}
+\usepackage{mathtools}
+\usepackage{algorithm,algorithmic}
+
+\input{header}
+
+% VARIABLES
+
+\newcommand{\lecturenum}{4}
+\newcommand{\lecturetopic}{Number Theory, OWF Variants}
+\newcommand{\scribename}{Shiva Kintali}
+
+% END OF VARIABLES
+
+\lecheader
+
+\pagestyle{plain}               % default: no special header
+
+\begin{document}
+
+\thispagestyle{fancy}           % first page should have special header
+
+% LECTURE MATERIAL STARTS HERE
+
+Today we will see some concrete one-way function candidates that arise
+from number theory, and abstract out some of their other special
+properties that will be useful when we proceed to investigate
+pseudorandomness.
+
+\section{Collections of OWFs}
+\label{sec:coll-owfs-vari}
+
+Our generic definition of a one-way function is concise, and very
+useful for complexity-theoretic crypto.  However, it tends not to be
+as appropriate for the kinds of hard functions that we use in
+``real-life'' crypto; below we give a more flexible definition.  (In
+your homework, you will show that the generic OWF definition is
+equivalent to this one.)
+
+\begin{definition}
+  \label{def:collection-owfs}
+  A \emph{collection of one-way functions} is a family $F = \set{
+    f_{s} \colon D_{s} \to R_{s} }_{s \in S}$ satisfying the following
+  conditions:
+  \begin{enumerate}
+  \item \emph{Easy to sample a function:} there is a PPT algorithm
+    $\algo{S}$ such that $\algo{S}()$ outputs some $s \in S$
+    (according to some arbitrary distribution).
+  \item \emph{Easy to sample from domain:} there is a PPT algorithm
+    $\algo{D}$ such that $\algo{D}(s)$ outputs some $x \in D_{s}$
+    (according to some arbitrary distribution).
+  \item \emph{Easy to evaluate function:} there is a PPT algorithm
+    $\algo{F}$ such that $\algo{F}(s,x)=f_{s}(x)$ for all $s \in S$,
+    $x \in D_{s}$.
+  \item \emph{Hard to invert:} for any non-uniform PPT algorithm
+    $\Inv$, \[ \Pr_{s \gets \algo{S}(1^n), x \gets \algo{D}(s)}
+    \bracks*{\Inv(s,f_{s}(x)) \in f_{s}^{-1}(f_{s}(x))} = \negl(n). \]
+  \end{enumerate}
+\end{definition}
+
+For example, the subset-sum function $f_{\text{ss}}$ is more naturally
+defined as a collection, as follows.  Let $S_{n} = (\Z_{N})^{n}$ where
+$N=2^{n}$, and let the full index set $S = \cup_{n=1}^{\infty} S_{n}$.
+Define the domain $D_{\vec{a}} = \bit^{n}$ and the range $R_{\vec{a}}
+= \Z_{N}$, for all $\vec{a} = (a_{1}, \ldots, a_{n}) \in S_{n}$. The
+corresponding function is defined as \[ f_{\vec{a}}(x) =
+\sum_{i=1}^{n} a_{i} \cdot x_{i} \bmod N. \] The algorithms $\algo{S}$
+(function sampler), $\algo{D}$ (domain sampler), and $\algo{F}$
+(function evaluator) are all straightforward.
+
+In the remainder of the lecture, we will see other examples of OWF
+collections (some with other special properties) that arise from
+number theory.
+
+\section{Number Theory Background}
+\label{sec:numb-theory-backgr}
+
+\begin{definition}
+   \label{def:gcd}
+   For positive integers $a,b \in \N$, their \emph{greatest common
+     divisor} $d = \gcd(a,b)$ is the largest integer $d$ such that $d
+   \mid a$ and $d \mid b$.
+\end{definition}
+
+As a consequence of Algorithm~\ref{alg:exteuclid} below, there always
+exist integers $x,y \in \Z$ such that $ax + by = \gcd(a,b)$.  We say
+that $a$ and $b$ are \emph{co-prime} (or \emph{relatively prime}) if
+$\gcd(a,b) = 1$, i.e., $ax = 1 \bmod b$.  From this, $x$ is the
+multiplicative inverse of $a$ modulo $b$, and likewise $y$ is the
+multiplicative inverse of $b$ modulo $a$.  The following deterministic
+algorithm shows that $\gcd(a,b)$ (and additionally, the integers $x$
+and $y$) can be computed efficiently.
+
+\newcommand{\exteuclid}{\algo{ExtendedEuclid}}
+\renewcommand{\algorithmicrequire}{\textbf{Input:}}
+\renewcommand{\algorithmicensure}{\textbf{Output:}}
+
+\begin{algorithm}
+  \caption{Algorithm $\exteuclid(a,b)$ for computing the greatest
+    common divisor of $a$ and $b$.}
+  \label{alg:exteuclid}
+
+  \begin{algorithmic}[1]
+    \REQUIRE Positive integers $a \geq b > 0$.
+
+    \ENSURE $(x,y) \in \Z^{2}$ such that $ax + by = \gcd(a,b)$.
+
+    \IF {$b \mid a$}
+    \RETURN $(0,1)$
+    \ELSE
+    \STATE Let $a = b \cdot q + r$ for $r \in \set{1, \ldots, b-1}$
+    \STATE $(x',y') \gets \exteuclid(b,r)$
+    \RETURN $(y', x' - q \cdot y')$
+    \ENDIF
+  \end{algorithmic}
+\end{algorithm}
+
+\begin{theorem}
+  \label{thm:exteuclid}
+  $\exteuclid$ is correct and runs in polynomial time in the
+  \emph{lengths} of $a$ and $b$, i.e., in $poly(\log a + \log b)$
+  time.
+\end{theorem}
+
+\begin{proof}
+  For correctness, we argue by induction on the second argument $b$.
+  Clearly the algorithm is correct when $b=1$.  If $b \mid a$, then
+  $\gcd(a,b) = b$, hence $\exteuclid$ correctly returns $(0,1)$.  If
+  $b \nmid a$ then by the inductive hypothesis (using $b > r$), the
+  recursive call correctly returns $(x',y')$ such that $bx' + ry' =
+  \gcd(b,r)$.  It can be checked that $\gcd(a,b) = \gcd(b,r)$, because
+  any common divisor of $a$ and $b$ is also a divisor of $r$.
+  Finally, observe that \[ \gcd(b,r) = bx' + ry' = bx' + (a - b \cdot
+  q)y' = ay' + (x' - q \cdot y')b. \] Hence $\exteuclid$ correctly
+  returns $(y', x' - q \cdot y')$.
+  
+  For the running time, observe that all the basic operations (not
+  including the recursive call) can be implemented in polynomial
+  time.  The following claim establishes the overall efficiency.
+  
+  \begin{claim}
+    For $2^{n} > a \geq b > 0$, $\exteuclid$ makes at most $2n$
+    recursive calls.
+  \end{claim}
+
+  We use induction.  The claim is true when $a < 2^{1}$.  Suppose the
+  claim is true for all $a < 2^n$, and suppose $a < 2^{n+1}$.  Two
+  cases arise:
+  \begin{itemize}
+  \item If $b < 2^n$, the first recursive call is on $(b, r)$.
+    Since $b < 2^n$, by the inductive hypothesis we make at most
+    $2n$ more recursive calls.  Hence the total number of recursive
+    calls is at most $1 + 2n < 2(n+1)$.
+  \item If $b \geq 2^n$, i.e., $2^{n+1} > a \geq b \geq 2^n$, we have
+    $a = b \cdot 1 + r$ for $r = a-b < 2^n < b$.  The first recursive
+    call is on $(b \geq 2^n, r < 2^n)$.  In turn, its recursive call
+    uses $r < 2^n$ as its first parameter.  By the inductive
+    hypothesis, the number of recursive calls following the second one
+    is at most $2n$.  Hence the total number of recursive calls is at
+    most $2 + 2n \leq 2(n+1)$. \qedhere
+  \end{itemize}
+\end{proof}
+
+\noindent We frequently work with the ring $(\ZN, +, \cdot)$ of
+integers modulo a positive integer $N$.
+
+\begin{lemma}[Chinese remainder theorem, special case]
+  Let $N = p \cdot q$ for distinct primes $p,q$.  The ring $\Z_N$ is
+  isomorphic to the product ring $\Zp \times \Zq$, via the isomorphism
+  $h(x) = (x \bmod p, x \bmod q)$.
+\end{lemma}
+
+\noindent A few remarks about the above lemma:
+\begin{itemize}
+\item In the product ring $\Zp \times \Zq$, addition and
+  multiplication are coordinate-wise.
+\item Clearly the isomorphism $h$ is efficiently computable.  Less
+  obvious is that it is also efficiently \emph{invertible}.  Suppose
+  we know some elements $c_{p}, c_{q} \in \ZN$ such that $h(c_{p}) =
+  (1,0)$ and $h(c_{q}) = (0,1)$; such a pair is sometimes called a
+  \emph{CRT basis}.  Then given $(x,y) \in \Zp \times \Zq$, it is easy
+  to see that $h^{-1}(x,y) = x \cdot c_{p} + y \cdot c_{q}$.
+  Exercise: show how to compute $c_{p}, c_{q}$ efficiently (hint: use
+  $\exteuclid$ on $p,q$).
+\end{itemize}
+
+\begin{definition}
+  The multiplicative group $\ZN^{*} := \set{ x \in \Z_N : x \text{
+      is invertible mod $N$, i.e., } \gcd(x,N) = 1 }$.
+\end{definition}
+
+\noindent Here are some useful facts about the multiplicative group
+$\ZN^{*}$:
+\begin{itemize}
+\item For a prime $p$, $\Zp^{*} = \set{1, \ldots, p-1}$.
+\item When $N=pq$ for distinct primes $p,q$, we have $\Z^{*}_N \cong
+  \Zp^{*} \times \Zq^{*}$.
+\end{itemize}
+
+\begin{definition}
+  For $N \in \Z^+$, Euler's \emph{totient function} $\varphi(n)$ is
+  defined to be $\abs{\ZN^{*}}$, i.e., the number of positive integers
+  $a \leq n$ relatively prime to $n$.
+\end{definition}
+
+\noindent Here are some useful facts about the totient function:
+\begin{itemize}
+\item For a prime $p$, we have $\varphi(p) = p - 1$.
+\item For a prime $p$ and positive integer $a$, we have $\varphi(p^a)
+  = (p-1) p^{a-1} = p^a - p^{a-1}$.
+\item If $gcd(a,b) = 1$, then $\varphi(a \cdot b) = \varphi(a) \cdot
+  \varphi(b)$.
+\end{itemize}
+
+\begin{definition}
+  The subgroup of \emph{quadratic residues} is defined as \[ \QRN^{*}
+  = \set{y \in \ZN^{*} : \exists\; x \in \ZN^{*} \text{ s.t. } y = x^2
+    \bmod N} \subseteq \ZN^{*}. \]
+\end{definition}
+
+\noindent Here are some useful facts about $\QRN^{*}$:
+\begin{itemize}
+\item For an odd prime $p$, $\abs{\QRp^{*}} = \frac{p-1}{2}$, because
+  $x \mapsto x^{2}$ is $2$-to-$1$ over $\Zp^{*}$.  (Exercise: prove
+  this.)
+
+\item When $N = pq$ for distinct odd primes $p,q$, we have $\QRN^{*}
+  \cong \QRp^{*} \times \QR_{q}^{*}$, hence $\abs{\QRN^{*}} =
+  \frac{p-1}{2} \cdot \frac{q-1}{2}$.
+
+\item For an odd prime $p$, we have $-1 \in \QRp^{*}$ if and only if
+  $p = 1 \bmod 4$.
+\end{itemize}
+
+\section{Factoring-Related Functions}
+\label{sec:fact-related}
+
+We can abstract out a modulus generation algorithm $\algo{S}$, which
+given the security parameter $1^{n}$ outputs the product $N$ of two
+primes $p,q$.  For example, $\algo{S}$ might choose $p$ and $q$ to be
+uniformly random and independent $n$-bit primes.
+
+\emph{Rabin's function} $f_{N} \colon \ZN^{*} \to \QRN^{*}$ is defined
+as follows: \[ f_{N}(x) = x^{2} \bmod N. \] Precisely defining the
+collection according to Definition~\ref{def:collection-owfs} is a
+simple exercise.  Note that $f_{N}$ is $4$-to-$1$, because each $y \in
+\QRN^{*}$ has two square roots modulo $p$, and two modulo $q$.
+
+\begin{theorem}
+  \label{thm:rabin-owf-factor}
+  If factoring is hard (with respect to $\algo{S}$), then the Rabin
+  collection (with function generator $\algo{S}$) is one-way.
+\end{theorem}
+
+\begin{proof}
+  First, as already discussed it is easy to generate a function,
+  sample its domain, and evaluate the function.  The main fact we use
+  to prove one-wayness is the following.
+
+  \begin{claim}
+    \label{claim:roots-factor}
+    Let $N = pq$ be the product of distinct odd primes.  Given any
+    $x_{1}, x_{2} \in \ZN^{*}$ such that $x_{1}^{2} = x_{2}^{2} \bmod
+    N$ but $x_{1} \neq \pm x_{2} \bmod N$, the factors of $N$ can be
+    computed efficiently.
+  \end{claim}
+
+  \begin{proof}[Proof of Claim]
+    We have $x_{1}^{2} = x_{2}^{2} \bmod p$ and $x_{1}^{2} = x_{2}^{2}
+    \bmod q$, which implies $x_{1} = \pm x_{2} \bmod p$ and $x_{1} =
+    \pm x_{2} \bmod q$.  But we cannot have both $+$ or both $-$, by
+    assumption.  Wlog, we have $x_{1} = + x_{2} \bmod p$ and $x_{1} =
+    - x_{2} \bmod q$.  Then $p \mid (x_{1}-x_{2})$ but $q \nmid
+    (x_{1}-x_{2})$, otherwise we'd have $q \mid (2x_{2}) \Rightarrow q
+    \mid x_{2} \Rightarrow x_{2} \not\in \ZN^{*}$.  Then
+    $\gcd(x_{1}-x_{2},N) = p$, which we can compute efficiently.
+  \end{proof}
+
+  Continuing with the proof of Theorem~\ref{thm:rabin-owf-factor}, we
+  prove one-wayness by contrapositive, via a reduction.  Assuming we
+  have an inverter for the Rabin function, the idea is to choose our
+  own $x_{1} \in \ZN^{*}$ and invoke the inverter on $y = f_{N}(x_{1})
+  = x_{1}^{2} \bmod N$.  The square root $x_{2}$ it returns will be
+  $\neq \pm x_{1}$, with probability $1/2$.  In such a case, we get
+  the prime factorization of $N$ by Claim~\ref{claim:roots-factor}.
+  We now proceed more formally.
+
+  Assume a non-uniform PPT inverter $\Inv$ violating the one-wayness
+  of the Rabin collection, i.e., \[ \Pr_{N \gets \algo{S}(1^{n}), x
+    \gets \ZN^{*}}[\Inv(N, y = x^{2} \bmod N) \in \sqrt{y} \bmod N] =
+  \delta(n) \] is non-negligible.
+
+  Our factoring algorithm $\Adv(N)$ works as follows: first, generate
+  a uniform $x_{1} \gets \ZN^{*}$.  Let $y = x_{1}^{2} \bmod N$ and
+  let $x_{2} \gets \Inv(N, y)$.  If $x_{2}^{2} = y \bmod N$ but $x_{1}
+  \neq \pm x_{2} \bmod N$, then compute the factorization of $N$ by
+  Claim~\ref{claim:roots-factor}.
+
+  We now analyze the reduction.  First, $N$ and $y$ are distributed as
+  expected, so $\Inv$ outputs $x_{2}$ such that $x_{2}^{2} = y \bmod
+  N$ with probability $\delta$.  Conditioned on the fixed value of
+  $y$, there are four possible values for $x_{1}$, each equally likely
+  by construction.  So we have $x_{2}^{2} = y \bmod N$ and $x_{2} \neq
+  \pm x_{1} \bmod N$ with prob $\delta/2$, which is non-negligible by
+  assumption.
+\end{proof}
+
+Suppose $p,q = 3 \bmod 4$.  Then $-1$ is not a square modulo $p$
+(respectively, $q$).  So for any $x \in \Zp^{*}$ (resp., $\Zq^{*}$),
+exactly one of $\pm x$ is a square modulo $p$ (resp., $q$).  From this
+it can be seen that if we restrict the Rabin function to have domain
+$\QRN^{*}$, i.e., $f_{N} \colon \QRN^{*} \to \QRN^{*}$, it becomes a
+\emph{permutation} (bijection).
+
+\medskip
+\noindent {\bf{Question}}: Our proof that $f_{N}$ is one-way used
+(quite essentially) the fact that $f_{N}$ is $4$-to-$1$.  Now that we
+have changed its domain to make $f_{N}$ a permutation, is the proof
+still valid?
+
+\begin{definition}[One-Way Permutation]
+  A collection $F = \set{f_{s} \colon D_{s} \to D_{s}}_{s \in S}$ is a
+  collection of \emph{one-way permutations} if it is a collection of
+  one-way functions $f_{s}$ under the \emph{uniform} distribution over
+  $D_{s}$, and each $f_{s}$ is a \emph{permutation} of $D_{s}$ (i.e.,
+  a bijection).
+\end{definition}
+
+\end{document}
+
+%%% Local Variables:
+%%% mode: latex
+%%% TeX-master: t
+%%% End:

@@ -1,0 +1,396 @@
+\documentclass[11pt]{article}
+
+\usepackage{fullpage}
+\usepackage{times}
+\usepackage{hyperref,microtype,pdfsync}
+\usepackage{amsmath,amsfonts,amssymb,amsthm}
+\usepackage{mathtools}
+\usepackage{fancyhdr}
+
+\input{header}
+
+% VARIABLES
+
+\newcommand{\lecturenum}{11}
+\newcommand{\lecturetopic}{Message Authentication}
+\newcommand{\scribename}{Daniel Dadush}
+
+\def\tg{\mathrm{tag}}
+\def\msg{\mathrm{msg}}
+\newcommand{\newl}
+{\vspace{1em}
+
+\noindent}
+
+% END OF VARIABLES
+
+\lecheader
+
+\pagestyle{plain}               % default: no special header
+
+\begin{document}
+
+\thispagestyle{fancy}           % first page should have special header
+
+% LECTURE MATERIAL STARTS HERE
+
+\section{Message Authentication}
+\label{sec:mess-auth}
+
+We start with some simple questions from real life:
+\begin{itemize}
+\item How do you know an email is from who it claims to be from?  (Do
+  you?)
+\item How does a soldier know his orders come from his commander?
+\item How does a bartender know you're 21?
+\end{itemize}
+All of these are questions of \emph{message authentication}:
+determining whether the contents of a message (an email, a soldier's
+orders, an identification card) came from their supposed source,
+without being modified (or generated outright) by a malicious
+interloper.
+
+A first natural question is: does encryption solve the problem of
+message authentication?
+
+Here is a proposal for the setting where Alice and Bob share a secret
+key: to authenticate a message, Alice simply encrypts the message $m$
+under a secure shared-key scheme.  For example, using the one-time
+pad, Alice sends: \[ c \gets \underbrace{m}_{\text{message}} \oplus
+\underbrace{k}_{\text{key}}. \] Bob decrypts the message and decides
+whether it ``looks good'' (e.g., whether it is properly formatted and
+readable).
+
+A moment's thought reveals the following property: \emph{An adversary
+  can flip any desired bit(s) of the message, without even knowing
+  what the message is!}  If the adversary knows anything about the
+format of the message, or its likely contents in certain places (which
+is the case in most applications), then it can change the message
+without causing any suspicion on the part of Bob.
+
+Hence, although the one-time pad is \emph{perfectly secret}, it is in
+a sense also \emph{perfectly inauthentic}.  The moral of this exercise
+is: Encryption is not \emph{sufficient} for authentication.  Later we
+will see that neither is it \emph{necessary}.  We need an entirely new
+model and security definition.
+
+\subsection{Model}
+\label{sec:model}
+
+We want the sender to be able to attach a ``tag'' or ``signature'' to
+every message, which can be checked for validity by the receiver.  In
+the shared-key setting, a \emph{message authentication code} $\mac$
+for message space $\msgspace$ is made up of algorithms $\macgen$,
+$\mactag$, $\macver$:
+\begin{itemize}
+\item $\macgen$ outputs a key $k$.
+\item $\mactag_k(m) := \mactag(k,m)$ outputs a tag $t \in \tagspace$
+  (the ``tag space'').
+\item $\macver_k(m,t) := \macver(k,m,t)$ either accepts or rejects
+  (i.e., outputs $1$ or $0$, respectively).
+\end{itemize}
+
+For completeness, we require that for any $m \in \msgspace$, for $k
+\gets \macgen$ and $t \gets \mactag_{k}(m)$, we have
+$\macver_{k}(m,t)=1$.
+
+\subsection{Information-Theoretic Treatment}
+\label{sec:inform-theor}
+
+The following definition is the analogue of perfect secrecy for
+authenticity, which captures the intuition that given a valid
+message-tag pair, no forger should be able to find a convincing tag
+for a \emph{different} message.
+
+\begin{definition}[Perfect unforgeability]
+  \label{def:perfect-unforg}
+  A $\mac$ scheme is \emph{perfectly unforgeable} if, for all
+  (possibly unbounded) $\For$ and all $m \in \msgspace$,
+  \[ \advan_{\mac}(\For) := \Pr_{k \gets \macgen, t \gets
+    \mactag(m)}[\For(m, t) \text{ succeeds}] \leq
+  \frac{1}{\abs{\tagspace}}, \] where ``succeeds'' means that $\For$
+  outputs some $(m',t') \in \msgspace \times \tagspace$ such that
+  $\macver_{k}(m',t') = 1$ and $m \neq m'$.
+
+  If the above holds for the relaxed success condition requiring only
+  that $(m',t') \neq (m,t)$ (i.e., $\For$ even succeeds if it outputs
+  a \emph{different} tag for the \emph{same} message), then the scheme
+  is said to be \emph{strongly} (and perfectly) unforgeable.
+\end{definition}
+
+\noindent Some remarks and observations about the definition:
+\begin{itemize}
+\item For any message $m'$, the forger $\For$ can always just guess a
+  tag $t'$ uniformly at random.  A valid tag (that makes
+  $\macver_{k}(m',t')$ accept) must exist by correctness, so
+  $1/\abs{\tagspace}$ is the strongest bound on the forger's advantage
+  that we can hope for.
+\item Unlike with encryption, the $\mactag_{k}$ algorithm can be
+  \emph{deterministic} (and all the examples we see today will be).
+\item If $\macver_{k}$ accepts a \emph{unique} tag for any given
+  message, then the $\mac$ is perfectly unforgeable if and only if it
+  is \emph{strongly} perfectly unforgeable.
+\end{itemize}
+
+\subsubsection{Construction}
+\label{sec:construction-info-mac}
+
+We'll construct a (strongly) perfectly unforgeable $\mac$ using a
+special kind of hash function family.
+
+\begin{definition}
+  \label{def:pairwise-ind-hash}
+  A family of functions $\calH = \set{h_{k} \colon \msgspace \to
+    \tagspace}$ is \emph{pairwise independent} if for any
+  \emph{distinct} $m,m' \in \msgspace$, the random variable $(h(m),
+  h(m'))$ is uniform over $\tagspace^{2}$, for a uniformly random $h
+  \gets \calH$.
+\end{definition}
+
+\begin{example} 
+  \label{ex:pairwise-ind}
+  Let $p$ be a prime.  Define $h_{a,b}(x) = ax + b \bmod p$ for $(a,b)
+  \in \Zp^2$.  We let $\msgspace = \tagspace = \Zp$.  We check that
+  the family $\set{h_{(a,b)}}$ is pairwise independent: for any
+  \emph{distinct} $m,m' \in \Zp$, and any $t,t' \in \Zp$,
+  \begin{align*}
+    \Pr_{(a,b) \gets \Zp^2}\left[h_{a,b}(m) = t \wedge h_{a,b}(m') =
+      t'\right] =
+    \Pr_{(a,b) \gets \Zp^2}\left[am+b = t \wedge am'+b = t'\right] = \\
+    \Pr_{(a,b) \gets \Zp^2}\left[
+      \begin{pmatrix} m & 1 \\ m ' & 1 \end{pmatrix}
+      \begin{pmatrix} a \\ b \end{pmatrix} =
+      \begin{pmatrix} t \\ t' \end{pmatrix} \right] = \Pr_{(a,b) \gets
+      \Zp^2}\left[ \begin{pmatrix} a \\ b \end{pmatrix} =
+      \begin{pmatrix} m & 1 \\ m ' & 1 \end{pmatrix}^{-1}
+      \begin{pmatrix} t \\ t' \end{pmatrix} \right] = \frac{1}{p^2}.
+  \end{align*}
+  Here we note that the matrix $\left( \begin{smallmatrix} m & 1 \\ m
+      ' & 1 \end{smallmatrix} \right)$ is invertible modulo $p$ by our
+  assumption that $m \neq m'$.  Our family is therefore pairwise
+  independent, as claimed.
+\end{example}
+
+From Definition~\ref{def:pairwise-ind-hash}, it is immediate to see
+that for any distinct $m,m' \in \msgspace$ and any $t,t' \in
+\tagspace$, \[ \Pr_{h \gets \calH}\left[h(m')=t' \mid h(m)=t\right] =
+\frac{1}{\abs{\tagspace}}. \]
+
+\noindent
+Our $\mac$ construction is as follows: let $\calH = \set{h_k \colon
+  \msgspace \to \tagspace}$ be a pairwise independent hash family.
+\begin{itemize}
+\item $\macgen$ outputs $h_{k} \gets \calH$.
+\item $\mactag_k(m)$ outputs $h_{k}(m) \in \tagspace$.
+\item $\macver_k(m, t)$ accepts if $t = h_k(m)$, and rejects otherwise.
+\end{itemize}
+
+\begin{theorem}
+  \label{thm:pwise-unforgeable}
+  The $\mac$ described above is strongly, perfectly unforgeable.
+\end{theorem}
+
+\begin{proof}
+  Since $\macver_{k}$ accepts at most one tag for a given message, it
+  suffices to prove that $\mac$ is perfectly unforgeable.  Now for any
+  $m \in \msgspace$, we see that
+  \[
+  \advan_{\mac}(\For) := \Pr_{k \gets \macgen, t \gets
+    \mactag(m)}[\For(m, t) \text{ succeeds}] = \Pr_{k \gets
+    \macgen}[\For(m, h_k(m)) = (m', h_k(m')) \wedge m' \neq m].
+  \]
+  Now breaking up the probability space over the forger's choice of
+  $m'$ and $t'$, the above expression becomes
+  \begin{align*}
+    \sum_{\substack{(m',t') \in \msgspace \times \tagspace \\ m' \neq
+        m}} &\Pr_{k \gets \macgen}[\For(m, t) = (m',t') \wedge
+    h_{k}(m')=t' \mid h_{k}(m) = t] \\
+    & = \sum_{\substack{(m',t') \in \msgspace \times \tagspace \\
+        m' \neq m}} \Pr[\For(m, t) = (m',t')] \cdot \Pr_{k \gets
+      \macgen}[h_k(m') = t' \mid h_{k}(m) = t] \\
+    & = \sum_{\substack{(m',t') \in \msgspace \times \tagspace \\
+        m' \neq m}} \Pr[\For(m, t) = (m',t')] \cdot
+    \frac{1}{|\tagspace|},
+  \end{align*}
+  where the first equality is because $\For$'s random coins are
+  independent of the choice of $k \gets \macgen$, and the second
+  inequality is because $\calH$ is pairwise independent.  We can
+  immediately upper bound the final expression above by
+  $1/\abs{\tagspace}$, as desired.
+\end{proof}
+
+\subsubsection{Critiques}
+\label{sec:critiques-info-mac}
+
+The scheme is only one-time!  In fact, using our concrete pairwise
+independent hash family from Example~\ref{ex:pairwise-ind}, it can be
+broken trivially if $\For$ sees two message-tag pairs for distinct
+messages $m,m'$, by solving for the key $(a,b)$ using basic linear
+algebra.  This problem is a deficiency in our \emph{definition} of
+unforgeability, because it does not comport with the fact that we
+would like to use a $\mac$ scheme to tag multiple messages.  However,
+it can be shown that perfect (information-theoretic) unforgeability is
+impossible to achieve, if the forger gets to see enough message-tag
+pairs relative to the (fixed) secret key size.  So to have any hope of
+achieving security, we need to consider a computational definition
+instead.
+
+\subsection{Computational Treatment}
+\label{sec:comp-mac}
+
+We want to be conservative and capture the fact that the adversary
+(forger) can choose to see tags on \emph{arbitrary} messages of its
+choice, but still cannot forge a tag for another message.  As usual,
+we do so by giving the adversary oracle access to the scheme.
+
+\begin{definition}[Unforgeability under Chosen-Message Attack]
+  \label{def:uf-mca}
+  We say that $\mac$ is UF-CMA if for all nuppt $\For$,
+  \[
+  \advan_{\mac}(\For) := \Pr_{k \gets \macgen}\left[\For^{\mactag_k}
+  \text{ succeeds} \right] \leq \negl(n),
+  \]
+  where here ``succeeds'' means that $\For$ outputs $(m',t')$ such that
+  \begin{enumerate}
+  \item $\macver_k(m',t') = 1$, and
+  \item 
+    \begin{enumerate}
+    \item \emph{Standard unforgeability:} $m'$ was not a query to the
+      $\mactag_{k}$ oracle, or
+    \item \emph{Strong unforgeability:} $(m',t')$ was not a query /
+      response pair from the $\mactag_{k}$ oracle.
+    \end{enumerate}
+  \end{enumerate}
+\end{definition}
+
+\paragraph{Construction for fixed-length messages.}
+
+Here we use a PRF in place of pairwise independent hash family.
+Intuitively, this should work since PRFs ``appear'' uniform and
+independent on any polynomial number of (adaptive) queries.  Letting
+$\msgspace = \tagspace = \bit^n$, and $\set{f_k \colon \msgspace \to
+  \tagspace}$ be a PRF family, we construct the $\mac = (\macgen,
+\mactag, \macver)$ identically to the previous construction.
+
+\begin{theorem} 
+  The above $\mac$ is strongly unforgeable under chosen message
+  attack.
+\end{theorem}
+
+\begin{proof}
+  We shall show that attacking $\mac$ is at least as hard as breaking
+  the PRF family (i.e., distinguishing a function chosen at random
+  from the family from a truly uniform, random function).  Let $\For$
+  be a candidate nuppt forger against $\mac$.  We use $\For$ to
+  construct an (oracle) distinguisher $\Dist^{\cdot}$ for the PRF game
+  as follows.  Notice that $\Dist$ needs to ``simulate'' the
+  chosen-message attack for $\For$, by providing a $\mactag_{k}$
+  oracle; it will do so using its own oracle.
+  
+  $\Dist$ is given oracle access to a function $g$, where $g \gets
+  \set{f_k}$ or $g \gets U(\bit^n \to \bit^n)$, as in the PRF
+  definition.  $\Dist^{g}$ runs $\For$, and whenever $\For$ queries a
+  message $m$ to be tagged, $\Dist$ queries $t = g(m)$ and returns $t$
+  to $\For$, also storing $m$ in an internal list of queries it
+  maintains.  Finally, $\For$ outputs a candidate forgery $(m',t')$.
+  If $m'$ is different from all of the queries so far and $t' =
+  g(m')$, then $\Dist$ returns $1$, otherwise it returns $0$.
+
+  We observe that $D$ is clearly nuppt.  We also remark that $\Dist$
+  only outputs $1$ when $\For$ outputs a tag for a message $m$ that
+  was not previously queried.  Now we want to know the advantage of
+  $\Dist$ against $\set{f_k}$:
+  \[
+  \advan_{\prf}(\Dist) = \left|\Pr_{g \gets \set{f_k}}[D^g = 1] -
+    \Pr_{g \gets U(\bit^n \to \bit^n)}[D^g = 1]\right|.
+  \]
+  \begin{enumerate}
+  \item When $g \gets \set{f_k}$, we see that $D^g$ emulates the
+    chosen-message attack to $\For$, and accepts exactly when $\For$
+    succeeds according to the definition.  Hence $\Pr[D^g = 1] =
+    \advan_{\mac}(\For)$.
+  \item When $g \gets U(\bit^n \to \bit^n)$, we claim that $\Pr[D^g =
+    1] \leq 2^{-n}$.  We note that when $\For$ returns a message $m'$
+    different from its queries $m_1,\dots,m_q$, the value $g(m)$ is
+    still uniform on $\bit^n$ conditioned on the values of
+    $g(m_1),\dots,g(m_k)$, because $g$ is a truly random function.
+    Therefore, $\For$ can succeed at guessing $g(m')$ with probability
+    at most $2^{-n}$, as claimed.
+  \end{enumerate}
+  We conclude that $\Dist$ has advantage at least $\advan_{\mac}(\For)
+  - 2^{-n}$ against $\set{f_k}$.  Since $\set{f_k}$ is a PRF family by
+  assumption, we must have that $\advan_{\mac}(\For) - 2^{-n} \in
+  \negl(n) \Rightarrow \advan_{\mac}(\For) \in \negl(n)$ as needed.
+\end{proof}
+
+\begin{exercise} 
+  This scheme works for messages of fixed input length.  Is it
+  possible to extend the scheme to handle messages of unbounded
+  length?
+\end{exercise}
+
+\section{Authenticated Encryption}
+\label{sec:auth-encrypt}
+
+Often Alice and Bob would want both secrecy and authenticity together
+in one package; this is more than just the sum of the two properties.
+
+Our model is as follows: an authenticated encryption scheme
+$\scheme{AE}$ is made up of $\skcgen$, $\skcenc$, $\skcdec$ as usual.
+But $\skcdec$ outputs an element of $\msgspace \cup \set{\bot}$, where
+$\bot$ is a distinguished symbol indicating ``inauthentic
+ciphertext,'' and any other output message implicitly means that the
+ciphertext was judged to be authentic.
+
+\begin{definition}
+  $\scheme{AE}$ is a secure authenticated encryption scheme if it is:
+  \begin{enumerate}
+  \item IND-CPA-secure as an encryption scheme, and
+  \item Strongly unforgeable as a $\mac$.  That is, for all nuppt
+    $\For$,
+    \[
+    \Pr_{k \gets \skcgen}[\For^{\skcenc_k(\cdot)} \text{ forges}] \leq \negl(n),
+    \]
+    where ``forges'' means that $\For$ outputs some $c'$ where
+    $\skcdec_k(c') \neq \bot$, and $c'$ is different from every
+    response of the $\skcenc_{k}$ oracle.  (That is, the only way to
+    obtain a valid ciphertext is to get it from the encryption
+    oracle.)
+  \end{enumerate}
+\end{definition}
+
+\paragraph{Candidate constructions.}
+
+Here we give some attempts to combine an IND-CPA secure $\skc$ with a
+strongly unforgeable $\mac$ to construct $\scheme{AE}$.  In all cases,
+we make sure to use \emph{independent} keys for both $\skc$ and
+$\mac$, which will be important in any potential security proof.  Take
+$m \in \msgspace$, and define $\scheme{AE}.\skcgen$ to choose $k_a
+\gets \mac.\macgen$ and $k_e \gets \scheme{SKC}.\skcgen$, and output
+key $(k_{a}, k_{e})$.  Now consider the following encryption
+algorithms $\scheme{AE}.\skcenc_{(k_{a},k_{e})}(m)$:
+
+\begin{enumerate}
+\item ``Encrypt and tag:'' output $(c \gets \skc.\skcenc_{k_e}(m), t
+  \gets \mac.\mactag_{k_a}(m))$.  This scheme has a problem: since
+  $\mactag$ need not have any secrecy properties, its output might
+  leak some of the plaintext $m$.  (For example, it is easy to
+  construct a ``pathological'' secure $\mactag$ that includes the
+  first few bits of $m$ in its output tag.)  Therefore, this scheme
+  will not necessarily be IND-CPA secure.
+  
+\item ``Tag then encrypt:'' output $c \gets \skc.\skcenc_{k_e}(m
+  \concat \mac.\mactag_{k_a}(m))$.  How should $\skcdec$ operate?  Can
+  you prove the scheme secure?
+  
+\item ``Encrypt then tag:'' output $(c \gets \skc.\skcenc_{k_e}(m), t
+  \gets \mac.\mactag_{k_a}(c))$.  How should $\skcdec$ operate?  Is
+  the scheme secure?
+\end{enumerate}
+
+\end{document}
+
+%%% Local Variables: 
+%%% mode: latex
+%%% TeX-master: t
+%%% End: 

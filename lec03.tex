@@ -1,0 +1,367 @@
+\documentclass[11pt]{article}
+
+\usepackage{fullpage}
+\usepackage{times}
+\usepackage{hyperref,microtype,pdfsync}
+\usepackage{amsmath,amsfonts,amssymb,amsthm}
+\usepackage{fancyhdr}
+\usepackage{mathtools}
+\usepackage{algorithm,algorithmic}
+
+\input{header}
+
+% VARIABLES
+
+\newcommand{\lecturenum}{3}
+\newcommand{\lecturetopic}{OWFs, Hardness Amplification}
+\newcommand{\scribename}{George P.~Burdell}
+
+% END OF VARIABLES
+
+\lecheader
+
+\pagestyle{plain}               % default: no special header
+
+\begin{document}
+
+\thispagestyle{fancy}           % first page should have special header
+
+% LECTURE MATERIAL STARTS HERE
+
+\section{One-Way Functions}
+\label{sec:one-way-functions}
+
+Recall our formal definition of a one-way function:
+\begin{definition}
+  \label{def:owf}
+  A function $f : \bit^{*} \to \bit^{*}$ is \emph{one-way} if it
+  satisfies the following conditions.
+  \begin{itemize}
+  \item \emph{Easy to compute.}  There is an efficient algorithm
+    computing $f$.  Formally, there exists a (uniform, deterministic)
+    poly-time algorithm $\algo{F}$ such that $\algo{F}(x) = f(x)$ for
+    all $x \in \bit^{*}$.
+  \item \emph{Hard to invert.}  An efficient algorithm inverts $f$ on
+    a random input with only negligible probability.  Formally, for
+    any non-uniform PPT algorithm $\Inv$, the \emph{advantage} of
+    $\Inv$ \[ \advan_{f}(\Inv) := \Pr_{x \gets \bit^{n}} \bracks*{
+      \Inv(1^{n}, f(x)) \in f^{-1}(f(x)) } = \negl(n) \] is a
+    negligible function (in the security parameter $n$).
+  \end{itemize}
+\end{definition}
+We also allowed a syntactic relaxation where the domain and range (and
+the input distribution over the domain) may be arbitrary, as long as
+the input distribution can be sampled efficiently (given the security
+parameter $n$).
+
+\subsection{Candidates}
+\label{sec:candidates}
+
+At the end of last lecture we defined two functions, with the idea of
+investigating whether they could be one-way functions:
+\begin{enumerate}
+\item Subset-sum: define $f_{\text{ss}} : (\Z_{N})^{n} \times \bit^{n}
+  \to (\Z_{N})^{n} \times \Z_{N}$, where $N = 2^{n}$, as \[
+  f_{\text{ss}}(a_{1}, \ldots, a_{n}, b_{1}, \ldots, b_{n}) = (a_{1},
+  \ldots, a_{n}, S = \sum_{i\; :\; b_{i} = 1} a_{i} \bmod N). \]
+  Notice that because the $a_{i}$s are part of the output, inverting
+  $f$ means finding a subset of $\set{1,\ldots,n}$ (corresponding to
+  those $b_{i}$s equaling $1$) that induces the given sum $S$ modulo
+  $N$.
+\item Multiplication: define $f_{\text{mult}} : \N^{2} \to \N$
+  as\footnote{For security parameter $n$, we use the domain $[1,2^{n}]
+    \times [1,2^{n}]$.  The cases $x=1$ and $y=1$ are special to rule
+    out the trivial preimages $(1,xy)$ and $(xy, 1)$ for the output
+    $xy \neq 1$.}
+  \[
+  f_{\text{mult}}(x,y) =
+  \begin{cases}
+    1 & \text{if } x=1 \vee y=1 \\
+    x \cdot y & \text{otherwise.}
+  \end{cases}
+  \]
+\end{enumerate}
+
+First consider $f_{\text{ss}}$; clearly it can be computed in
+polynomial time.  The subset-sum problem is a famous $\NP$-complete
+problem, hence if $\P \neq \NP$ there is no poly-time algorithm to
+solve it, and $f_{\text{ss}}$ must be one-way, right?  Not exactly:
+subset-sum is $\NP$-complete in the \emph{worst case}, but for
+$f_{\text{ss}}$ to be one-way we need it be hard on the
+\emph{average}.  Nevertheless, many believe that this form of
+subset-sum is indeed average-case hard, and hence $f_{\text{ss}}$ is
+conjectured to be one-way.
+
+Now consider $f_{\text{mult}}$; again, it can be computed in
+poly-time.  Inverting $f_{\text{mult}}$ means factoring $xy$ (into
+non-trivial factors), and factoring is hard, right?  Again, we need to
+be more careful: consider the following inverter $\Inv(z)$: if $z$ is
+even, then output $(2, z/2)$, otherwise fail.  Notice that $\Inv$
+outputs a valid preimage of $z$ exactly when $z = xy$ is even, which
+occurs with probability $3/4$ when $x, y$ are chosen independently and
+uniformly from $[1,2^{n}]$.
+
+The problem here is that while \emph{some} natural numbers seem hard
+to factor, a large fraction of them (e.g., those that are even)
+certainly are not.  There are two common ways to deal with this.  The
+first is to ``tweak'' the function (actually, its input distribution)
+to focus on the instances that we believe to be hard.  For the
+factoring problem, it is believed (but not proved!) that the hardest
+numbers to factor are those that are the product of exactly two primes
+of about the same size.  More specifically, define \[ \Pi_{n} = \set{
+  p\; :\; p \in [1,2^{n}] \text{ is prime}} \] to be the set of
+``$n$-bit prime numbers.''  Then we may make the following plausible
+conjecture:
+
+\begin{conjecture}[Factoring Assumption]
+  \label{conj:fact-primes-hard}
+  For every non-uniform PPT algorithm $\Adv$,
+  \[ \Pr_{p,q \gets \Pi_{n}} [\Adv(p \cdot q) = (p,q)] = \negl(n). \]
+\end{conjecture}
+
+Let's next change the input distribution of $f_{\text{mult}}$ so that
+$x,y$ are chosen uniformly and independently from $\Pi_{n}$.  Now, the
+one-wayness property for $f_{\text{mult}}$ is syntactically identical
+to Conjecture~\ref{conj:fact-primes-hard}, so for that property we
+have a ``proof by assumption.''  The only remaining question is the
+distribution over inputs: can we efficiently sample a random $n$-bit
+prime, i.e., sample uniformly from $\Pi_{n}$?
+Algorithm~\ref{alg:genprime} gives a potential algorithm,
+$\algo{GenPrime}$, to do so.
+
+\begin{algorithm}
+  \caption{Algorithm $\algo{GenPrime}(1^{n})$ for sampling a uniformly
+    random $n$-bit prime.}
+  \label{alg:genprime}
+  \begin{algorithmic}[1]
+    \STATE Choose a fresh uniformly random integer $p \in [1, 2^{n}]$.
+
+    \STATE If $p$ is prime, output $p$.  Otherwise start over.
+  \end{algorithmic}
+\end{algorithm}
+
+Clearly, if $\algo{GenPrime}$ terminates, it outputs an element of
+$\Pi_{n}$.  Moreover, it outputs a \emph{uniformly random} element of
+$\Pi_{n}$, because every $\bar{p} \in \Pi_{n}$ is equally likely to be
+chosen in the first step.  So the only remaining question is the
+running time: can we test primality efficiently?  And can we guarantee
+that the algorithm terminates quickly, i.e., does not start over too
+many times?
+
+The first question has many answers.  The definitive answer was
+provided in 2002 by Agrawal, Kayal, and Saxena, who gave a
+\emph{deterministic} primality test that runs in time polynomial in
+the bit length of the number (i.e., $\poly(n)$ for a number in
+$[1,2^{n}]$).  The running time, while polynomial, is quite large, so
+the AKS test is not used in practice.  Instead, \emph{randomized}
+tests such as Miller-Rabin are used to quickly test primality;
+however, such tests have a \emph{very small} probability of returning
+the wrong answer (``prime'' when the number is composite, or vice
+versa, or both).  This introduces a tiny bias into the output
+distribution of $\algo{GenPrime}$, which we can fold into a negligible
+error term that we won't need to worry about.\footnote{Another
+  alternative is to use \emph{deterministic} primality tests which
+  only have proofs of correctness under unproved (but widely-believed)
+  number-theoretic assumptions.  These are less common in practice
+  because they aren't so fast.}  (Later on we will rigorously define
+what ``negligible error term'' means.  We may study primality tests in
+more detail.)
+
+The second question, about the running time of $\algo{GenPrime}$, is
+also very interesting.  The probability that a particular iteration
+terminates is exactly $\abs{\Pi_{n}} / 2^{n}$ (assuming a perfect
+primality test).  How does $\abs{\Pi_{n}}$ compare to $2^{n}$, i.e.,
+how ``dense'' are the $n$-bit primes?  It is easy to show that there
+are an infinite number of primes, but this is not strong enough for
+our purposes --- primes could be so vanishingly rare that
+$\algo{GenPrime}$ effectively runs forever.  Fortunately, it turns out
+that the primes are quite dense.  For an integer $N > 1$, let $\pi(N)$
+denote the number of primes not exceeding $N$.  We have the following:
+
+\begin{lemma}[Chebyshev]
+  \label{lem:chebyshev-primes}
+  For every integer $N > 1$, $\pi(N) > \frac{N}{2 \log_{2} N}$.
+\end{lemma}
+(In fact, this is a weaker form of the ``prime number theorem,'' which
+says that $\pi(N)$ asymptotically approaches $\frac{N}{\ln N}$.  We
+will not give a proof of Lemma~\ref{lem:chebyshev-primes} now, but
+there is an elementary one in the Pass-shelat notes.)  Using
+Lemma~\ref{lem:chebyshev-primes}, we have \[
+\frac{\abs{\Pi_{n}}}{2^{n}} = \frac{\pi(2^{n})}{2^{n}} >
+\frac{2^{n}}{2^{n} \cdot 2 \log_{2}(2^{n})} = \frac{1}{2n}. \]
+Finally, since all the iterations of $\algo{GenPrime}$ are
+independent, the probability that it fails to terminate after (say)
+$2n^{2}$ iterations is \[ (1-\tfrac{1}{2n})^{2n \cdot n} \leq
+(1/2)^{n}, \] which is exponentially small.\footnote{To be completely
+  formal, in order to say that $\algo{GenPrime}$ is polynomial-time,
+  we should modify it so that if it has not terminated after $2n^{2}$
+  iterations, it just outputs some fixed value (say, $1$).  This
+  introduces only an exponentially small bias in its output
+  distribution.}
+
+\subsection{Weak OWFs and Hardness Amplification}
+\label{sec:hardn-ampl}
+
+The second way of dealing with the above difficulty of ``somewhere
+hard'' functions is more general, but also most costly and technically
+more complex.  Suppose we were not confident where the ``hard'' inputs
+to a OWF were likely to be, but we did believe that they weren't too
+rare.  We would then have a $\delta$-\emph{weak} one-way function,
+where the ``hard to invert'' property from Definition~\ref{def:owf} is
+relaxed to the following:
+\begin{itemize}
+\item For any non-uniform PPT algorithm $\Inv$, \[ \advan_{f}(\Inv) :=
+  \Pr_{x \gets \bit^{n}} \bracks*{\Inv(f(x)) \in f^{-1}(f(x))} \leq
+  1-\delta, \] for some $\delta = \delta(n) = 1/\poly(n)$.
+\end{itemize}
+The only change is that we have replaced the $\negl(n)$ success
+probability by $1-\delta$.  This definition allows for $f$ to be
+easily invertible for a large fraction of inputs (e.g., all the even
+numbers), but not ``almost everywhere:'' a $\delta$-fraction of the
+inputs remain hard.
+
+Suppose that $f$ is a $\delta$-weak OWF.  Can we get a (strong) OWF
+from it?  The answer is yes; this kind of result lies within the area
+called \emph{hardness amplification} (for obvious reasons).  Assume
+that we have a function $f$; then define its $m$-wise \emph{direct
+  product} \[ f'(x_{1}, \ldots, x_{m}) = (f(x_{1}), \ldots,
+f(x_{m})), \] where we parse the input so that $\len{x_{1}} = \cdots
+= \len{x_{m}}$.  We have the following theorem:
+
+\begin{theorem}
+  \label{thm:weak-strong-owf}
+  If $f$ is a $\delta$-weak one-way function, then $f'$ is a (strong)
+  one-way function for any $\poly(n)$-bounded $m \geq 2n/\delta$.
+\end{theorem}
+
+\textbf{Proof idea:} The intuition here is that inverting $f'$
+requires inverting $f$ on $m$ independently chosen values.  If each
+component is inverted independently with probability at most
+$1-\delta$, then the probability of inverting all of them should be at
+most \[ (1-\delta)^{2n/\delta} \approx (1/e)^{2n} = \negl(n). \]
+Rigorously proving that this intuition is correct, however, turns out
+to be quite subtle.  The reason is that an adversary $\Inv'$ attacking
+$f'$ does not have to treat each of the inversion sub-tasks $y_{1} =
+f(x_{1}), \ldots, y_{m} = f(x_{m})$ independently.  For example, it
+might look at all of the $y_{i}$s at once, and either invert
+\emph{all} of them (with some non-negligible probability overall), or
+none of them.  So the individual events (that $\Inv'$ succeeds in the
+sub-task of inverting $y_{i} = f(x_{i})$) can be highly correlated.
+
+To give a correct proof of the theorem, we need to perform a
+\emph{reduction} from inverting $f$ with advantage $> 1-\delta$ to
+inverting $f'$ with some non-negligible advantage.  Unpacking this a
+bit, we want to prove the contrapositive: suppose there is some
+(efficient) adversary $\Inv'$ that manages to break the (strong)
+one-wayness of $f'$, i.e., it inverts with some non-negligible
+advantage $\advan_{f'}(\Inv') = \alpha = \alpha(n)$.  Then we will
+construct another (efficient) adversary $\Inv$ that manages to break
+the $\delta$-weak one-wayness of $f$, i.e., it inverts $f$ with
+advantage $\advan_{f}(\Inv) > 1-\delta$.  In doing so, we will use
+$\Inv'$ as a ``black box,'' invoking it on inputs of our choice and
+using its outputs in whatever way may be useful.  However, we cannot
+assume that $\Inv'$ ``works'' in any particular way; we can only rely
+on the hypothesis that it violates the strong one-wayness of $f'$.
+
+The basic idea of the reduction is this: $\Inv$ is given $y = f(x)$
+and wants to use $\Inv'$ to invert $y$.  An obvious first attempt is
+to ``plug in'' the value $y$ as part of the output of $f'$, i.e., to
+run $\Inv'$ on \[ y' = (y_{1} = y = f(x), y_{2} = f(x_{2}), \ldots,
+y_{m} = f(x_{m})) = f'(x_{1} = x, x_{2}, \ldots, x_{m}) \] for some
+random $x_{2}, \ldots, x_{m}$ chosen by $\Inv$.  When $\Inv'$ produces
+a (candidate) preimage $x'=(x'_{1},\ldots,x'_{m})$, then $\Inv$ just
+outputs $x'_{1}$ as its candidate preimage of $y=f(x)$.  Notice that
+if $\Inv'$ happens to invert $y'$ successfully, then in particular
+$x_{1} \in f^{-1}(y)$ as required.
+
+Unfortunately, this simple idea does not quite work.  The problem is
+that $\Inv'$ inverts only with non-negligible probability $\alpha$,
+whereas we need $\Inv$ to invert with (typically larger) probability
+$> 1-\delta$, to violate the weak one-wayness of $f$.  We might hope
+to fix this problem by running $\Inv'$ a large number of times, using
+the same $y_{1} = f(x)$ but \emph{fresh} random $x_{2}, \ldots, x_{m}$
+each time, expecting $\Inv'$ to successfully invert at least once.
+(Note that we can check whether $\Inv'$ succeeded in inverting $f'$ on
+a particular tuple, because $f'$ is efficiently computable.)  This
+strategy is better, but still flawed: the problem is that the runs are
+\emph{not independent}, since we use the same $y_{1} = f(x)$ every
+time.  Indeed, $\Inv'$ might behave in a ``sneaky'' way to make this
+very strategy fail.  For example, $\Inv'$ might fix a certain
+$\alpha$-fraction of ``good'' values of $x_{1}$ for which it always
+inverts (ignoring $x_{2}, \ldots, x_{m}$), and fail on \emph{all}
+other values of $x_{1}$.  Notice that such $\Inv'$ has overall
+advantage $\alpha$, as required.  But no matter how many time we
+repeatedly run $\Inv'$ with $y_{1}=y=f(x)$, we will eventually succeed
+only if the original $x$ is ``good,'' which happens with probability
+only $\alpha$.
+
+A better reduction (which will turn out to work) just applies the
+above ``plug-and-repeat'' strategy for \emph{each} position $i = 1,
+\ldots, m$.  As it turns out, we can show that \emph{some} position
+must have a very large ($> 1-\delta/2$) fraction of ``good''
+$x_{i}$'s, for a suitable definition of good.  Conditioned on the $x$
+from our given instance $y = f(x)$ being good, by repeatedly calling
+$\Inv'$ a polynomial number of times (using fresh $x_{2}, \ldots,
+x_{m}$ each time), the probability that $\Inv'$ inverts successfully
+in at least one call will be extremely close to 1, so our overall
+advantage in inverting $f$ will be $\approx 1-\delta/2 > 1-\delta$, as
+desired.
+
+We now give the formal proof.
+
+\begin{proof}[Proof of Theorem~\ref{thm:weak-strong-owf}]
+  Because $m = \poly(n)$ by assumption (and because $2n/\delta = 2n
+  \cdot \poly(n) = \poly(n)$), if $f$ is efficiently computable, then
+  so is $f'$.  Now suppose that some efficient adversary $\Inv'$
+  violates the one-wayness of $f'$, with non-negligible advantage
+  $\alpha = \alpha(n) = \advan_{\Inv'}(f')$.  We wish to construct an
+  efficient adversary $\Inv$ that uses $\Inv'$ (efficiently) to
+  violate the $\delta$-weak one-wayness of $f$.
+
+  We first establish a crucial property of $\Inv'$ that will help us
+  obtain the desired reduction.  Define the ``good'' set for position
+  $i$ to be the set of all $x_{i}$ such that $\Inv'$ successfully
+  inverts with ``good enough'' probability, over the random choice of
+  all the remaining $x_{j}$.  Formally, \[ G_{i} = \set*{ x_{i}\;
+    :\; \Pr_{x_{j} \text{ for } j \neq i} \bracks*{ \Inv'(f'(x'))
+      \text{ succeeds} } \geq \frac{\alpha}{2m}}. \] Note that because
+  $\Inv'$ succeeds with at least $\alpha$ probability overall, it is
+  easy to see that $G_{i}$ is at least $(\alpha/2)$-dense for every
+  $i$.  However, we will show a very different fact: that $G_{i}$ is
+  at least $(1-\delta/2)$-dense for \emph{some} $i$.  (Note that
+  typically, $(1-\delta/2)$ is much larger than $\alpha$.)
+
+  \begin{claim}
+    \label{claim:good-dense}
+    For some $i$, we have $\frac{\abs{G_{i}}}{2^{n}} \geq
+    (1-\delta/2)$.
+  \end{claim}
+
+  \begin{proof}
+    Suppose not.  Then we have
+    \begin{align*}
+      \lefteqn{\Pr_{x'}[\Inv'(f'(x')) \text{ succeeds]}} \\
+      &\leq \Pr[\Inv' \text{ succeeds} \wedge \text{every } x_{i} \in
+      G_{i}] + \sum_{i=1}^{m} \Pr[\Inv' \text{ succeeds} \wedge
+      x_{i} \not\in G_{i}] & \text{(union bound)} \\
+      &\leq \Pr[\text{every } x_{i} \in G_{i}] + \sum_{i=1}^{m}
+      \Pr[\Inv' \text{ succeeds}\; |\; x_{i} \not\in
+      G_{i}] & \text{(probability)} \\
+      &< (1-\tfrac{\delta}{2})^{2n/\delta} + m \cdot \tfrac{\alpha}{2m}
+      & \text{(def \& size of $G_{i}$)} \\
+      &\leq 2^{-n} + \alpha/2 < \alpha,
+    \end{align*}
+    contradicting our assumption on $\Inv'$.
+  \end{proof}
+
+  The remainder of the proof is a simple exercise, following the
+  ``plug-and-repeat'' strategy described above, and using
+  Claim~\ref{claim:good-dense}.
+\end{proof}
+
+\end{document}
+
+%%% Local Variables: 
+%%% mode: latex
+%%% TeX-master: t
+%%% End: 

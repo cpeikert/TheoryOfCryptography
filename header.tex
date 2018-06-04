@@ -1,0 +1,292 @@
+%%% BLACKBOARD SYMBOLS
+
+\newcommand{\C}{\ensuremath{\mathbb{C}}}
+\newcommand{\D}{\ensuremath{\mathbb{D}}}
+\newcommand{\F}{\ensuremath{\mathbb{F}}}
+\newcommand{\G}{\ensuremath{\mathbb{G}}}
+\newcommand{\J}{\ensuremath{\mathbb{J}}}
+\newcommand{\N}{\ensuremath{\mathbb{N}}}
+\newcommand{\Q}{\ensuremath{\mathbb{Q}}}
+\newcommand{\R}{\ensuremath{\mathbb{R}}}
+\newcommand{\T}{\ensuremath{\mathbb{T}}}
+\newcommand{\Z}{\ensuremath{\mathbb{Z}}}
+\newcommand{\QR}{\ensuremath{\mathbb{QR}}}
+
+\newcommand{\Zt}{\ensuremath{\Z_t}}
+\newcommand{\Zp}{\ensuremath{\Z_p}}
+\newcommand{\Zq}{\ensuremath{\Z_q}}
+\newcommand{\ZN}{\ensuremath{\Z_N}}
+\newcommand{\Zps}{\ensuremath{\Z_p^*}}
+\newcommand{\ZNs}{\ensuremath{\Z_N^*}}
+\newcommand{\JN}{\ensuremath{\J_N}}
+\newcommand{\QRN}{\ensuremath{\QR_{N}}}
+\newcommand{\QRp}{\ensuremath{\QR_{p}}}
+
+%%% THEOREM COMMANDS
+
+\theoremstyle{plain}            % following are "theorem" style
+\newtheorem{theorem}{Theorem}[section]
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{corollary}[theorem]{Corollary}
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{claim}[theorem]{Claim}
+\newtheorem{fact}[theorem]{Fact}
+
+\theoremstyle{definition}       % following are def style
+\newtheorem{definition}[theorem]{Definition}
+\newtheorem{conjecture}[theorem]{Conjecture}
+\newtheorem{example}[theorem]{Example}
+\newtheorem{protocol}[theorem]{Protocol}
+
+\theoremstyle{remark}           % following are remark style
+\newtheorem{remark}[theorem]{Remark}
+\newtheorem{note}[theorem]{Note}
+\newtheorem{exercise}[theorem]{Exercise}
+
+% equation numbering style
+\numberwithin{equation}{section}
+
+%%% GENERAL COMPUTING
+
+\newcommand{\bit}{\ensuremath{\set{0,1}}}
+\newcommand{\pmone}{\ensuremath{\set{-1,1}}}
+
+% asymptotics
+\DeclareMathOperator{\poly}{poly}
+\DeclareMathOperator{\polylog}{polylog}
+\DeclareMathOperator{\negl}{negl}
+\newcommand{\Otil}{\ensuremath{\tilde{O}}}
+
+% probability/distribution stuff
+\DeclareMathOperator*{\E}{E}
+\DeclareMathOperator*{\Var}{Var}
+
+% sets in calligraphic type
+\newcommand{\calD}{\ensuremath{\mathcal{D}}}
+\newcommand{\calF}{\ensuremath{\mathcal{F}}}
+\newcommand{\calG}{\ensuremath{\mathcal{G}}}
+\newcommand{\calH}{\ensuremath{\mathcal{H}}}
+\newcommand{\calX}{\ensuremath{\mathcal{X}}}
+\newcommand{\calY}{\ensuremath{\mathcal{Y}}}
+
+% types of indistinguishability
+\newcommand{\compind}{\ensuremath{\stackrel{c}{\approx}}}
+\newcommand{\statind}{\ensuremath{\stackrel{s}{\approx}}}
+\newcommand{\perfind}{\ensuremath{\equiv}}
+
+% font for general-purpose algorithms
+\newcommand{\algo}[1]{\ensuremath{\mathsf{#1}}}
+% font for general-purpose computational problems
+\newcommand{\problem}[1]{\ensuremath{\mathsf{#1}}}
+% font for complexity classes
+\newcommand{\class}[1]{\ensuremath{\mathsf{#1}}}
+
+% complexity classes and languages
+\renewcommand{\P}{\class{P}}
+\newcommand{\BPP}{\class{BPP}}
+\newcommand{\NP}{\class{NP}}
+\newcommand{\coNP}{\class{coNP}}
+\newcommand{\AM}{\class{AM}}
+\newcommand{\coAM}{\class{coAM}}
+\newcommand{\IP}{\class{IP}}
+
+%%% "LEFT-RIGHT" PAIRS OF SYMBOLS
+
+%% NOTE: this requires \usepackage{mathtools} in the document preamble
+
+% inner product
+\DeclarePairedDelimiter\inner{\langle}{\rangle}
+% absolute value
+\DeclarePairedDelimiter\abs{\lvert}{\rvert}
+% a set
+\DeclarePairedDelimiter\set{\{}{\}}
+% parens
+\DeclarePairedDelimiter\parens{(}{)}
+% tuple, alias for parens
+\DeclarePairedDelimiter\tuple{(}{)}
+% square brackets
+\DeclarePairedDelimiter\bracks{[}{]}
+% rounding off
+\DeclarePairedDelimiter\round{\lfloor}{\rceil}
+% floor function
+\DeclarePairedDelimiter\floor{\lfloor}{\rfloor}
+% ceiling function
+\DeclarePairedDelimiter\ceil{\lceil}{\rceil}
+% length of some vector, element
+\DeclarePairedDelimiter\length{\lVert}{\rVert}
+% "lifting" of a residue class
+\DeclarePairedDelimiter\lift{\llbracket}{\rrbracket}
+\DeclarePairedDelimiter\len{\lvert}{\rvert}
+
+%%% CRYPTO-RELATED NOTATION
+
+% KEYS AND RELATED
+
+\newcommand{\key}[1]{\ensuremath{#1}}
+
+\newcommand{\pk}{\key{pk}}
+\newcommand{\vk}{\key{vk}}
+\newcommand{\sk}{\key{sk}}
+\newcommand{\mpk}{\key{mpk}}
+\newcommand{\msk}{\key{msk}}
+\newcommand{\fk}{\key{fk}}
+\newcommand{\id}{id}
+\newcommand{\keyspace}{\ensuremath{\mathcal{K}}}
+\newcommand{\msgspace}{\ensuremath{\mathcal{M}}}
+\newcommand{\ctspace}{\ensuremath{\mathcal{C}}}
+\newcommand{\tagspace}{\ensuremath{\mathcal{T}}}
+\newcommand{\idspace}{\ensuremath{\mathcal{ID}}}
+
+\newcommand{\concat}{\ensuremath{\|}}
+
+% GAMES
+
+% advantage
+\newcommand{\advan}{\ensuremath{\mathbf{Adv}}}
+
+% different attack models
+\newcommand{\attack}[1]{\ensuremath{\text{#1}}}
+
+\newcommand{\atk}{\attack{atk}} % dummy attack
+\newcommand{\indcpa}{\attack{ind-cpa}}
+\newcommand{\indcca}{\attack{ind-cca}}
+\newcommand{\anocpa}{\attack{ano-cpa}} % anonymous
+\newcommand{\anocca}{\attack{ano-cca}}
+\newcommand{\euacma}{\attack{eu-acma}} % forgery: adaptive chosen-message
+\newcommand{\euscma}{\attack{eu-scma}} % forgery: static chosen-message
+\newcommand{\suacma}{\attack{su-acma}} % strongly unforgeable
+
+% ADVERSARIES
+\newcommand{\attacker}[1]{\ensuremath{\mathcal{#1}}}
+
+\newcommand{\Adv}{\attacker{A}}
+\newcommand{\AdvA}{\attacker{A}}
+\newcommand{\AdvB}{\attacker{B}}
+\newcommand{\Dist}{\attacker{D}}
+\newcommand{\Sim}{\attacker{S}}
+\newcommand{\Ora}{\attacker{O}}
+\newcommand{\Inv}{\attacker{I}}
+\newcommand{\For}{\attacker{F}}
+
+% CRYPTO SCHEMES
+
+\newcommand{\scheme}[1]{\ensuremath{\text{#1}}}
+
+% pseudorandom stuff
+\newcommand{\prg}{\algo{PRG}}
+\newcommand{\prf}{\algo{PRF}}
+\newcommand{\prp}{\algo{PRP}}
+
+% symmetric-key cryptosystem
+\newcommand{\skc}{\scheme{SKC}}
+\newcommand{\skcgen}{\algo{Gen}}
+\newcommand{\skcenc}{\algo{Enc}}
+\newcommand{\skcdec}{\algo{Dec}}
+
+% public-key cryptosystem
+\newcommand{\pkc}{\scheme{PKC}}
+\newcommand{\pkcgen}{\algo{Gen}}
+\newcommand{\pkcenc}{\algo{Enc}} % can also use \kemenc and \kemdec
+\newcommand{\pkcdec}{\algo{Dec}}
+
+% digital signatures
+\newcommand{\sig}{\scheme{SIG}}
+\newcommand{\siggen}{\algo{Gen}}
+\newcommand{\sigsign}{\algo{Sign}}
+\newcommand{\sigver}{\algo{Ver}}
+
+% message authentication code
+\newcommand{\mac}{\scheme{MAC}}
+\newcommand{\macgen}{\algo{Gen}}
+\newcommand{\mactag}{\algo{Tag}}
+\newcommand{\macver}{\algo{Ver}}
+
+% key-encapsulation mechanism
+\newcommand{\kem}{\scheme{KEM}}
+\newcommand{\kemgen}{\algo{Gen}}
+\newcommand{\kemenc}{\algo{Encaps}}
+\newcommand{\kemdec}{\algo{Decaps}}
+
+% identity-based encryption
+\newcommand{\ibe}{\scheme{IBE}}
+\newcommand{\ibesetup}{\algo{Setup}}
+\newcommand{\ibeext}{\algo{Ext}}
+\newcommand{\ibeenc}{\algo{Enc}}
+\newcommand{\ibedec}{\algo{Dec}}
+
+% hierarchical IBE (as key encapsulation)
+\newcommand{\hibe}{\scheme{HIBE}}
+\newcommand{\hibesetup}{\algo{Setup}}
+\newcommand{\hibeext}{\algo{Extract}}
+\newcommand{\hibeenc}{\algo{Encaps}}
+\newcommand{\hibedec}{\algo{Decaps}}
+
+% binary tree encryption (as key encapsulation)
+\newcommand{\bte}{\scheme{BTE}}
+\newcommand{\btesetup}{\algo{Setup}}
+\newcommand{\bteext}{\algo{Extract}}
+\newcommand{\bteenc}{\algo{Encaps}}
+\newcommand{\btedec}{\algo{Decaps}}
+
+% trapdoor functions
+\newcommand{\tdf}{\scheme{TDF}}
+\newcommand{\tdfgen}{\algo{Gen}}
+\newcommand{\tdfeval}{\algo{Eval}}
+\newcommand{\tdfinv}{\algo{Invert}}
+\newcommand{\tdfver}{\algo{Ver}}
+
+%%% PROTOCOLS
+
+\newcommand{\out}{\text{out}}
+\newcommand{\view}{\text{view}}
+
+%%% COMMANDS FOR LECTURES/HOMEWORKS
+
+\newcommand{\lecheader}{%
+  \chead{\large \textbf{Lecture \lecturenum\\\lecturetopic}}
+
+  \lhead{\small
+    \textbf{\href{https://t-square.gatech.edu/portal/site/28862.201302}{Theory of Cryptography}\\Georgia Tech, Spring 2013}}
+
+  \rhead{\small \textbf{Instructor:
+      \href{http://www.cc.gatech.edu/~cpeikert/}{Chris Peikert}\\Scribe:
+      \scribename}}
+
+  \setlength{\headheight}{20pt}
+  \setlength{\headsep}{16pt}
+}
+
+\newcommand{\hwheader}{%
+  \chead{\Large \textbf{Homework \hwnum}}
+
+  \lhead{\small
+    \textbf{\href{https://t-square.gatech.edu/portal/site/28862.201302}{Theory
+    of Cryptography}\\Georgia Tech, Spring 2013}}
+
+  \rhead{\small \textbf{Instructor:
+      \href{http://www.cc.gatech.edu/~cpeikert/}{Chris
+      Peikert}\\Student: \studentname}}
+
+  \setlength{\headheight}{20pt}
+  \setlength{\headsep}{16pt}
+  
+  \headrule
+}
+
+\newcommand{\examheader}{%
+  \chead{\Large \textbf{Take-Home Exam}}
+  
+  \lhead{\small
+    \textbf{\href{https://t-square.gatech.edu/portal/site/28862.201302}{Theory
+    of Cryptography}\\Georgia Tech, Spring 2013}}
+
+  \rhead{\small \textbf{Instructor:
+      \href{http://www.cc.gatech.edu/~cpeikert/}{Chris
+        Peikert}\\Student: \studentname}}
+
+  \setlength{\headheight}{20pt}
+  \setlength{\headsep}{16pt}
+  
+  \headrule
+}
+  

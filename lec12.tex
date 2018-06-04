@@ -1,0 +1,300 @@
+\documentclass[11pt]{article}
+
+\usepackage{fullpage}
+\usepackage{times}
+\usepackage{hyperref,microtype,pdfsync}
+\usepackage{amsmath,amsfonts,amssymb,amsthm}
+\usepackage{mathtools}
+\usepackage{fancyhdr}
+
+\input{header}
+
+% VARIABLES
+
+\newcommand{\lecturenum}{12}
+\newcommand{\lecturetopic}{CCA, Digital Signatures}
+\newcommand{\scribename}{Rajiv Iyer}
+
+% END OF VARIABLES
+
+\lecheader
+
+\pagestyle{plain}               % default: no special header
+
+\begin{document}
+
+\thispagestyle{fancy}           % first page should have special header
+
+% LECTURE MATERIAL STARTS HERE
+
+\section{Chosen-Ciphertext Attacks}
+\label{sec:chos-ciph-attacks}
+
+\subsection{Motivation}
+\label{sec:cca-motivation}
+
+In the preceding lectures, our notion of security for encryption was
+constrained to work against so-called \emph{passive} adversaries.
+Such adversaries are permitted to see the ciphertexts for messages of
+their choice, and (in the public-key setting) to generate ciphertexts
+on their own.  However, the adversary never gets to see the
+\emph{decryptions} of any messages.  For some applications, we will
+need a stronger definition in which the adversary gets (limited)
+access to the decryption machinery as well.
+
+To establish the motivation for this stricter definition, imagine an
+auction scenario, where Alice and Eve are bidders for some item that
+Bob has for sale.  Alice is the honest participant, while Eve is the
+malicious adversary who tries to outbid Alice by the smallest amount
+possible.  Consider how it might work:
+\begin{itemize}
+\item Alice encrypts her bid $b_{A}$ under a key $k$, and sends the
+  resulting ciphertext $c$ to Bob.
+\item Eve intercepts the ciphertext $c$ and modifies some bit(s),
+  dispatching the modified ciphertext $c'$ to Bob.  To Bob, $c'$ looks
+  like a ciphertext and is treated as such.  Bob decrypts Alice's and
+  Eve's ciphertexts, yielding bids $b_{A}$ and $b_{E}$, and decides who
+  has bid the highest.
+\item To the highest bidder, Bob sends a message to the effect of
+  ``Congratulations, you won with a bid of $b$!'' where $b = b_A$ or
+  $b=b_E$, whichever is larger.
+\end{itemize}
+
+Suppose that the encryption scheme used in this scenario allows Eve to
+modify the ciphertext $c$, so that the result $c'$ encrypts a message
+that is related (in a predictable way) to $b_{A}$, \emph{even though
+  Eve does not know what $b_{A}$ is}?  For example, what if Eve can
+increase the underlying bid by $1$?  Then she will always win the
+auction with the lowest possible bid, \emph{and} she will learn the
+value of Alice's bid!
+
+It turns out that many encryption schemes are ``malleable'' in the
+above-described way.  For example, consider our PRF-based scheme,
+where $c = (r , f_{k}(r) \oplus m)$.  Flipping any bit of the second
+component causes the same bit in the underlying message to flip.  So
+if Alice's bid happened to be even, Eve can increment it by $1$ by
+flipping the least significant bit.  (If Even suspects that Alice's
+bid is odd, she can flip other bits to increase it by $1$ or more.)
+In the public-key setting, textbook RSA is similarly vulnerable: given
+Alice's ciphertext $c = b_{A}^{e} \bmod N$, Eve can (for example)
+double Alice's bid with $2^{e} \cdot c = (2b_{A})^{e} \bmod N$.
+
+The example illustrates some fine points:
+\begin{itemize}
+\item Eve is \emph{generating} ciphertexts of her own, not just seeing
+  ciphertexts that come from an encryption oracle.  She is mounting a
+  so-called ``chosen-ciphertext attack'' on the scheme.
+\item Bob is taking some action based on the result of
+  $\skcdec_{k}(c)$.  In this case, when Bob sends his congratulations
+  message, he is even acting as a \emph{decryption oracle}!
+\end{itemize}
+
+These issues are not just philosophical curiosities.  PKCS\#1 is a
+family of public-key cryptographic standards implemented by web
+servers and browsers, smart cards, etc.  In 1998, Bleichenbacher
+demonstrated a ``chosen-ciphertext'' attack against the PKCS\#1
+standard, which queried the decryption device (e.g., an SSL-equipped
+web server) on a large number of specially crafted ciphertexts, which
+gradually revealed information to the attacker.  In practical terms,
+this meant that an SSL session key could be exposed in a reasonable
+amount of time, perhaps a day or less.  (PKCS\#1 has since been
+updated with a ``chosen ciphertext-secure'' protocol that withstands
+such attacks.)
+
+\subsection{Definition}
+\label{sec:cca-definition}
+
+We seek a very conservative definition that ensures security
+\emph{even if the attacker is given access to a decryption oracle}.
+Of course, the attacker can learn the underlying message of any
+ciphertext simply by querying its decryption oracle, so how can we
+hope to achieve any meaningful notion of secrecy?  The answer is that
+we slightly weaken the decryption oracle (in one of a couple of
+possible ways) to prevent the adversary from querying it on the
+challenge ciphertext.
+
+\begin{definition}
+  \label{def:skc-cca}
+  We say that $\skc$ is secure under \emph{chosen-ciphertext attack}
+  (IND-CCA-secure) if the following tuple of oracles is
+  indistinguishable for $b=0,1$:
+  \[ \langle k \gets \skcgen : \skcenc_{k}(\cdot),
+  \algo{D}_{k}(\cdot), \algo{C}_{k}^{b}(\cdot, \cdot) \rangle, \]
+  where $\algo{C}_{k}(m_{0},m_{1})$ is the usual challenge oracle that
+  outputs $c^{*} = \skcenc_{k}(m_{b})$ and terminates, and
+  $\algo{D}_{k}(c)$ is an oracle that outputs $\bot$ if $c = c^{*}$
+  (the challenge ciphertext), else it outputs $\skcdec_{k}(c)$.
+
+  We say that $\skc$ is IND-CCA1-secure (or secure under ``lunchtime''
+  attacks) if the above holds where $\algo{D}_{k}$ is a decryption
+  oracle that answers queries \emph{before} $\algo{C}_{k}$ is invoked,
+  then terminates (i.e., it does not answer queries after the
+  challenge ciphertext $c^{*}$ has been produced).
+\end{definition}
+
+(``Lunchtime'' security is weaker than full IND-CCA security.  The
+name refers to the following whimsical scenario: Eve breaks into Bob's
+office while Bob is out to lunch, thus temporarily gaining access to
+his decryption machinery.  She wants to formulate a sequence of
+queries so that later on, when Bob comes back from lunch and she no
+longer has a decryption oracle, she can violate the secrecy of
+encrypted messages sent to/from Bob.)
+
+\subsection{Achieving CCA Security}
+\label{sec:achi-cca-secur}
+
+Our PRF-based scheme is not CCA-secure, as it is vulnerable to the
+bit-flipping attack described above.  (Exercise: how does the
+bit-flipping trick violate the precise definition above?)
+
+To design a CCA-secure scheme, we wish to use the notion of
+\emph{invalid ciphertexts}, i.e., we allow the decryption algorithm
+$\skcdec_{k}(\cdot)$ to output $\bot$ on ciphertexts that don't look
+``well-formed.''  The intuition is to design the scheme so that the
+only way an adversary can obtain a well-formed ciphertext is by
+directly querying the encryption oracle.  This way, it already
+``knows'' the underlying message, hence the decryption oracle is
+``useless!''  (This is just the intuition for how we think about
+designing a CCA-secure scheme.)
+
+It can be shown that in the shared-key setting, combining a message
+authentication code ($\mac$) with an IND-CPA-secure in the right way
+yields Authenticated Encryption (AE), a concept from last lecture.
+Moreover, it can be proved that an Authenticated Encryption (AE)
+scheme is, in fact, IND-CCA-secure.  (You will prove these facts in
+your homework.)
+
+\section{Digital Signatures}
+\label{sec:digital-signatures}
+
+We now switch back to message authentication itself.  Just as with
+encryption, a natural question is whether the tagging algorithm
+$\mactag$ and verification algorithm $\macver$ must use the
+\emph{same} key, or could they be \emph{asymmetric}?  That is, is it
+possible for verification to be performed by anyone (using a public
+verification key), while signing can be performed by only one party?
+
+Digital signatures are the asymmetric analogue of $\mac$s. For
+messages sent over an insecure channel, a properly implemented digital
+signature gives the receiver reason to believe the message was sent by
+the claimed sender.
+
+\subsection{Model}
+\label{sec:model}
+
+Very similarly to a $\mac$, a digital signature scheme $\sig$ is a
+triple of algorithms:
+
+\begin{itemize}
+\item $\siggen$: outputs a (public) verification key $\vk$ and a
+  (secret) signing key $\sk$.
+\item $\sigsign_{\sk}(m) = \sigsign(\sk,m)$: given a message $m \in
+  \msgspace$, outputs a signature $\sigma$.
+\item $\sigver_{\vk}(m,\sigma) = \sigver(\vk,m,\sigma)$: given a
+  message $m$ and signature $\sigma$, either accepts or rejects.
+\end{itemize}
+
+\subsection{Definition}
+\label{sec:uf-cma-definition}
+
+We seek a security definition in which the adversary (forger) may see
+signatures for messages that it selects arbitrarily (hence
+\textit{chosen-message-attack} or CMA), but still cannot forge a
+signature for another message.  Therefore, we give the adversary
+oracle access to $\sigsign_{\sk}(\cdot)$.  Moreover, the forger should
+explicitly be given the signature verification key $\vk$, because it
+is public information.
+
+\begin{definition}
+  \label{def:uf-cma-sig}
+  We say that $\sig$ is \emph{(strongly) unforgeable under
+    chosen-message-attack} (UF-CMA-secure) if for every nuppt $\For$,
+  \[ \advan_{\sig}(\For) := \Pr_{(\vk,\sk) \gets \siggen}
+  \bracks*{\For^{\sigsign_{\sk}(\cdot)}(\vk) \text{ succeeds}} \leq
+  \negl(n), \] where ``succeeds'' means that $\For$ outputs $(m' ,
+  \sigma')$ such that $\sigver_{v_{k}}(m' , \sigma') = 1$, and either
+  \begin{itemize}
+  \item \emph{Standard} unforgeability: $m'$ differs from all queries
+    $m_{i}$ to the $\sigsign$ oracle;
+  \item \emph{Strong} unforgeability: $(m', \sigma')$ differs from all
+    query/response pairs $(m_{i}, \sigma_{i})$ of the $\sigsign$
+    oracle.
+  \end{itemize}
+\end{definition}
+
+As with a $\mac$, the definition of \emph{strong} unforgeability
+corresponds to a looser notion of success, implying a stricter
+definition of security.
+
+\subsection{A (Failed) Proposal}
+\label{sec:failed-proposal}
+
+We sketch out a scheme with the view of making it UF-CMA-secure, but
+which we will show fails to live up the definition.  The scheme is
+based on a family of trapdoor one-way permutations.  Recall that a TDP
+family is a family $\calF = \set{f_{s} : D_{s} \to D_{s}}$ of one-way
+permutations, where the function sampler $\algo{S}$ outputs, along
+with $f_{s} \gets \calF$, a \emph{trapdoor} $t$ that makes it easy to
+compute $f_{s}^{-1}$.  The intuition is that the signer can use the
+trapdoor to compute a signature by inverting $f_{s}$ on the message,
+which the verifier can check by computing $f_{s}$ in the ``forward''
+direction.
+
+Formally, we define the following triplet of algorithms:
+\begin{itemize}
+\item $\siggen$: choose $(s,t) \gets \algo{S}$.  Output $\vk = s$ and
+  $\sk = t$. 
+\item $\sigsign_{t} (m \in D_{s})$: output $f_{s}^{-1}(m)$.
+\item $\sigver_{s}(m , \sigma)$: accept if $f_{s}(m) = \sigma$,
+  otherwise reject.
+\end{itemize}
+
+The scheme is correct by inspection.  And $f_{s}$ is ``hard to
+invert'' by assumption, so why isn't the scheme secure according to
+Definition~\ref{def:uf-cma-sig}?  The key point is that $f_{s}$ is
+hard to invert on a \emph{random} value $y \in D_{s}$, but a forger
+gets to \emph{choose} the message on which it inverts $f_{s}$!  In
+fact, observe that there is a trivial attack on the above scheme
+(which doesn't even make use of a signing oracle): given $\vk = s$,
+choose some $\sigma \in D_{s}$, let $m = f_{s}(\sigma)$, and output
+$(m,\sigma)$ as a forgery.  Clearly, $\sigver_{s}$ accepts this pair!
+
+Designing a truly UF-CMA-secure signature scheme is quite tricky, and
+involves several steps.  We will see how to do so in the next lecture.
+
+\end{document}
+
+\subsection{A One-Time Signature}
+\label{sec:one-time-signature}
+
+We suggest a "one time" secure signature scheme based on one way
+functions. We constrain the $\sigsign_{s_{k}}(\cdot)$ oracle to be
+able to answer \emph{only one} query. We describe the construction
+based on an OWF $f$ over a message space $M = \bit^{n}$ as the
+following triplet of algorithms:
+
+\begin{itemize}
+\item $\siggen$ works as follows:
+  \begin{itemize}
+  \item for $i \in [n]$ and $b \in \bit$, we choose $X_{i}^{b}
+    \leftarrow \bit^{n}$ and let $Y_{i}^{b} = f(X_{i}^{b})$.
+  \item We select $s_{k} = \set{X_{i}^{b}}$ and $v_{k} =
+    \set{Y_{i}^{b}}$
+  \end{itemize}
+\item $\sigsign (s_{k} , m \in \bit^{n})$ ouputs $\sigma =
+  (X_{i}^{m_{i}})$ where $\sigma$ is a tuple in $\set{\bit^{n}}^{n}$
+\item $\sigver (v_{k} , m , \sigma)$ checks $f(\sigma_{i}) =
+  Y_{i}^{m_{i}}$ , $\forall i \in [n]$.
+\end{itemize}
+
+The completeness is evident on inspection. Also, for any forgery $(m'
+, \sigma')$ there must exist an $i$ such that $m_{i}' \neq m_{i}$
+(where $m$ was the query). If $\sigma'$ is verified, then $\sigma_{i}'
+\in f^{-1}(Y_{i}^{m_{i}})$.
+
+\end{document}
+
+%%% Local Variables: 
+%%% mode: latex
+%%% TeX-master: t
+%%% End: 

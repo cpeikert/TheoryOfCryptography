@@ -1,0 +1,447 @@
+\documentclass[11pt]{article}
+
+\usepackage{fullpage}
+\usepackage{times}
+\usepackage{hyperref,microtype,pdfsync}
+\usepackage{amsmath,amsfonts,amssymb,amsthm}
+\usepackage{fancyhdr}
+\usepackage{mathtools}
+\usepackage[noend]{algorithm,algorithmic}
+
+\input{header}
+
+% VARIABLES
+
+\newcommand{\lecturenum}{17}
+\newcommand{\lecturetopic}{Zero-Knowledge for NP}
+\newcommand{\scribename}{Akash Kumar}
+
+% END OF VARIABLES
+
+\lecheader
+
+\pagestyle{plain}               % default: no special header
+
+\begin{document}
+
+\thispagestyle{fancy}           % first page should have special header
+
+% LECTURE MATERIAL STARTS HERE
+
+\section{Recap: Zero-Knowledge Proofs}
+\label{sec:recap:zkp}
+
+\begin{definition}
+  \label{def:ips}
+  A \emph{zero-knowledge interactive proof system} with
+  \emph{soundness error} $s \in [0,1]$ for a language $L \subseteq
+  \bit^{*}$ is a pair of algorithms: a (possibly computationally
+  unbounded) prover $P$, and a ppt verifier $V$, having the following
+  properties:
+  \begin{enumerate}
+  \item \emph{Completeness}: for all $x \in L$, $\out_{V}[ P(x)
+    \leftrightarrow V(x) ] = 1$, with probability $1$.
+  \item \emph{Soundness}: for any $x \not\in L$ and any (possibly
+    unbounded) $P^{*}$,
+    \[ \Pr\left[ \out_{V}[ P^{*}(x) \leftrightarrow V(x) ] = 1 \right]
+    \leq s. \]
+  \item \emph{Zero-knowledgeness}: for every nuppt (possibly cheating)
+    verifier $V^{*}$, there exists an nuppt simulator $\Sim$ such that
+    for all $x \in L$, \[ \view_{V^{*}}[P(x) \leftrightarrow V^{*}(x)]
+    \approx \Sim(x). \]
+  \end{enumerate}
+
+  The type of indistinguishability in the zero-knowledge condition can
+  either be \emph{statistical} (i.e., $\statind$) or
+  \emph{computational} (i.e., $\compind$).  We also say that the proof
+  system is \emph{efficient} if the prover's strategy can be
+  implemented by a randomized algorithm $P(x,w)$ that runs in time
+  polynomial in the length of its first argument, and any $x \in L$
+  has a ``hint'' (or witness) $w$ for which $P$ functions as it
+  should.
+\end{definition}
+
+\section{Which Languages Have ZKPs?}
+\label{sec:which-languages-zkp}
+
+We've seen zero-knowledge (sometime just honest-verifier ZK) proofs
+for graph non-isomorphism and graph isomorphism.  There are similar
+proofs for quadratic residuosity and non-residuosity modulo $N=pq$.
+(As an exercise, try to design them.)  What other languages have
+zero-knowledge proofs?  If we had to start from scratch every time we
+wanted a ZKP for a new language, it would be very cumbersome and
+time-consuming.  Here, we will see a very powerful and general result
+of Goldreich, Micali and Wigderson: informally, it says that ``any
+language for which membership can be efficiently verified can be
+proved in zero-knowledge.''
+
+\begin{theorem}
+  \label{thm:zkp-np}
+  Assume that there exists a statistically binding / computationally
+  hiding commitment scheme, defined below.  In particular, such a
+  commitment scheme can be constructed from any one-way permutation,
+  or even any one-way function.  Then for any $\NP$-language $L$ (also
+  defined below), there is a zero-knowledge proof system (with
+  efficient prover) for $L$.  
+\end{theorem}
+
+\subsection{Preliminaries}
+\label{sec:preliminaries}
+
+\subsubsection{$\NP$ and $\NP$-hardness}
+\label{sec:np}
+
+For completeness, we recall the definition of the class $\NP$ of
+languages that are decidable in nondeterministic polynomial time.
+
+\begin{definition}
+  \label{def:np}
+  A language $L \subseteq \bit^{*}$ is said to be in $\NP$ if there
+  exists a deterministic algorithm $W(x,w)$, running in time
+  polynomial in the length of its first argument $x$, such that $x \in
+  L$ if and only if there exists some $w \in \bit^{*}$ for which
+  $W(x,w)$ accepts.
+\end{definition}
+
+(Note that even though $W$ is a deterministic machine, its second
+argument $w$ captures the nondeterminism in the definition.)  If
+$W(x,w)$ accepts, we say that $w$ is a ``witness'' (or a
+``certificate,'' or a ``proof'') that $x \in L$.  Recall that any
+language $L \in \P$ (i.e., one for which membership can be decided in
+\emph{deterministic} polynomial time) is also in $\NP$: the machine
+$W(x,w)$ can just ignore its second argument and decide whether $x \in
+L$ on its own.  But $\NP$ also contains many languages that are not
+believed to be in $\P$, such as $\problem{3SAT}$, the language of all
+satisfiable 3CNF formulas; a witness $w$ is a satisfying assignment
+for the given formula.
+
+Also recall that $L'$ is said to be an \emph{$\NP$-hard} language if
+for \emph{every} $\NP$-language $L$, there is a deterministic
+polynomial-time algorithm (a reduction) $R_{L}$ such that $x \in L$ if
+and only if $R_{L}(x) \in L'$.  A language $L'$ is said to be
+\emph{$\NP$-complete} if it is $\NP$-hard, and is itself in $\NP$.
+Many important problems are $\NP$-complete, including
+$\problem{3SAT}$, graph $3$-colorability (defined below), graph
+Hamiltonicity, and so on.
+
+\subsubsection{Commitment Scheme}
+\label{sec:commitment-scheme}
+
+\newcommand{\Com}{\algo{Com}}
+
+Consider the following scenario.  Alice and Bob are betting on the
+result of a coin toss: Bob tosses the coin and Alice calls it while
+it's still in the air.  This game is trivial to analyze.  But what if
+Alice and Bob are not at the same location --- what if they are
+playing this game over the phone?  If Alice announces her call first,
+then Bob can lie about the outcome of his coin toss and always win.
+If Bob announces the outcome first, then Alice can just call the same
+thing and always win.  In order to ensure fair play, we want Alice to
+\emph{commit} to her call before the coin flip, in a way that conceals
+her choice from Bob but does not allow her to change her call after
+Bob announces the outcome of the coin flip.  The idea is that Alice
+can run a randomized algorithm $\Com$ on her guess, then later reveal
+it and the random coins she used when running $\Com$.  This should
+allow Bob to check that she revealed her commitment correctly, while
+hiding the value of her guess until it is revealed.  A formal
+definition follows.
+
+\begin{definition}
+  A statistically binding, computationally hiding \emph{commitment
+    scheme} for message space $\bit^{\ell}$ is a ppt algorithm $\Com$
+  having the following properties:
+  \begin{itemize}
+  \item \emph{Statistical (perfect) binding}: for all \emph{distinct}
+    $m_0, m_1 \in \bit^{\ell}$ and all random coins $r_0, r_1 \in
+    \bit^{*}$, \[ \Com(m_0; r_0) \neq \Com(m_1; r_1). \]
+   
+  \item \emph{Computational hiding}: For all messages $m_0, m_1 \in
+    \bit^{\ell}$, over the random coins of $\Com$, \[ \Com(m_{0})
+    \compind \Com(m_{1}). \]
+  \end{itemize}
+\end{definition}
+
+\begin{remark}
+  \label{rem:com-enc}
+  A commitment scheme is much like a public-key encryption scheme, in
+  that it computationally hides the committed message, but commitment
+  is potentially weaker.  The reason is that there need not be any
+  \emph{decryption} algorithm; instead, the message and randomness are
+  revealed by Alice at a later point.
+\end{remark}
+
+It is simple to construct a commitment scheme for a \emph{single bit}
+using a one-way \emph{permutation} $f$ with a hard-core predicate $h$.
+Define $\Com(b \in \bit, r \in \bit^n) = (f(r), b \oplus h(r))$.  The
+scheme is clearly \textit{binding}: given any commitment $(y \in
+\bit^{n}, c \in \bit)$, there is a unique $r = f^{-1}(y)$ and hence
+the committed bit is $b = c \oplus h(r)$.  That the above scheme is
+also \emph{hiding} follows by noticing that $(f(r), h(r)) \compind
+(f(r), U_1) \compind (f(r), 1 \oplus h(r))$.  To extend the scheme to
+multiple-bit messages, just execute $\Com$ in parallel with
+independent randomness on each bit; hiding follows by a simple hybrid
+argument.
+
+In fact, as we have seen in the homework, it is possible to construct
+an \emph{interactive} (two-message) commitment scheme using a
+pseudorandom generator, which can be constructed (with a lot of work)
+from any one-way \emph{function}.
+
+\section{Zero-Knowledge for $\NP$}
+\label{sec:zero-knowledge-np}
+
+\newcommand{\tcol}{\problem{3COL}}
+
+We can now prove Theorem~\ref{thm:zkp-np}.  For the reasons given
+below, it will suffice to give a zero-knowledge proof (with efficient
+prover) for the \emph{graph $3$-colorability} problem $\tcol$, defined
+as follows.
+
+\begin{definition}
+  \label{def:3col}
+  We say that a graph $G = (V,E)$ is \emph{$3$-colorable} if there
+  exists a function $\pi \colon V \to \set{1,2,3}$ (a ``coloring'' of
+  the vertices) such that $\pi(i) \neq \pi(j)$ for every edge $(i,j)
+  \in E$; that is, the endpoints of each edge have distinct colors.
+  The language $\tcol$ is the set of graphs $G$ that are
+  $3$-colorable.
+\end{definition}
+
+It suffices to give a zero-knowledge proof for $\tcol$ because $\tcol$
+is $\NP$-complete.  In more detail, to get a ZKP for any language $L
+\in \NP$, the prover and verifier (and also the simulator) on input
+$x$ first compute $x' = R_{L}(x)$, where $R_{L}$ is a deterministic
+poly-time reduction from $L$ to $\tcol$; such a reduction is
+guaranteed to exist because $\tcol$ is $\NP$-complete.  (In fact, the
+Cook-Levin reduction, which works for any $L \in \NP$, is a
+``canonical'' reduction that can be used.)  Then the prover and
+verifier run the ZKP for $\tcol$ on $x' = R_{L}(x)$; because $R_{L}(x)
+\in \tcol$ if and only if $x \in L$, this yields a ZKP for $L$.  Note
+that to get an \emph{efficient} prover for $L$, we also need an
+efficient reduction that maps any \emph{witness} for $x \in L$ to a
+witness for $R_{L}(x) \in \tcol$; fortunately, the Cook-Levin
+reduction provides this as well.
+
+\subsection{Interactive Proof for $\tcol$}
+\label{sec:ip-3col}
+
+Let $G = ([n],E)$ be a graph on $n$ vertices, which are numbered $1,
+\ldots, n$ without loss of generality.
+
+Consider the setup again. $P$ wants to convince $V$ that there is a
+valid $3$-coloring $\pi \colon [n] \to \set{1,2,3}$ of the graph $G$.
+The prover and verifier are both given the graph $G$, and the prover
+is additionally given $\pi$.  The basic idea is that the prover
+commits to a \emph{random permutation} of the coloring $\pi$, then the
+verifier challenges the prover to reveal the colors of the two
+vertices on a single edge.  If the prover correctly reveals two
+different colors, then the verifier accepts.  Intuitively, the
+protocol is sound because if the graph is not $3$-colorable, the
+verifier has at least a $1/\abs{E}$ chance of choosing an improperly
+colored edge.  Again intuitively, the protocol is zero-knowledge
+because the verifier only sees the commitments to each vertex (which
+hide the colors), plus openings to two distinct random colors.  The
+formal protocol follows.
+
+\begin{center}
+ \begin{tabular}{ccc}
+   $P(G, \pi)$ & & $V(G)$ \\ \\
+   Choose random perm $\rho$ of $\set{1,2,3}$. & & \\
+   For all $i \in [n]$, let $k_{i} = \rho(\pi(i))$ & & \\
+   and let $c_{i} = \Com(k_{i}; r_{i})$. & & \\
+   & $\underrightarrow{\quad c_{1}, \ldots, c_{n} \quad }$ & \\
+   && Choose $(u,v) \gets E$ \\
+   & $\underleftarrow{\quad (u,v) \quad}$ & \\
+   If $(u,v) \in E$, && \\
+   & $\underrightarrow{\quad (k_{u}, r_{u}), (k_{v}, r_{v})
+     \quad}$ & \\
+   && Accept iff $k_{u}, k_{v} \in \set{1,2,3}$ are distinct \\
+   && and $c_{i} = \Com(k_{i}, r_{i})$ for $i=u,v$.
+ \end{tabular}
+\end{center}
+
+The following claim is immediate by inspection:
+
+\begin{claim}
+  \label{claim:complete}
+  The interactive proof system $(P,V)$ described above is complete.
+\end{claim}
+
+\begin{claim}
+  \label{claim:sound}
+  The proof system $(P,V)$ described above has soundness error at most
+  $1-1/\abs{E} \leq 1-1/n^{2}$.
+\end{claim}
+
+\begin{proof}
+  Suppose that $G$ is not $3$-colorable, and let $P^{*}$ be any
+  possibly unbounded prover.  By statistical binding of $\Com$, for
+  any value of a commitment $c_{i}$ sent by $P^{*}$, there is at most
+  one color $k_{i} \in \set{1,2,3}$ for which $P^{*}$ could acceptably
+  open the commitment $c_{i}$.  Because $G$ is not $3$-colorable, for
+  any values of the colors $k_{i} \in \set{1,2,3}$, there must be at
+  least one edge $(u,v) \in E$ for which $k_{u} = k_{v}$.  The
+  verifier chooses this edge with probability $1/\abs{E}$, and no
+  message from $P^{*}$ could cause it to accept in this case.
+\end{proof}
+
+\begin{claim}
+  \label{claim:zk}
+  The proof system $(P,V)$ described above is computational
+  zero-knowledge.
+\end{claim}
+
+\begin{proof}
+  Let $G \in \tcol$, and let $\pi$ be an arbitrary valid $3$-coloring
+  of $G$.  Let $V^{*}$ be an arbitrary nuppt cheating verifier.  We
+  need to show that there exists an nuppt simulator $\Sim$ such
+  that \[\view_{V^{*}}[P(G,\pi) \leftrightarrow V^{*}(G)] \compind
+  \Sim(G). \] As usual, we will give a ``black-box'' simulator $\Sim$
+  that uses $V^{*}$ only as an oracle.  Informally, the simulator
+  prepares an initial message to $V^{*}$ (i.e., the commitments
+  $c_{i}$) so that it knows how to correctly answer \emph{one} of the
+  possible challenge edges.  If $V^{*}$ happens to ask for that edge,
+  the simulator completes the transcript with the correct reply,
+  otherwise it rewinds and tries again until it succeeds (up to a
+  certain number of attempts).  More formally, the simulator
+  $\Sim^{V^{*}}(G)$ is defined as follows:
+  \begin{algorithmic}[1]
+    \STATE Choose $(u, v) \gets E$ uniformly at random.
+    
+    \STATE Choose \emph{distinct} uniformly random $k_{u}, k_{v} \in
+    \set{1,2,3}$.  For all other $i \in [n]$, set $k_{i} = 1$.
+    
+    \STATE For each $i \in [n]$, compute commitments $c_{i} =
+    \Com(k_{i}; r_{i})$.
+
+    \STATE Run $V^{*}$ with fresh random coins $r_{V^{*}}$, send the
+    $c_{i}$s to $V^{*}$, and receive a challenge edge $(u^{*},v^{*})
+    \in E$.
+    
+    (If $V^{*}$ does not reply with a valid edge, then just
+    output the view so far.)
+
+    \IF{ $(u^{*}, v^{*}) = (u,v)$ }
+    
+    \STATE Output the view $(G, r_{V^{*}}, \set{c_{i}}, (k_{u},
+    r_{u}), (k_{v}, r_{v}))$.
+
+    \ELSE
+
+    \STATE Restart from the beginning (up to $n^{3}$ total
+    iterations).
+
+    \ENDIF
+  \end{algorithmic}
+  
+  To prove that $\Sim$ is a valid simulator, i.e., that
+  $\view_{V^{*}}[P(G,\pi) \leftrightarrow V^{*}(G)] \compind \Sim(G)$,
+  we will consider a sequence of hybrid experiments that successively
+  change from the view in a true interaction with $P$ to the view
+  output by $\Sim$.  The hybrid experiments are defined as follows,
+  along with the reasons why successive hybrids are indistinguishable,
+  which will complete the proof.
+  \begin{itemize}
+  \item $H_{0}$ is the view of $V^{*}$ in an interaction with the real
+    prover $P(G,\pi)$.
+  \item $H_{1}$ is the view of $V^{*}$ in an interaction with an
+    algorithm $P'(G,\pi)$.  The algorithm $P'$ works almost
+    identically to $P$, but it first chooses an edge $(u,v) \gets E$
+    before preparing the commitments $c_{i}$ as usual.  It then
+    replies to $V^{*}$'s challenge $(u^{*},v^{*})$ \emph{only if}
+    $(u^{*}, v^{*}) = (u,v)$; otherwise, the experiment is re-run from
+    the beginning (with fresh random coins), up to $n^{3}$ iterations.
+    In other words, $P'(G,\pi)$ generates messages exactly as
+    $P(G,\pi)$ does, but has the rewinding strategy of $\Sim$.
+
+    Observe that conditioned on the event $(u^{*}, v^{*}) = (u,v)$,
+    the view of $V^{*}$ when interacting with $P'$ is identical to its
+    view when interacting with $P$.  And because the choice of $(u,v)$
+    by $P'$ is \emph{statistically independent} of its initial message
+    to $V^{*}$, the probability that $(u^{*},v^{*}) = (u,v)$ is
+    exactly $1/\abs{E} \geq 1/n^{2}$, and some iteration succeeds,
+    except with negligible probability.  We conclude that $H_{0}
+    \statind H_{1}$.
+
+  \item $H_{2}$ is the view of $V^{*}$ in an interaction with an
+    algorithm $P''(G,\pi)$.  The algorithm $P''$ works almost
+    identically to $P'$: it chooses $(u,v) \gets E$ and sets the
+    colors $k_{u} = \rho(\pi(u))$, $k_{v} = \rho(\pi(v))$ as before,
+    but sets all other colors $k_{i} = 1$ (ignoring the valid coloring
+    $\pi$).  It then constructs the commitments $c_{i}$ using the
+    colors $k_{i}$, and either replies to $V^{*}$ or rewinds in
+    exactly the same way as before.  In other words, $P''(G,\pi)$
+    still uses the valid coloring $\pi$ for vertices $u$ and $v$, but
+    uses $\Sim$'s coloring strategy for the others.
+
+    Using the computational hiding property of the commitment scheme,
+    one can show that $H_{1} \compind H_{2}$.  To do this formally, we
+    would actually consider a sequence of ``sub-hybrids'' in which one
+    color $k_{i}$ at a time is changed from its ``true'' value
+    $\rho(\pi(i))$ (as in $H_{1}$) to its ``simulated'' value $1$ (as
+    in $H_{2}$).  We remark that the reduction from breaking the
+    commitment scheme to distinguishing adjacent sub-hybrids uses
+    \emph{non-uniformity} in an essential way, because to simulate the
+    entire view of $V^{*}$ (given a commitment to either
+    $\rho(\pi(i))$ or $1$), the simulator needs to have $G$ and $\pi$
+    ``hard-coded'' into it.  (This is a rather technical point, but is
+    an important one for a rigorous proof.)
+
+  \item $H_{3}$ is the view of $V^{*}$ in an interaction with
+    $\Sim(G)$.  It is easy to see that $H_{2}$ and $H_{3}$ are
+    \emph{identical}: for any valid $3$-coloring $\pi$, over the
+    random choice of $\rho$ by $P''$, the values $k_{u} =
+    \rho(\pi(u))$ and $k_{v} = \rho(\pi(v))$ are \emph{distinct
+      random} colors, independent of everything else (just as in the
+    definition of $\Sim$). \qedhere
+  \end{itemize}
+\end{proof}
+
+\section{Applications of ZK}
+\label{sec:applications-zk}
+
+We conclude by mentioning a few fascinating applications of zero
+knowledge proofs for $\NP$.
+
+\paragraph{Deniability / Non-transferability.}
+
+Suppose that a CIA agent Alice wants to prove her credentials to an
+MI5 agent Bob.  One way to do this is for the CIA to give her a
+signature, signed under the CIA's public key, for the message ``Alice
+is a CIA agent.''  Alice can then give this signature to Bob.
+However, what if Bob goes rogue and wants to sell his list of known
+CIA agents (with proof, in the form of valid signatures!) to the
+highest bidder?  The problem is that signature identifying Alice as a
+CIA agent is \emph{transferable}.  Instead, Alice should prove to Bob
+using zero-knowledge that she has a signature for the message ``Alice
+is a CIA agent.''  This is an $\NP$-statement, since the signature is
+a valid witness (which Alice has in her possession).  Bob will believe
+the proof, but he will not be able to convincingly transfer the
+transcript of that proof to anybody else, because for all they know,
+Bob could have created the transcript on his own by running the
+simulator!  In other words, Alice's proof is \emph{deniable}, in that
+she can plausibly claim that she was not responsible for producing it.
+
+\paragraph{Enforcing honest behavior.}
+
+Here the idea is that players in an interactive protocol can prove
+that they are not ``cheating,'' i.e., that they are not deviating from
+prescribed (and known) programs that they are supposed to be running
+(on their own secret inputs).
+
+Roughly, the idea is that at the outset of the protocol, the players
+are required to commit to the secret inputs and random coins of the
+``honest'' (prescribed) algorithms that they are supposed to run.
+They then carry out their computations, and with each output message
+they prove to each other in zero-knowledge that the message was
+honestly computed under the committed inputs and coins.  By soundness,
+we know that the players must really act honestly in order to be able
+to provide a valid proof.  By zero-knowledge, the proofs do not
+compromise the privacy of their secret inputs.
+
+\end{document}
+
+%%% Local Variables: 
+%%% mode: latex
+%%% TeX-master: t
+%%% End: 

@@ -1,0 +1,7 @@
+**/*.aux
+**/*.pdf
+**/*.pdfsync
+**/*.log
+**/*.out
+**/*.gz
+**/*.rel

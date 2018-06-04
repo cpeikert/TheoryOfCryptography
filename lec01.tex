@@ -1,0 +1,388 @@
+\documentclass[11pt]{article}
+
+\usepackage{fullpage}
+\usepackage{times}
+\usepackage{hyperref,microtype,pdfsync}
+\usepackage{amsmath,amsfonts,amssymb,amsthm}
+\usepackage{mathtools}
+\usepackage{fancyhdr}
+
+\input{header}
+
+% VARIABLES
+
+\newcommand{\lecturenum}{1}
+\newcommand{\lecturetopic}{Overview, Perfect Secrecy}
+\newcommand{\scribename}{George P.~Burdell}
+
+% END OF VARIABLES
+
+\lecheader                      % execute lecture commands
+
+\pagestyle{plain}               % default: no special header
+
+\begin{document}
+
+\thispagestyle{fancy}           % first page should have special header
+
+% LECTURE MATERIAL STARTS HERE
+
+\section{Overview of Course}
+\label{sec:overview-course}
+
+Cryptography is about \emph{communicating} and \emph{computing}
+securely in the presence of \emph{malicious} behavior.  Its use goes
+back to antiquity, but only in the past few decades has it become a
+rigorous discipline.  Central to the modern approach are precise
+mathematical \emph{models} and strong \emph{definitions} of security,
+as well as rigorous \emph{proofs} based on well-formed (and often
+mild) assumptions.
+
+\medskip \noindent
+Our inquiry will be centered around several core themes: 
+\begin{itemize}
+\item \textbf{``Perfect'' security.}  The ideal and its limitations.
+
+\item \textbf{Computational hardness.}  What it means for a problem to
+  be ``hard.''  The kinds of hardness needed for cryptographic
+  applications.  Where we might hope to find such hardness.
+
+\item \textbf{Indistinguishability and pseudorandomness.}  How very
+  different objects can appear ``essentially the same,'' and how
+  hardness can be used to achieve this.  Applying these concepts to
+  secret communication (encryption).
+
+\item \textbf{Authentication.}  How to ensure that a message came from
+  an expected source, not an impersonator.  How to identify yourself
+  remotely.
+
+\item \textbf{Interaction and knowledge.}  Proving that a statement is
+  true, without giving any reason why.  Keeping a secret even if
+  pieces of it are revealed.  Running a program in public without
+  revealing its inputs.
+
+\item \textbf{Advanced encryption.}  Secrecy even given a decryption
+  oracle.  Your name as your public key.
+
+\item \textbf{Special topics.}  Querying a database privately.
+  Implications of quantum computers.  Lattice-based cryptography.  The
+  frontier.
+\end{itemize}
+
+See the Course Information handout for policies and procedures.
+
+\section{Hidden Writing and Perfect Secrecy}
+\label{sec:hidd-writ-perf}
+
+Suppose a sender (call her Alice) wants to send a secret message to a
+receiver (Bob), but she doesn't want a potential eavesdropper (Eve) to
+be privy to its contents.  Can this be achieved?
+
+In addressing this question (and almost all others in this course!),
+we will apply the \emph{cryptographic methodology}:
+\begin{enumerate}
+\item Form a realistic \emph{model} of the problem (adjusting
+  as necessary to allow for the possibility of a solution).
+\item Next, \emph{precisely define} the desired functionality and
+  security properties of a potential solution.
+\item Finally, \emph{construct} and \emph{analyze} a solution,
+  (ideally) proving that it satisfies all the desired properties.
+\end{enumerate}
+
+\subsection{A First Attempt at a Model}
+\label{sec:first-attempt}
+
+In any scientific discipline, one of the earliest tasks in addressing
+a question is to form a precise \emph{model} of the problem.  This is
+one of the most important steps of the process, because all else
+depends on it: we need the model both to admit a useful solution to
+our problem, and to be as close to ``reality'' as possible (even
+though it will necessarily only be an approximation).
+
+Let's try to define a model for the above ``hidden writing'' problem.
+In cryptography, we generally model all the potential actors in the
+system by \emph{algorithms}.  These algorithms have precisely defined
+interfaces, i.e., what inputs they take and what outputs they produce.
+In this case, we might choose the following model:
+\begin{itemize}
+\item The sender Alice is represented by an algorithm $A(\cdot)$ that
+  takes as input a ``plaintext'' $m$ from some (finite) set of
+  possible messages $\msgspace$, and outputs some ``ciphertext'' $c$
+  from some (finite) set $\ctspace$.
+\item The receiver Bob is an algorithm $B(\cdot)$ that takes as input
+  a ciphertext $c \in \ctspace$, and outputs a message $m \in
+  \msgspace$.
+\item The eavesdropper Eve is some algorithm $E(\cdot)$ that takes as
+  input (i.e., is allowed to see) a ciphertext $c$, and outputs\ldots
+  what, exactly?  Because $E$ is an adversary, we have little control
+  over what it does, so let's not impose any constraint on the form of
+  its output.  
+
+  Note, however, that we have specified (though somewhat imprecisely
+  at this point) Eve's privileges in attacking the system: she gets to
+  see a ciphertext $c$, and nothing else.
+\end{itemize}
+So far, so good.  Notice that we have so far defined only the
+\emph{interfaces} of the algorithms, but not any of the properties we
+would like them to have.  One obvious property we'd want is that Bob
+should correctly recover (i.e., output) the message that Alice
+intended.  More precisely: for every $m \in \msgspace$, we should have
+$B(A(m)) = m$.  (For jargon lovers, this is often called the
+``completeness'' property.)
+
+Our next task is to try to precisely define the desired
+\emph{security} property we want our scheme to have.  This is usually
+one of the most difficult and subtle tasks to get right, perhaps
+because it is a ``negative goal:'' we want to say that Eve
+\emph{cannot} do something --- but what, exactly?  For the moment, we
+can certainly agree that even a minimally secure scheme should
+\emph{at least} prevent Eve from always discovering Alice's message
+$m$.  But a moment's thought reveals a problem: if the eavesdropper
+simply runs Bob's algorithm $B$ (i.e., if $E = B$), then by the
+completeness property, $E$ will \emph{always} output the correct $m$.
+The problem is with our model --- it is too strong to allow for a
+meaningful solution to the problem.  We need to change it.
+
+\subsection{Fixing the Model}
+\label{sec:fixing-model}
+
+To avoid the problem described above, we need to introduce something
+that distinguishes Bob (and perhaps Alice as well) from Eve.  One
+immediate idea is to make Bob's algorithm $B$ \emph{secret}, so that
+Eve cannot run it (often called ``security by obscurity'').  This
+turns out to be a \emph{terrible idea}: the history of cryptography
+(and security in general) is littered with the discarded remains of
+``secret'' algorithms/mechanisms that were anything but, or were
+broken even without discovering the mechanism at all.  Furthermore, it
+is impossible to evaluate the security or effectiveness of an
+algorithm without knowing what it is!  Therefore, a central tenet of
+modern cryptography is that
+\begin{center}
+  \emph{the system should be secure even if all its algorithms are
+    public}.
+\end{center}
+(This maxim is often called Kerckhoff's Law.)  Of course, we need not
+go out of our way to disclose our algorithms to our enemies, but we
+should play it safe and assume that they will somehow learn what they
+are.  And in practice, designing security mechanisms to be public
+often ``keeps us honest'' and ends up leading to better solutions.
+
+OK, back to the problem at hand.  Instead of using a secret algorithm,
+to distinguish Bob from Eve we use a secret \emph{input}, typically
+called a ``key'' (by analogy to a lock mechanism that only the key can
+open).  We augment our model above with an additional algorithm
+$\skcgen$ that creates a key, which then becomes an input to Alice and
+Bob, but not to Eve.\footnote{This is called the ``shared-key'' or
+  ``symmetric-key'' model, for obvious reasons.  Later in the course
+  we will see other models that can be both more flexible to use, and
+  allow for amazing functionality and security properties.} For more
+evocative notation, we also represent Alice by $\skcenc$ (for
+``encrypt'') and Bob by $\skcdec$ (for ``decrypt'').  Our new model is
+as follows:
+\begin{itemize}
+\item $\skcgen$ is a \emph{randomized} algorithm that takes no input,
+  and outputs a key $k$ in some (finite) set $\keyspace$.
+\item $\skcenc_{k}(m) = \skcenc(k,m)$ takes a key $k \in \keyspace$
+  and message $m \in \msgspace$, and outputs a ciphertext $c \in
+  \ctspace$.
+\item $\skcdec_{k}(c) = \skcdec(k,c)$ takes a key $k \in \keyspace$
+  and ciphertext $c \in \ctspace$, and outputs a message $m \in
+  \msgspace$.
+\end{itemize}
+Notice that $\skcgen$ \emph{cannot} be deterministic (i.e., it must be
+able to ``flip coins''), or else we would have gained nothing: Eve
+could just run $\skcgen$ herself and learn the key.  Also note that
+our model is still realistic, though somewhat less usable than before:
+Alice and Bob both need to get ahold of $\skcgen$'s output, so they
+may need to meet in advance or have some trusted communication path to
+obtain the key without Eve intercepting it.
+
+For completeness (pun not intended), let's update our correctness
+condition: for every $k \in \keyspace$ and $m \in \msgspace$, we
+should have $\skcdec_{k}(\skcenc_{k}(m)) = m$.
+
+\subsection{Shannon / Perfect Secrecy}
+\label{sec:shannon-perfect-secrecy}
+
+Now we have a model that (hopefully) allows for a secure solution.
+But what does ``secure'' \emph{mean}?  We can imagine many desirable
+properties:
+\begin{itemize}
+\item Eve should not learn the key.
+\item Eve should not be able to output the message, given the
+  ciphertext.
+\item The ciphertext should look like ``random gibberish'' without the
+  key.
+\item \ldots
+\end{itemize}
+These all seem nice enough, but where does the list end?  And how do
+we define them in a precise, mathematical way?
+
+Let's go back and consider what we really want our scheme to
+accomplish: \emph{it should conceal the message}.  (The key and the
+ciphertext are only means to this end, so our security notion should
+not be ``about'' them.)  Ideally, we would like the ciphertext to
+convey \emph{no (new) information the message} to the adversary, i.e.,
+\begin{center}
+  seeing the ciphertext should be no better than \emph{seeing nothing
+    at all}.
+\end{center}
+This principle is a crucial insight that will appear again and again
+(in various guises) throughout our study of cryptography.
+
+In his seminal 1949 work on information theory and cryptography,
+Claude Shannon precisely expressed the above principle in the language
+of probability theory, giving the following definition.
+
+\begin{definition}[Shannon secrecy]
+  \label{def:shannon-secrecy}
+  A shared-key encryption scheme $(\skcgen,\skcenc,\skcdec)$ with
+  message space $\msgspace$ and ciphertext space $\ctspace$ is
+  \emph{Shannon secret with respect to a probability distribution $D$}
+  over $\msgspace$ if for all $\bar{m} \in \msgspace$ and all $\bar{c}
+  \in \ctspace$,
+  \begin{equation}
+    \label{eq:shannon}
+    \Pr_{m \gets D,\; k \gets \skcgen}[m = \bar{m}\; |\;
+    \skcenc_{k}(m) = \bar{c} ] = \Pr_{m \gets D}[ m = \bar{m} ].
+  \end{equation}
+  The scheme is \emph{Shannon secret} if it is Shannon secret with
+  respect to every distribution $D$ over $\msgspace$.
+\end{definition}
+
+Let's consider this definition.  First, the distribution $D$
+represents how Alice chooses her message, and can be arbitrary --- but
+we (conservatively) imagine that the distribution itself is publicly
+known.  The right-hand side of Equation~\eqref{eq:shannon} is simply
+the \textit{a priori} probability that Alice chooses the message
+$\bar{m}$; this represents what Eve already knows about the message
+\emph{without seeing the ciphertext}.  The left-hand side is the
+\textit{a posteriori} probability that Alice chose the message
+$\bar{m}$, \emph{conditioned} on the fact that the ciphertext (which
+Eve gets to see) was $\bar{c}$.  The definition says that the two
+probabilities are exactly the same, or in other words, that no matter
+the value of the ciphertext, it reveals nothing new about the
+underlying message that was encrypted.
+
+Let's now rewrite the Shannon secrecy condition in another way, to
+eliminate the (somewhat cumbersome) conditional probability.  Using
+the definition of conditional probability, then substituting $m$ for
+$\bar{m}$ in $\skcenc_{k}(m)$ (because $m=\bar{m}$ is the other event
+in the conjunction), and then using the independence of $m$ and $k$,
+we can expand the left side of Equation~\eqref{eq:shannon} as follows:
+\[ \Pr_{m,k}[m=\bar{m}\; |\; \skcenc_{k}(m)=\bar{c}] =
+\frac{\Pr_{m,k}[m = \bar{m} \wedge
+  \skcenc_{k}(\bar{m})=\bar{c}]}{\Pr_{m,k}[\skcenc_{k}(m)=\bar{c}]} =
+\frac{\Pr_{m}[m=\bar{m}] \cdot
+  \Pr_{k}[\skcenc_{k}(\bar{m})=\bar{c}]}{\Pr_{m,k}[\skcenc_{k}(m)=\bar{c}]}. \]
+Shannon secrecy says that the above expression must equal
+$\Pr[m=\bar{m}]$, which is one of the terms in the numerator.  As long
+as this probability is positive (i.e., $\bar{m}$ is in the support of
+$D$), we can cancel it from both sides.  (Note that if $\bar{m}$ is
+not in the support of $D$, then Equation~\eqref{eq:shannon} always
+holds, regardless of how $\skcenc$ works!)  We therefore get an
+equivalent form of Shannon secrecy, which is: for every distribution
+$D$ over $\msgspace$, every $\bar{m}$ in the support of $D$, and every
+$\bar{c} \in \ctspace$, \[ \Pr_{k \gets
+  \skcgen}[\skcenc_{k}(\bar{m})=\bar{c}] = \Pr_{m \gets D,k \gets
+  \skcgen}[\skcenc_{k}(m)=\bar{c}]. \] In words, every
+\emph{particular} message $\bar{m}$ is equally likely to encrypt to
+$\bar{c}$ as a \emph{random} message $m$ (chosen from~$D$) is.
+
+While we have simplified the Shannon secrecy condition, it can still
+somewhat complicated to analyze, because of the arbitrary message
+distribution $D$.  Here we give a simpler definition which eliminates
+this distribution.  It says that no matter what message is encrypted,
+the ciphertext's distribution (solely over the random choices of
+$\skcgen$ and $\skcenc$) is exactly the same.
+
+\begin{definition}[Perfect secrecy]
+  \label{def:perfect-secrecy}
+  A shared-key encryption scheme $(\skcgen,\skcenc,\skcdec)$ with
+  message space $\msgspace$ and ciphertext space $\ctspace$ is
+  \emph{perfectly secret} if for all $m_{0}, m_{1} \in \msgspace$ and
+  all $\bar{c} \in \ctspace$,
+  \begin{equation}
+    \label{eq:perfect}
+    \Pr_{k \gets \skcgen}[\skcenc_{k}(m_{0}) = \bar{c}] = \Pr_{k \gets
+      \skcgen}[\skcenc_{k}(m_{1}) = \bar{c}].
+  \end{equation}
+\end{definition}
+
+Using elementary probability facts, it is straightforward to prove
+that perfect secrecy is \emph{equivalent} to Shannon secrecy (in
+either of the forms above).  That is, a scheme is Shannon secret if
+and only if it is perfectly secret, so we can use whichever definition
+we prefer.  (As an exercise, give the proof.)  The fact that such
+syntactically different definitions have exactly the same meaning also
+gives us further confidence that our definition is meaningful and
+robust.  Later on we will see other examples where seemingly very
+different security definitions end up being equivalent.
+
+\subsection{A Perfectly Secret Scheme: The One-Time Pad}
+\label{sec:one-time-pad}
+
+Now that we have a model and a (pair of) good definition(s), it's time
+to move to the third step of our methodology: constructing and
+analyzing a scheme.
+
+Interestingly, the encryption scheme we use predates Shannon's
+definition by 30 years!  (Nowadays it is less common for a scheme to
+end up being proved secure according to a definition that was
+formulated later on, but those were simpler times.)  Today the scheme
+is is called the \emph{one-time pad}, or sometimes the \emph{Vernam
+  cipher} after its inventor.  The intuition is that the key is used
+to completely ``randomize'' the message, but in a reversible way
+(using the key).
+
+\begin{definition}[One-Time Pad]
+  Let $n \geq 1$ be an integer.  The key, message, and ciphertext
+  spaces are each the set of $n$-bit strings: $\keyspace = \msgspace =
+  \ctspace = \bit^{n}$.  The scheme is defined as follows:
+  \begin{itemize}
+  \item $\skcgen$ outputs a uniformly random $k \gets \bit^{n}$.
+  \item $\skcenc_{k}(m)$ outputs $c = m \oplus k \in \bit^{n}$, where
+    $\oplus$ denotes the bitwise exclusive-or.
+  \item $\skcdec_{k}(c)$ outputs $m = c \oplus k \in \bit^{n}$.
+  \end{itemize}
+\end{definition}
+
+\begin{theorem}
+  \label{thm:otp-perfect}
+  The one-time pad is a perfectly secret shared-key encryption scheme.
+\end{theorem}
+
+\begin{proof}
+  First, the one-time pad is well-defined as a shared-key encryption
+  scheme: we have defined the sets $\keyspace$, $\msgspace$,
+  $\ctspace$, and the algorithms $\skcgen$, $\skcenc$, $\skcdec$ in a
+  manner consistent with our model.
+
+  We now prove completeness.  Observe that for any $m \in \msgspace$
+  and $k \in \keyspace$, we have \[ \skcdec_{k}(\skcenc_{k}(m)) = (m
+  \oplus k) \oplus k = m \oplus (k \oplus k) = m \oplus 0^{n} = m, \]
+  as required.  (Here we have used standard facts about the $\oplus$
+  operation, i.e., associativity and that $x \oplus x = 0$ for all
+  $x$.)
+
+  Finally, we prove perfect secrecy according to
+  Definition~\ref{def:perfect-secrecy}.  ``Plugging in'' the scheme to
+  the definition, observe that for any $\bar{m} \in \msgspace$ and
+  $\bar{c} \in \ctspace$, we have \[ \Pr_{k \gets
+    \skcgen}[\skcenc_{k}(\bar{m}) = \bar{c}] = \Pr_{k \gets
+    \bit^{n}}[\bar{m} \oplus k = \bar{c}] = \Pr_{k \gets \bit^{n}}[k =
+  \bar{m} \oplus \bar{c}] = 2^{-n}, \] where the last equality holds
+  because $\bar{m} \oplus \bar{c} \in \bit^{n}$ is fixed. It follows
+  that for any $m_{0}, m_{1} \in \msgspace$ and $\bar{c} \in
+  \ctspace$, we have \[ \Pr_{k \gets \skcgen}[\skcenc_{k}(m_{0}) =
+  \bar{c}] = 2^{-n} = \Pr_{k \gets \skcgen}[\skcenc_{k}(m_{1}) =
+  \bar{c}], \] as required by the definition.  This completes the
+  proof.
+\end{proof}
+
+\end{document}
+
+%%% Local Variables: 
+%%% mode: latex
+%%% TeX-master: t
+%%% End: 

@@ -1,0 +1,316 @@
+\documentclass[11pt]{article}
+
+\usepackage{fullpage}
+\usepackage{times}
+\usepackage{hyperref,microtype,pdfsync}
+\usepackage{amsmath,amsfonts,amssymb,amsthm}
+\usepackage{mathtools}
+\usepackage{fancyhdr}
+
+\input{header}
+
+% VARIABLES
+
+\newcommand{\lecturenum}{15}
+\newcommand{\lecturetopic}{Zero Knowledge, Interactive Proofs}
+\newcommand{\scribename}{Abhinav Shantanam}
+
+% END OF VARIABLES
+
+\lecheader
+
+\pagestyle{plain}               % default: no special header
+
+\begin{document}
+
+\thispagestyle{fancy} % first page should have special header
+
+% LECTURE MATERIAL STARTS HERE
+
+\section{Zero Knowledge}
+\label{sec:zero-knowledge}
+
+\subsection{Warm-Up: Zero Information}
+\label{sec:warm-up-zero-inf}
+
+When does a random variable $Y$ reveal \emph{no information} about
+another random variable $X$?  In probability theory, the answer to
+this question is: when $X$ and $Y$ are \emph{independent}.  One
+equivalent form of independence is that for \emph{any} fixed value of
+$X$, the conditional distribution of $Y$ (given $X$) is always just
+some certain distribution $D_{Y}$.
+
+Observe that perfect secrecy can be seen in this light: a shared-key
+encryption scheme is perfectly secure if (and only if) for any message
+$m \in \msgspace$, the distribution of the ciphertext $c \in \ctspace$
+(over the choice of $k \gets \skcgen$) is the same: some fixed
+distribution $D'$ over $\ctspace$.
+
+\subsection{Zero \emph{Computational} Knowledge}
+\label{sec:zero-comp-knowl}
+
+What is the \emph{computational} analogue of revealing no information?
+When working with bounded computation, we speak of \emph{knowledge}
+instead of information.  This is because even though a value $Y$ might
+reveal \emph{all} the information in $X$, that information might not
+be accessible to a bounded algorithm.  For example, for a one-way
+permutation $f$ with hard-core predicate $h$, the value $f(x)$ reveals
+all the information in $x$, but it gives no \emph{knowledge} about
+$h(x)$, because $h(x)$ ``looks like'' a uniformly random bit.  Seen
+another way: up to computational indistinguishability, $h(x)$ ``might
+as well have been'' produced by an \emph{efficient algorithm that is
+  not given $x$ at all!}  (That is, the algorithm that just outputs a
+uniformly random bit.)
+
+Let us see a concrete example of this kind of definition for
+shared-key encryption.  Informally, it says that a ciphertext of a
+message $m$ might as well be produced by an efficient algorithm (a
+simulator) that is not given the message.  (Note the syntactic
+similarity to the information-theoretic statements above.)
+
+\begin{definition}
+  \label{def:zk-skc}
+  A shared-key cryptosystem $\skc$ for message space $\msgspace$ is
+  \emph{zero-knowledge} if there exists an nuppt \emph{simulator}
+  $\Sim$ such that for all $m \in \msgspace$, \[ \set{k \gets
+    \skcgen(1^{n}) : \skcenc_{k}(m)} \compind \set{\Sim(1^{n})}. \]
+\end{definition}
+
+Recall our simplest definition of security for shared-key encryption,
+one-time indistinguishability, which says that for all $m_{0}, m_{1}
+\in \msgspace$, \[ \set{k \gets \skcgen : \skcenc_{k}(m_{0})} \compind
+\set{k \gets \skcgen : \skcenc_{k}(m_{1})}. \]
+
+\begin{theorem}
+  \label{thm:zk-iff-indist}
+  A shared-key cryptosystem $\skc$ is one-time indistinguishable if
+  and only if it is zero-knowledge.
+\end{theorem}
+
+\begin{proof}
+  If $\skc$ is zero-knowledge, let $\Sim$ be the simulator guaranteed
+  by Definition~\ref{def:zk-skc}.  Then by hypothesis, for all $m_{0},
+  m_{1} \in \mathcal{M}$,
+  \[ \set{k \gets \skcgen(1^{n}): \skcenc_{k}(m_0)} \compind
+  \set{\Sim(1^{n})} \compind \set{k \gets \skcgen(1^{n}) :
+    \skcenc_{k}(m_1)}. \] One-time indistinguishability follows by the
+  hybrid lemma.
+
+  If $\skc$ is one-time indistinguishable, let $m' \in \msgspace$
+  denote some arbitrary message, and define $\Sim(1^{n})$ to choose $k
+  \gets \skcgen(1^{n})$ and output $c \gets \skcenc_{k}(m')$.  Then by
+  one-time indistinguishability, for any $m \in \msgspace$ we have
+  \[ \set{k \gets \skcgen(1^{n}): \skcenc_{k}(m)} \compind \set{k
+    \gets \skcgen(1^{n}) : \skcenc_{k}(m')} \equiv
+  \set{\Sim(1^{n})}. \qedhere \]
+\end{proof}
+
+\subsection{Why Zero Knowledge?}
+\label{sec:why-zero-knowledge}
+
+What do we gain from zero-knowledge/simulation-style security
+definitions?  So far, not much other than a new perspective.  However,
+this new perspective is very powerful: it can capture, in a unified
+way, many of the disparate security definitions we have seen so far
+(e.g., for pseudorandom generators/functions, signatures, etc.).  Even
+more importantly, this perspective will allow us to give meaningful
+security definitions for protocols in which the adversary may be an
+\emph{active participant}.  By ``active'' we mean not just that the
+adversary can make queries to the scheme (e.g., chosen-message or
+chosen-ciphertext attacks), but that it instead \emph{plays the role}
+of one of the scheme's algorithms (possibly in a malicious way).
+
+\section{Interactive Proofs}
+\label{sec:interactive-proofs}
+
+\subsection{Motivation}
+\label{sec:motivation}
+
+What is a (mathematical) proof?  Two of the most common answers
+include:
+\begin{enumerate}
+\item A sequence of sound logical deductions, starting from a set of
+  axioms and/or hypotheses, that concludes in a theorem?
+\item An argument that convinces the peer community?
+\end{enumerate}
+
+A ``classical'' proof (in the mold of the first answer above) is a
+\emph{static} object, which can be easily checked by applying
+mechanical rules.  In contrast, many proofs in mathematics have
+required a lot of effort to find --- much more effort than it takes to
+verify them.  Intuitively, then, a classical proof may reveal more
+than zero knowledge to the party verifying it, in that the verifier
+may not have been able to generate the proof itself.
+
+In practice, many proofs are partially ``interactive:'' a prover
+asserts a theorem, and a verifier (e.g., the peer community) asks
+questions of the prover until it is satisfied that the theorem is
+correct.  It turns out that this style of proof in some cases appears
+to be qualitatively \emph{more powerful} than a static, classical
+proof.
+
+Consider the following example ``theorem:'' Coke and Pepsi are
+different soft drinks.  To prove this claim, it might not suffice to
+give different recipes for the two drinks.  First, how does one check
+that a given recipe corresponds to the claimed drink?  And even if one
+could, how can one be sure that two different recipes don't end up
+producing the same end product (e.g., by a different sequence of
+chemical reactions)?
+
+On the other hand, consider the following interactive ``proof'' for
+establishing the theorem: the verifier secretly buys either a bottle
+of Coke or Pepsi at random, pours it into a glass, and asks the prover
+to identify the drink (by looking at, tasting it, or whatever the
+prover requires to decide).  The prover and verifier may repeat the
+exercise multiple times (with a fresh random choice of drink each
+time).  If the theorem is indeed true (Coke and Pepsi are different),
+then a sufficiently talented prover can always identify correctly.
+However, if the theorem is false (Coke and Pepsi are exactly the
+same), then the prover would have only a $1/2$ chance of guessing
+successfully in each iteration.  Therefore, if the prover succeeds in
+every iteration, the verifier can conclude --- with very high but not
+complete confidence --- that the theorem is true.
+
+\subsection{Formalization}
+\label{sec:formalization}
+
+Let $P$ and $V$ denote ``interactive'' algorithms, which take inputs
+and random coins as usual, but also (informally speaking) can pass
+messages to each other.  Only one machine at a time performs ``work;''
+when it passes a message to the other, the other machine starts
+working.  We denote their joint execution on their respective inputs
+by $P(\cdot) \leftrightarrow V(\cdot)$.  The notation
+$\out_{V}[\cdot]$ denotes the output of $V$ in the specified
+interaction.  A \emph{language} $L$ is just a subset of $\bit^{*}$,
+whose elements we often call ``theorems.''
+
+\begin{definition}
+  \label{def:ips}
+  An \emph{interactive proof system} (with \emph{soundness error} $s
+  \in [0,1]$) for a language $L \subseteq \bit^{*}$ is a pair of
+  algorithms: a (possibly computationally unbounded) prover $P$, and a
+  ppt verifier $V$, with the following properties:
+  \begin{enumerate}
+  \item \emph{Completeness} (``the specified prover convinces the
+    specified verifier of a true statement''): For all $x \in L$,
+    $\out_{V}[ P(x) \leftrightarrow V(x) ] = 1$, with probability $1$.
+  \item \emph{Soundness} (``\emph{no} possibly cheating prover can
+    convince the specified verifier of a false statement''): For every
+    computationally unbounded $P^*$ and all $x \not\in L$,
+    \[ \Pr\left[ \out_{V}[ P^{*}(x) \leftrightarrow V(x) ] = 1 \right]
+    \leq s. \]
+  \end{enumerate}
+\end{definition}
+
+\begin{remark}
+  \label{rem:ips}
+  Some notes on the above definition:
+  \begin{itemize}
+  \item Completeness is a property of the specified (``honest'')
+    prover and verifier algorithms, and says nothing about security.
+    Soundness protects the verifier: as long as it runs its specified
+    $V$ algorithm, a cheating prover --- \emph{no matter how it might
+      arbitrarily deviate from the protocol!} --- will not be able to
+    convince it of a false theorem (with probability greater than
+    $s$).
+  \item We could relax the completeness condition to require
+    $\out_{V}[ P(x) \leftrightarrow V(x) ] = 1$ with probability at
+    least $1-c > s$ for some $c$ called the \emph{completeness} error.
+    Every proof system we'll see in this course will have
+    \emph{perfect} completeness, i.e., $c=0$.
+  \item If we allow the probabilistic verifier machine and the
+    all-powerful prover to interact for a polynomial number of rounds,
+    we get the class of problems called IP.  In 1992, Adi Shamir found
+    one of the central results of complexity theory: IP equals PSPACE,
+    the class of problems solvable by an ordinary deterministic Turing
+    machine using polynomial space (and unbounded time).
+  \end{itemize}
+\end{remark}
+
+\subsection{Interactive Proof for Graph Nonisomorphism}
+\label{sec:inter-proof-graph}
+
+A formal analogue of the Coke-versus-Pepsi question is the \emph{graph
+nonisomorphism} problem, defined below.
+
+\newcommand{\gni}{\problem{GNI}}
+
+A graph $G = (V,E)$ consists of a finite set $V$ of vertices, and an
+edge set $E \subseteq V \times V$ (where $(v_{0}, v_{1}) \in E$ means
+that there is an edge between vertices $v_{0}$ and $v_{1}$).  Without
+loss of generality, we often say that the vertex set is $[n] = \set{1,
+\ldots, n}$ for some nonnegative integer $n$.
+
+\begin{definition}
+  Two graphs $G_{0} = (V_{0}, E_{0})$ and $G_{1} = (V_{1}, E_{1})$ are
+  \emph{isomorphic}, written $G_{0} \equiv G_{1}$, if there exists a
+  bijection $\rho \colon V_{0} \to V_{1}$ such that $(v_{0}, v_{1})
+  \in E_{0}$ if and only if $(\rho(v_{0}), \rho(v_{1})) \in E_{1}$.
+\end{definition}
+
+\begin{definition}
+  \label{def:gni}
+  The \emph{graph nonisomorphism language} $\gni$ is defined as \[
+  \gni = \set{(G_{0}, G_{1}) : G_{0}, G_{1} \text{ are graphs such
+      that } G_{0} \not\equiv G_{1}}. \]
+\end{definition}
+
+To date, it is unknown whether there exists an efficient algorithm
+that decides the graph (non)isomorphism language (though there
+\emph{are} efficient algorithms that decide it for a broad class of
+special cases).  It is not even known if $\gni$ is in $\NP$, i.e., if
+membership in $\gni$ can be efficiently verified given a
+(polynomial-length) static proof.  However, we are able to give a very
+simple \emph{interactive} proof for $\gni$.
+
+\begin{protocol}
+  We define the following verifier and prover algorithms for $\gni$,
+  which interact as follows:
+  \begin{enumerate}
+  \item $V(G_{0}, G_{1})$: Choose $b \gets \bit$ and a uniformly
+    random permutation $\pi$ of $V_{b}$ (the vertex set of $G_{b}$).
+    Send the permuted graph $H = \rho(G_{b})$ to the prover.
+    (Intuitively, the verifier is challenging the prover to identify
+    which of the original two graphs $H$ is isomorphic to.)
+  \item $P(G_{0}, G_{1})$: Upon receiving a graph $H$ from the
+    verifier, find (perhaps using a large amount of computation) a $b'
+    \in \bit$ such that $G'$ is isomorphic to $G_{b'}$.  Send $b'$ to
+    the verifier.  (Note that if $G_{0}$ and $G_{1}$ are not
+    isomorphic, then there is at most one valid $b'$.)
+  \item $V(G_{0}, G_{1})$: If $b' = b$, accept; otherwise, reject.
+  \end{enumerate}
+\end{protocol}
+
+\begin{theorem}
+  The algorithm pair $(P,V)$ described above forms an interactive
+  proof system for $\gni$, with soundness error $1/2$.
+\end{theorem}
+
+\begin{proof}
+  First we show completeness.  Let $(G_{0}, G_{1}) \in \gni$, i.e.,
+  $G_0$ and $G_1$ are not isomorphic.  Then no graph can be isomorphic
+  to both $G_0$ and $G_1$.  It follows that for any $H$ generated by
+  (honest) $V$ with random choice $b$, the bit $b'$ computed by the
+  prover always equals the $b$ chosen by the verifier, and $V$ always
+  accepts.
+  
+  Now we show soundness.  If $(G_0, G_{1}) \not\in \gni$, i.e.,
+  $G_{0}$ and $G_1$ are isomorphic, then a uniformly random
+  permutation of $G_{0}$ and $G_{1}$ are identically distributed.
+  More precisely, suppose that $G_{1} = \pi(G_{0})$ for some
+  permutation $\pi$.  Then for any permutation $\rho$, we have
+  $\rho(G_{1}) = (\rho \circ \pi)(G_{0})$.  In particular, if $\rho$
+  is a uniformly random permutation, then $\rho \circ \pi$ is also
+  uniformly random, hence $\rho(G_{0})$ and $(\rho \circ \pi)(G_{0})$
+  are identically distributed.  Therefore, the graph $H$ sent by the
+  verifier is statistically independent of its internal bit $b$, and
+  for any prover reply $b'$, the probability that $b' = b$ is exactly
+  $1/2$, as desired.
+\end{proof}
+
+\end{document}
+
+%%% Local Variables: 
+%%% mode: latex
+%%% TeX-master: t
+%%% End: 

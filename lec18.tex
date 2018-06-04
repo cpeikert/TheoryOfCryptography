@@ -1,0 +1,285 @@
+\documentclass[11pt]{article}
+
+\usepackage{fullpage}
+\usepackage{times}
+\usepackage{hyperref,microtype,pdfsync}
+\usepackage{amsmath,amsfonts,amssymb,amsthm}
+\usepackage{mathtools}
+\usepackage{fancyhdr}
+
+\input{header}
+
+% VARIABLES
+
+\newcommand{\lecturenum}{18}
+\newcommand{\lecturetopic}{Proofs of Knowledge}
+\newcommand{\scribename}{Joel Odom}
+
+% END OF VARIABLES
+
+\lecheader
+
+\pagestyle{plain}              % default: no special header
+
+\begin{document}
+
+\thispagestyle{fancy}          % first page should have special header
+
+% LECTURE MATERIAL STARTS HERE
+
+\section{Proofs of Knowledge}
+\label{sec:pok}
+
+Up to this point we have studied zero-knowledge proofs that are
+capable of proving whether a statement is ``true'' or ``false,'' i.e.,
+whether a statement lies in or out of a language.  Sometimes, though,
+the notion of membership in a language does not capture the claim that
+the prover wants to demonstrate.  For example, if the statement is
+true, might it be that \emph{anyone} can give an acceptable proof?
+The definition of an interactive proof doesn't give us much insight
+into this question; it only says that \emph{false} theorems can't be
+proved (even by an unbounded prover).  Here we will see that it is
+sometimes useful to have a \emph{proof of knowledge}, in which a
+prover convinces a verifier that the prover ``knows why'' a statement
+is true.
+
+Take, for example, the application we considered at the end of the
+last lecture.  Alice wanted to convince Bob, in zero knowledge, that
+she is a CIA agent --- or more precisely, that the CIA has signed the
+message ``Alice is a CIA agent'' under its public key.  (ZK is useful
+here because it would make the proof nontransferable by Bob.)  How can
+we go about proving this in ZK?  If Alice just reveals the signature,
+that conveys knowledge to Bob that he could not have simulated himself
+(and is transferable).  If Alice proves merely that there
+\emph{exists} a valid signature (under the CIA's public key) of the
+message ``Alice is a CIA agent,'' this doesn't necessarily prove
+anything meaningful, because by the completeness of the signature
+scheme, there exists a signature for \emph{every} message!  What Alice
+really wants to prove is that she \emph{knows} a valid signature of
+the appropriate message.
+
+\subsection{Example Protocol}
+\label{sec:example-protocol}
+
+What we want to capture is not only the truth of a proposition ($x \in
+L$), but also that the prover ``possesses'' a suitable witness to this
+fact.  We demonstrate this concept by an example protocol which proves
+knowledge of a discrete logarithm in a cyclic group.
+
+\begin{protocol}
+  \label{prot:dlog}
+  Let $G = \langle g \rangle$ be a cyclic group of known order $q$
+  with known generator $g$, and let $x \in G$ be an arbitrary group
+  element having discrete logarithm $w = \log_{g}(x)$.  The common
+  input to $P$ and $V$ is $x$, and $P$ is additionally given $w$.
+  \begin{enumerate}
+
+  \item $P(x,w)$ selects a random $r \gets \Zq$ and sends $z = g^{r}$
+    to $V$.
+
+  \item $V(x)$ sends a random challenge bit $b \in \bit$ to $P$.  (Here
+    $V$ is challenging the prover to reply with the discrete log of $z$,
+    or of $z \cdot x$.)
+
+  \item $P$ responds with $a = r + b \cdot w \in \Zq$.
+    
+  \item $V$ accepts if $g^{a} = z \cdot x^{b}$.
+
+  \end{enumerate}
+  Schematically,
+
+  \begin{center}
+    \begin{tabular}{ccc}
+      $P(x,w = \log_{g}(y))$ & & $V(x)$ \\ \\
+      $r \gets \Zq$ & $\underrightarrow{\quad z = g^{r} \quad}$ & \\
+      & & $b \gets \bit$ \\
+      & $\underleftarrow{\quad b \quad}$ & \\
+      & & \\
+      & $\underrightarrow{\quad a = r + b w \quad}$ & accept iff
+      $g^{a}=z\cdot x^{b}$
+    \end{tabular}
+  \end{center}
+\end{protocol}
+
+Is the protocol \emph{complete}?  Yes: if $P$ and $V$ act as
+described, then $g^{a} = g^{r + bw} = g^{r} \cdot (g^{w})^{b} = z
+\cdot x^{b}$.  Is the protocol \emph{zero-knowledge}?  Let $V^{*}$ be
+a (possibly malicious) nuppt verifier.  We define a simulator
+$\Sim^{V^{*}}(x)$:
+\begin{enumerate}
+
+\item Choose a random bit $b \gets \bit$ and a random group element $a
+  \gets G$.  (This can be done by choosing $t \gets \Zq$ and letting
+  $a = g^{t}$.)
+
+\item Send $z = g^{a} / x^{b}$ to $V^{*}$ (run with fresh random
+  coins) and get back a challenge bit $b^{*}$.  (If $V^{*}$ responds
+  with a malformed message or aborts, just output the view so far.)
+
+\item If $b^{*} = b$, complete the view using $a$ as the prover's last
+  message, otherwise rewind $V^{*}$ and repeat the simulation (up to
+  $n$ total iterations).
+\end{enumerate}
+It is relatively easy to show that $\Sim$ reproduces $V^{*}$'s view,
+up to negligible statistical distance.  (Briefly, this is because the
+value $z$ calculated by $\Sim$ is statistically independent of its bit
+$b$, so $b^{*} = b$ with probability $1/2$.)
+
+Is the protocol \emph{sound}?  Note that \emph{every} $x \in G$ has a
+discrete logarithm, so the notion of soundness is not particularly
+meaningful here!  A separate question is whether the protocol gives
+evidence that the prover possesses \emph{knowledge} of the discrete
+logarithm $x$.  An informal inspection of the protocol seems to
+indicate that it does: if the prover can answer both challenges, then
+it is prepared to reply with both $\log_{g}(z)$ and $\log_{g}(z \cdot
+x) = \log_{g}(z) + \log_{g}(x)$, whose difference is exactly
+$\log_{g}(x)$.  But we need to formalize some notions before we can
+come to any definite conclusion.
+
+\subsection{Definition of an $\NP$-Relation}
+\label{sec:def-pok}
+
+\begin{definition}
+  \label{def:NP-relation}
+  An \emph{$\NP$-relation} $R \subseteq \bit^{*} \times \bit^{*}$ is
+  given by a deterministic algorithm $W(\cdot,\cdot)$ that runs in
+  time polynomial in the length of its first input.  The relation
+  is \[ R = \set{(x,w) : W(x,w) \text{ accepts}}. \] The associated
+  $\NP$-language $L_{R} = \set{x : \exists\; w \text{ such that }
+    W(x,w) \text{ accepts}}$.  The witness set for an $x \in \bit^{*}$
+  is $R(x) = \set{w : W(x,w) = 1}$.
+\end{definition}
+
+That is, the $\NP$-relation $R$ is just the set of theorem-witness
+pairs $(x,w)$ that are accepted by the verifier $W$.  It is easily
+seen that the language $L_{R}$ associated with the relation is an
+$\NP$ language.
+
+\begin{example}
+  \label{ex:dlog-relation}
+  For the discrete logarithm problem in $G$, the natural relation
+  is \[ R = \set{(x \in G, w \in \Zq) : g^{w} = x}. \]
+\end{example}
+
+\subsection{Definition of a Proof of Knowledge}
+\label{sec:defin-proof-knowl}
+
+We can now define a proof of knowledge for a relation $R$.  The
+definition captures the intuition that from \emph{any} (possibly
+cheating) prover $P^{*}$ that is able to convince the verifier with
+good enough probability on a statement $x \in L_{R}$, there is a way
+to extract a valid witness for $x$ from $P^{*}$ with a related (not
+too small) probability.
+
+\begin{definition}
+  \label{def:pok}
+  An interactive proof system $(P,V)$ is a \emph{proof of knowledge}
+  with \emph{knowledge error} $\kappa \in [0,1]$ for an $\NP$-relation
+  $R$ if there exists an nuppt oracle machine $K^{\cdot}$ (the
+  \emph{knowledge extractor}) such that for any $x \in L_{R}$, and for
+  any (possibly unbounded) $P^{*}$ for which $p^{*}_{x} =
+  \Pr[\out_{V}[P^{*} \leftrightarrow V(x)] = 1] > \kappa$, we have \[
+  \Pr[K^{P^{*}}(x) \in R(x)] \geq \poly(p^{*}_{x} - \kappa). \]
+\end{definition}
+
+In words, the probability that the knowledge extractor $K$ finds a
+valid witness for $x$ using its access to prover $P^{*}$ is at least
+polynomially related to the probability $p^{*}_{x}$ that $P^{*}$
+convinces the honest verifier on $x$, less some knowledge error.
+
+\begin{remark}
+  \label{rem:pok}
+  A number of remarks on this definition are appropriate.
+
+  \begin{enumerate}
+
+  \item We don't make any restriction on the kind of prover $P^{*}$
+    under consideration: it could be unbounded and/or malicious.
+
+  \item The definition is \emph{per instance} $x$: if $P^{*}$
+    convinces $V$ that a \emph{particular} $x$ is true, then it should
+    know a witness for \emph{that} $x$.
+
+  \item Notice that in the discrete logarithm protocol above, there is
+    a trivial cheating prover that convinces the verifier with
+    probability $\frac{1}{2}$.  (This is the prover that prepares an
+    answer for a known $b$ and succeeds only if the verifier issues
+    $b$ as its challenge bit.)  There is no hope of extracting any
+    witness from this prover, without just solving the discrete log
+    problem directly.  Just as with soundness error, the knowledge
+    error $\kappa$ captures the ``threshold'' probability with which a
+    cheating prover $P^{*}$ must convince the verifier before it can
+    be said to know a valid witness.
+
+  \item Because the relation $R$ is efficiently checkable, we can run
+    $K^{P^{*}}$ many times and output any valid witness for $x$ that
+    is found in any execution.  The expected running time of this is
+    $1/\poly(p^{*}_{x} - \kappa)$.  If $p^{*}_{x}-\kappa$ is at least
+    inverse-polynomial in the security parameter, then a witness is
+    extracted in expected polynomial time.
+
+  \item The definition is not formally related to soundness (i.e.,
+    neither property necessarily implies the other).  However, notice
+    that the definition only applies to $x \in L_{R}$, because
+    otherwise the set $R(x)$ is empty and therefore $K$ could never
+    output a valid witness.
+  \end{enumerate}
+\end{remark}
+
+\subsection{Knowledge Extractor for Discrete Log Protocol}
+\label{sec:knowl-extr-discr}
+
+\begin{theorem}
+  Protocol~\ref{prot:dlog} is a proof of knowledge for the discrete
+  logarithm relation, with knowledge error $\kappa = 1/2$.
+\end{theorem}
+
+\begin{proof}
+  We construct a knowledge extractor $K^{P^{*}}(x)$ that works as
+  follows:
+  \begin{enumerate}
+  \item Run $P^{*}$ and receive a message $z \in G$ from $P^{*}$.
+  \item Send challenge bit $b = 0$ to $P^{*}$ and receive an answer
+    $a_{0}$.\label{item:chall-zero}
+  \item Rewind $P^{*}$ to its state before Step~\ref{item:chall-zero}.
+    Send challenge bit $b = 1$ to $P^{*}$, and receive an answer
+    $a_{1}$.
+  \item Output $a_{1} - a_{0}$.
+  \end{enumerate}
+
+  Note that \emph{if} $a_{0}$ and $a_{1}$ are both correct answers to
+  the respective challenges on $z$, then $a_{1} - a_{0} = \log_{g}(z
+  \cdot x) - \log_{g}(z) = \log_{g}(x)$, so the knowledge extractor's
+  output is a correct witness for $x$.
+
+  Suppose that $\Pr[\out_{V}[P^{*} \leftrightarrow V(x)] = 1] = 1/2 +
+  \alpha$ for some positive $\alpha$ (otherwise, we have nothing to
+  prove).  We claim that \[ \Pr[a_{0} \text{ and } a_{1} \text{
+    correct}] \geq \alpha^{3}/2 = \poly(\alpha), \] as required by
+  Definition~\ref{def:pok}.
+
+  To prove the claim, define \[ p_{z} = \Pr[P^{*} \text{ convinces }
+  V(x) \mid P^{*} \text{ outputs $z$ in the first message}]. \] By an
+  averaging argument (Markov inequality), we have $\Pr_{z \gets
+    P^{*}}[p_{z} \geq \tfrac{1}{2} + \tfrac{\alpha}{2}] \geq
+  \frac{\alpha}{2}$.
+
+  Now consider any such ``good'' $z$, where $p_{z} \geq \tfrac12 +
+  \tfrac{\alpha}{2}$.  Define \[ p_{z, b} = \Pr[P^{*} \text{ convinces
+  } V(x) \mid z \text{, challenge $b$}]. \] Because $p_{z} = (p_{z,0}
+  + p_{z,1})/2$ and both $p_{z,0}, p_{z,1} \leq 1$, we have both
+  $p_{z, 0}, p_{z, 1} \geq \alpha$.  The events that $P^{*}$ returns a
+  valid $a_{0}$ (respectively, $a_{1}$) \emph{conditioned} on $z$ and
+  challenge $b=0$ (resp., $b=1$) are \emph{independent}, so both occur
+  with probability at least $\alpha^{2}$.  All together then, the
+  probability that $K$ outputs $\log_{g}(x)$ is at least
+  $\alpha^{3}/2$, as claimed.
+
+\end{proof}
+
+\end{document}
+
+%%% Local Variables:
+%%% mode: latex
+%%% TeX-master: t
+%%% End:

@@ -1,0 +1,384 @@
+\documentclass[11pt]{article}
+
+\usepackage{fullpage}
+\usepackage{times}
+\usepackage{hyperref,microtype,pdfsync}
+\usepackage{amsmath,amsfonts,amssymb,amsthm}
+\usepackage{mathtools}
+\usepackage{fancyhdr}
+\usepackage{algorithm,algorithmic}
+
+\input{header}
+
+% VARIABLES
+
+\newcommand{\lecturenum}{2}
+\newcommand{\lecturetopic}{Computational Hardness}
+\newcommand{\scribename}{George P.~Burdell}
+
+% END OF VARIABLES
+
+\lecheader
+
+\pagestyle{plain}               % default: no special header
+
+\begin{document}
+
+\thispagestyle{fancy}           % first page should have special header
+
+% LECTURE MATERIAL STARTS HERE
+
+\section{Recap: Perfect Secrecy}
+\label{sec:recap:-perf-secr}
+
+Recall from last time: 
+\begin{itemize}
+\item Shannon secrecy says that the \textit{a posteriori} distribution
+  over the message, given the ciphertext, is identical to the
+  \textit{a priori} distribution.  (See the lecture notes for formal
+  definition.)  Informally, ``seeing the ciphertext is only as good as
+  seeing nothing at all.''
+\item Perfect secrecy is the property that the distribution of the
+  ciphertext $c \in \ctspace$ (over the choice of key $k \in
+  \keyspace$) is exactly the same, no matter what message $m
+  \in \msgspace$ was encrypted.
+\item Shannon secrecy and perfect secrecy are equivalent.
+\item The one-time pad scheme enjoys Shannon/perfect secrecy.
+\end{itemize}
+
+\section{Limits of Shannon/Perfect Secrecy}
+\label{sec:limits-perf-secr}
+
+For reference, here again is the definition of Shannon secrecy:
+
+\begin{definition}[Shannon secrecy]
+  \label{def:shannon-secrecy}
+  A shared-key encryption scheme $(\skcgen,\skcenc,\skcdec)$ with
+  message space $\msgspace$ and ciphertext space $\ctspace$ is
+  \emph{Shannon secret with respect to a probability distribution $D$}
+  over $\msgspace$ if for all $\bar{m} \in \msgspace$ and all $\bar{c}
+  \in \ctspace$,
+  \begin{equation}
+    \label{eq:shannon}
+    \Pr_{m \gets D,\; k \gets \skcgen}[m = \bar{m}\; |\;
+    \skcenc_{k}(m) = \bar{c} ] = \Pr_{m \gets D}[ m = \bar{m} ].
+  \end{equation}
+  The scheme is \emph{Shannon secret} if it is Shannon secret with
+  respect to every distribution $D$ over $\msgspace$.
+\end{definition}
+
+Now that we know that the one-time pad is Shannon secret, what more is
+left to do?  (Cancel the course?)  Well, first notice that the
+one-time pad scheme is not necessarily very usable: the key length is
+as large as the message length, and for long messages it may be
+unrealistic for Alice and Bob to establish (and keep secret!)  a huge
+key before communicating.  (This is not to mention the additional
+distinct keys needed for when Carol, Dan, Edith, and Fred enter the
+picture\ldots) Also notice that the key can by used only \emph{one
+  time}: encrypting more than one message with the same key is
+``abusing the model,'' and causes the security proof to break down.
+In fact, using the key more than once often makes the scheme
+\emph{completely insecure}.  (The USSR~learned this the hard way as a
+result of the US/UK-led ``Venona'' project during the Cold War.)
+
+It turns out that these drawbacks are not really a deficiency of the
+one-time pad itself, but are \emph{inherent} in the strong
+requirement of perfect secrecy.
+
+\begin{theorem}[Shannon's theorem]
+  \label{thm:shannon}
+  If a shared-key encryption scheme (with key space $\keyspace$ and
+  message space $\msgspace$) is Shannon secret, then
+  $\abs{\keyspace} \geq \abs{\msgspace}$.
+\end{theorem}
+
+\begin{proof}
+  We prove the contrapositive: supposing that $\abs{\keyspace} <
+  \abs{\msgspace}$ for some scheme $(\skcgen, \skcenc, \skcdec)$, we
+  will show that the scheme is not Shannon secret.  It suffices to
+  show the existence of a distribution $D$ over $\msgspace$, a fixed
+  message $\bar{m} \in \msgspace$, and a ciphertext $\bar{c} \in
+  \ctspace$ such that the two sides of~\eqref{eq:shannon} are unequal.
+
+  Let $D$ be the uniform distribution over $\msgspace$, let $m \in
+  \msgspace$ be arbitrary, let $\bar{k} \in \keyspace$ be an arbitrary
+  key in the support of $\skcgen$ (i.e., $\skcgen$ outputs $\bar{k}$
+  with probability $> 0$), and let $\bar{c}$ be any ciphertext in the
+  support of $\skcenc_{\bar{k}}(m)$ (keeping in the mind that
+  $\skcenc$ may be randomized).  Now assume without loss of generality
+  that $\skcdec$ is deterministic (exercise: prove that it's really
+  w.l.o.g., using the correctness of decryption), and define $\calD =
+  \set{ \skcdec_{k}(\bar{c})\; :\; k \in \keyspace } \subseteq
+  \msgspace$ to be the set of all possible decryptions of $\bar{c}$
+  under all possible keys.  We must have $\abs{\calD} \leq
+  \abs{\keyspace} < \abs{\msgspace}$, which implies that there exists
+  some message $\bar{m} \in \msgspace \setminus \calD$.  By
+  correctness of decryption, and because $D$ is the uniform
+  distribution over $\msgspace$, we have
+  \[ 0 = \Pr_{m \gets D, k \gets \skcgen}[m=\bar{m}\; |\;
+  \skcenc_{k}(m)=\bar{c}] < \Pr_{m \gets D}[m=\bar{m}] =
+  \frac{1}{\abs{\msgspace}}, \] as desired.
+\end{proof}
+
+Notice that the proof above is ``effective'' in the sense that
+$\bar{m}$ can be computed by explicitly enumerating
+$\skcdec_{k}(\bar{c})$ for every $k \in \keyspace$.  However, if
+$\keyspace$ is huge, this task may take too long to be feasible.
+
+\section{Roadmap to Computational Security}
+\label{sec:roadmap-comp-sec}
+
+We have seen that perfect secrecy is obtainable, but impractical ---
+the key must be as long as the message.  Moreover, the proof of this
+fact provides an actual attack, which enumerates all possible keys.
+On the one hand, if the key space is huge (say, $2^{1000}$), the
+attack may need to run for a long, long time.  On the other hand,
+maybe some schemes fall to faster attacks that don't have to
+enumerate all keys...
+
+Today (and throughout most of the rest of course), we will be focused
+on schemes that are meaningfully secure (though not ``perfectly'' so)
+\emph{as long as the adversary does not employ an absurdly large
+  amount of computation}.  We have good reason to believe that there
+are inherent limits on the amount of computation that can be performed
+in the physical universe --- for example, the number of atoms in the
+observable universe is estimated at around $10^{80}$, and we have only
+about $10^{10}$ years until our sun runs out of fuel and collapses.
+
+The \emph{computationally secure} schemes we develop will have keys
+much shorter than the message length, but this is really just the
+beginning: they will also have absurdly strong (seemingly even
+paradoxical) security and functionality properties that go far beyond
+just keeping a message secret.
+
+To get there from here, there are many questions to which we must give
+precise mathematical answers.  here are just a few:
+\begin{itemize}
+\item How do we \emph{model} ``bounded computation''?
+\item What does it mean for a problem to be \emph{hard} for bounded
+  computation?
+\item Where might we hope to \emph{find} such hard problems?
+\item How do we \emph{define} security against computationally bounded
+  adversaries?
+\item How do we \emph{use} hard problems to design schemes that
+  satisfy our security definitions?
+\end{itemize}
+
+To keep a concrete example in mind, perhaps you have heard the
+(informal) conjecture that ``factoring is hard.''  We will see how to
+state this conjecture (and others like it) precisely, and start to use
+it in cryptography.
+
+\section{Computational Model}
+\label{sec:computational-model}
+
+\subsection{Algorithms}
+\label{sec:algorithms}
+
+Informally, we all know what an algorithm is: something that you can
+implement in your favorite programming language, and run on any kind
+of computer (or network of computers) that you might like.  As a
+formal mathematical object, an algorithm is a \emph{Turing machine}.
+In this course we will not need the formal definition too often, and
+the informal notion will usually suffice.
+
+The \emph{running time} of an algorithm on an input is the number of
+``basic'' steps it performs before terminating.  Basic steps include
+reading or writing to a location in memory, performing an arithmetic
+operation (on fixed-size pieces of data), etc.  For our purposes, the
+exact set of basic operations will not be too important, because it is
+possible to translate between different sets of basic operations with
+only polynomial slowdown: an algorithm (using one set of basic ops)
+with running time $T$ can be converted into an algorithm (using
+another set) with running time $d T^{c}$, for some fixed constants
+$c,d$.  The running time $T(n)$ of an algorithm as a function of input
+length $n$ is its \emph{maximum} running time over all inputs of
+length $n$.  We say that an algorithm is \emph{polynomial-time} if its
+running time $T(n)=O(n^{c})$ for some fixed constant $c \geq 0$.
+
+Two aspects of our model of an algorithm require a bit more precision.
+The first is \emph{randomization}, that is, we grant algorithms the
+ability to ``flip coins.''  In the Turing machine view, the machine is
+augmented with a read-only ``random tape,'' which is initialized with
+an infinite string of uniformly random and independent bits.
+Alternatively, we can view the algorithm's randomness as an extra
+argument $r \in \bit^{*}$, and we denote the output of $\Adv$ on input
+$x$ with ``coins'' $r$ as $\Adv(x; r)$.  (When omitted, $r$ is taken
+to be a uniformly random string.)  Note that $\Adv(x)$ defines a
+probability distribution over its outputs, where the probability is
+taken over the random coins.  The running time $T$ of a probabilistic
+algorithm $\Adv$ on an input $x$ is the \emph{maximum} number of steps
+performed by $\Adv(x;r)$, over all random strings $r$.  The notions of
+running time as a function of the input length $n = \len{x}$, and
+\emph{probabilistic polynomial-time} (PPT), are defined similarly.
+Note that a PPT algorithm can only ``look at'' polynomially many bits
+of its random string.
+
+In this course, PPT algorithms will be our main model of ``efficient
+computation'' for cryptographic schemes.  This is primarily to give us
+a \emph{useful, well-behaved abstraction}, which allows us not to get
+too caught up in the details of implementations.  Of course, an
+algorithm with running time $n^{100}$ is not very useful in practice,
+and at times we will take a more precise view of running times.
+
+The second aspect of our model, which we use only for modelling
+\emph{adversaries}, is \emph{non-uniformity}.  The idea is that we
+allow an adversary to have some extra ``advice'' that depends only on
+the \emph{length} of its input.  This advice can only increase what
+the algorithm is capable of computing, so security against non-uniform
+adversaries is potentially stronger than against only uniform ones.
+The ability to have advice will also simplify some of our security
+proofs.\footnote{It also makes Turing machines equivalent to ``circuit
+  families,'' which leads to more robust security definitions.}  More
+formally, we say that $\Adv$ is a non-uniform algorithm if there
+exists an infinite sequence $w_{1}, w_{2}, \ldots \in \bit^{*}$ so
+that on input $x$, $\Adv$ is also given the extra argument
+$w_{\len{x}}$.  The notion of PPT for non-uniform algorithms is as
+above; in particular, note that a non-uniform PPT machine can only
+``look at'' polynomially many bits of its advice string, so without
+loss of generality we can assume that $\len{w_{n}} = O(n^{c})$ for
+some constant $c \geq 0$.
+
+\subsection{Asymptotics}
+\label{sec:asymptotics}
+
+We have defined running time as a function of input length $n$, and we
+will also frequently do so for probabilities.  The length $n$ is
+frequently called the \emph{security parameter} of a cryptographic
+scheme, because it (informally) lets us specify ``how much'' security
+we want.
+
+We say that a function $T(n)$ is \emph{polynomial}, written $T(n) =
+\poly(n)$, if $T(n) = O(n^{c})$ for some fixed constant $c$.  A
+nonnegative function $\nu(n)$ is \emph{negligible}, written $\nu(n) =
+\negl(n)$, if it vanishes faster than the inverse of any polynomial:
+$\nu(n) = o(n^{-c})$ for every constant $c > 0$, or equivalently,
+$\lim_{n \to \infty} \tfrac \nu(n) \cdot n^{c} = 0$.  We usually apply
+the concept of a negligible function to quantify the probability of an
+``extremely rare'' event, i.e., one that will effectively ``never
+occur'' in a polynomial-time universe.  As with polynomial time, the
+concept of a negligible function is a \emph{useful} and
+\emph{well-behaved} abstraction, though at times we will need to be
+more precise in our manipulations of probabilities.
+
+\section{One-Way Functions}
+\label{sec:one-way-functions}
+
+There are many different notions of computational ``hardness'' in
+computer science, e.g.: undecidability (exemplified by the Halting
+Problem), $\NP$-completeness (circuit satisfiability), time/space
+hierarchies, and others.
+
+In cryptography, we have a few notions of hardness, the most basic of
+which is \emph{one-wayness}.  A \emph{one-way function} (OWF) is often
+called the ``minimal'' cryptographic object, because a scheme
+satisfying almost any interesting computational security notion will
+imply the existence of a OWF.  (This is obviously an informal
+statement, but a good rule of thumb.  We will see some examples later
+on.)  In other words, we can't have (computational) cryptography
+without one-way functions.
+
+\begin{definition}
+  \label{def:owf}
+  A function $f : \bit^{*} \to \bit^{*}$ is \emph{one-way} if it
+  satisfies the following conditions.
+  \begin{itemize}
+  \item \emph{Easy to compute.}  There is an efficient algorithm
+    computing $f$.  Formally, there exists a (uniform, deterministic)
+    poly-time algorithm $\algo{F}$ such that $\algo{F}(x) = f(x)$ for
+    all $x \in \bit^{*}$.
+  \item \emph{Hard to invert.}  An efficient algorithm inverts $f$ on
+    a random input with only negligible probability.  Formally, for
+    any non-uniform PPT algorithm $\Inv$, the \emph{advantage} of
+    $\Inv$ \[ \advan_{f}(\Inv) := \Pr_{x \gets \bit^{n}} \bracks*{
+      \Inv(1^{n}, f(x)) \in f^{-1}(f(x)) } = \negl(n) \] is a
+    negligible function (in the security parameter $n$).
+  \end{itemize}
+\end{definition}
+
+\noindent Some remarks on this definition:
+
+\begin{enumerate}
+\item On $f^{-1}(f(x))$ versus $x$: notice that the inverter $\Inv$
+  ``wins'' if it outputs \emph{any} preimage of $f(x)$, i.e., any
+  element in the set $f^{-1}(f(x))$.  (The preimage need not even have
+  length $n$.)  This is mainly to rule out trivial function, such as
+  the function $f$ that just maps every input to $0$.  If we required
+  the inverter to output the \emph{original} $x \in \bit^{n}$, then
+  the best any inverter could do against this $f$ would be to guess
+  randomly, which succeeds with only negligible probability $2^{-n}$.
+  But this $f$ does not satisfy our intuitive idea of a function that
+  is ``hard to invert.''
+  
+\item The choice of $\bit^{*}$ as the domain and range of $f$ is
+  mainly for syntactic convenience, and it may be replaced by any
+  finite sets, one for each value of the security parameter $n$.
+  There should also be an efficient algorithm for sampling from the
+  domain, so that the entire inversion experiment can be executed
+  efficiently.
+
+\item Ideally, we would like to require $\Inv$'s advantage to be $0$,
+  i.e., the function can \emph{never} be inverted.  But this is too
+  strong: after all, $\Inv$ can always guess $x$ with probability
+  $2^{-n}$ (without even looking at $f(x)$)!  In cryptography, when we
+  can't achieve the ``ideal,'' we can often do the next best thing by
+  using a negligible function to mean ``effectively zero.''
+  
+\item In contrast to some other notions of hardness you may have seen,
+  this definition is inherently \emph{average-case} rather than
+  \emph{worst-case}.  A worst-case definition would say that every
+  $\Inv$ fails to invert $f(x)$ for \emph{some} (possibly rare) value
+  of $x$.  Our definition is potentially much stronger: it says that
+  $\Inv$ fails to invert $f(x)$ for \emph{almost all} values of $x \in
+  \bit^{n}$ (for large enough $n$).\label{item:worst-average}
+  
+\item Notice that in addition to the value $f(x)$ to be inverted, the
+  input to $\Inv$ includes the string $1^{n}$.  This is simply a
+  technicality that always allows the inverter to run in time
+  $\poly(n)$, even if $f(x)$ has length much less than $n$.  Usually
+  we will omit this extra argument, with the implicit understanding
+  that all algorithms are given the security parameter (in unary), and
+  may run in time polynomial in it.
+\end{enumerate}
+
+\subsection{Candidates}
+\label{sec:candidates}
+
+We have defined the concept of a one-way function, but does such an
+object exist?  First, it can be shown that if a one-way function
+exists, then $\P \neq \NP$.  Since we have no idea how to show that
+$\P \neq \NP$, \emph{proving} that a one-way functions exis is far
+beyond our reach.  But we have many \emph{candidate} functions that we
+believe to be one-way.  Consider these two examples:
+\begin{enumerate}
+\item Subset-sum: define $f_{\text{ss}} : (\Z_{N})^{n} \times \bit^{n}
+  \to (\Z_{N})^{n} \times \Z_{N}$, where $N = 2^{n}$, as \[
+  f_{\text{ss}}(a_{1}, \ldots, a_{n}, b_{1}, \ldots, b_{n}) = (a_{1},
+  \ldots, a_{n}, S = \sum_{i\; :\; b_{i} = 1} a_{i} \bmod N). \]
+  Notice that because the $a_{i}$s are part of the output, inverting
+  $f$ means finding a subset of $\set{1,\ldots,n}$ (corresponding to
+  those $b_{i}$s equaling $1$) that induces the given sum $S$ modulo
+  $N$.
+\item Multiplication: define $f_{\text{mult}} : \N^{2} \to \N$
+  as\footnote{For security parameter $n$, we use the domain $[1,2^{n}]
+    \times [1,2^{n}]$.  The cases $x=1$ and $y=1$ are special to rule
+    out the trivial preimages $(1,xy)$ and $(xy, 1)$ for the output
+    $xy \neq 1$.}
+  \[
+  f_{\text{mult}}(x,y) =
+  \begin{cases}
+    1 & \text{if } x=1 \vee y=1 \\
+    x \cdot y & \text{otherwise.}
+  \end{cases}
+  \]
+\end{enumerate}
+
+Are these one-way functions, according to our definition?  This is
+something for you to think about until the next lecture.
+
+\end{document}
+
+%%% Local Variables: 
+%%% mode: latex
+%%% TeX-master: t
+%%% End: 

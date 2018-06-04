@@ -1,0 +1,454 @@
+\documentclass[11pt]{article}
+
+\usepackage{fullpage}
+\usepackage{tabularx}
+\usepackage{times}
+\usepackage{hyperref,microtype,pdfsync}
+\usepackage{amsmath,amsfonts,amssymb,amsthm}
+\usepackage{mathtools}
+\usepackage{fancyhdr}
+
+\input{header}
+
+% VARIABLES
+
+\newcommand{\lecturenum}{21}
+\newcommand{\lecturetopic}{Identity-Based Encryption}
+\newcommand{\scribename}{Pushkar Tripathi}
+
+% END OF VARIABLES
+
+\lecheader
+
+\pagestyle{plain}               % default: no special header
+
+\begin{document}
+
+\thispagestyle{fancy} % first page should have special header
+
+% LECTURE MATERIAL STARTS HERE
+
+\section{Identity-Based Encryption}
+\label{sec:ident-based-encrypt}
+
+Shamir, 1984: ``What if your name could be your public key?''
+
+\medskip
+\noindent Boneh and Franklin, 2001: ``It can!''
+
+\medskip
+\noindent Cocks, 2001: ``I did it years ago \ldots (again).''
+
+\bigskip
+
+Encryption in which ``your name is your public key'' is called
+Identity-Based Encryption (IBE).  Shamir's original motivation for
+identity-based encryption was to simplify the management of public
+keys.  Frequently, this process can be unwieldy because of the
+following problem: if Bob obtains Alice's public key over the network,
+how does Bob know that the key really belongs to Alice, and not to a
+malicious adversary-in-the-middle who replaced Alice's key with his
+own as it traveled over the network?  The usual solution is to rely
+upon ``certificate authorities'' (CAs), who are trusted to implement
+the following process: when Alice creates a key pair, she presents her
+public key $\pk_{A}$ and some valid form of identification to the CA.
+The CA then generates a signature, under its own verification key
+$\vk_{CA}$, attesting to the statement ``this public key $\pk_{A}$
+belongs to Alice,'' which Alice appends to her own public key.  Later
+on, Bob can verify the CA's signature and gain confidence that the key
+really is Alice's.  Of course, in order to do this Bob needs to know
+the CA's true public key (and to trust that the CA implemented its
+policy correctly), so at first sight it seems that we have gained very
+little.  However, there need only be a few CAs in the world, and they
+can make their keys widely known through alternative means, such as
+bundling with common cryptographic software or widespread publication.
+Still, this whole process is rather heavyweight: every time a person
+generates a new public key, she must register that key with a CA, and
+Bob must store and manage a large number of keys for all the people
+with whom he corresponds.  (Things become even more complicated when
+we introduce \emph{revocation}, where Alice may desire for her key to
+be declared invalid if, for example, it becomes compromised.)
+
+Identity-based encryption can simplify the above scenario in the
+following way: for a particular administrative domain (e.g.,
+\texttt{domain.com}), there is an ``authority'' who generates a
+``master'' public/secret key pair for the entire domain.  When Bob
+wants to send a message to Alice at \texttt{alice@domain.com}, he
+simply encrypts using the public key string \texttt{alice} and the
+master public key for the domain (which should be certified as usual).
+There is no need for Bob to obtain Alice's individual public key or
+certificate, or even for Alice to generate a key at all!  Meanwhile,
+Alice identifies herself to the domain authority, who uses its master
+secret key to ``extract'' a secret key that works just for the
+identity \texttt{alice}.  Alice uses this to decrypt her message as
+usual.  Notice here that the authority implicitly knows secret keys
+for every user in the system, so it can read everyone's encrypted
+messages.  Depending on the scenario, this can be a blessing or a
+curse, but in any case authority's master secret key is very powerful,
+so it must be guarded carefully.
+
+IBE also provides additional useful properties like implicit
+revocation (via identities that have an ``expiration date'' appended
+to them) and delegation (only a subset of messages can be decrypted by
+a particular agent).  More generally, IBE-related techniques and
+implications have proved to be very versatile and powerful in the
+design of other important and seemingly unrelated protocols.
+
+The problem of constructing an IBE remained open for many years
+following its initial conception by Shamir.  Finally in 2001, Boneh
+and Franklin described a scheme that used a relatively new
+mathematical object called a bilinear map (which has since been shown
+to have numerous other related applications).  Soon after Boneh and
+Franklin's announcement, it was revealed that Clifford Cocks, a
+mathematician in the United Kingdom's cryptography agency GCHQ, had
+years earlier devised a simple IBE based on a standard and elementary
+assumption (but his scheme was classified by the UK government).  This
+was an interesting case of ``history repeating itself,'' as Cocks
+himself had also discovered the famed RSA algorithm in 1974, three
+years before Rivest, Shamir and Adelman, but this discovery was also
+classified!
+
+In this lecture we will present the Cocks IBE scheme.
+
+\subsection{Model}
+\label{sec:model}
+
+The model for IBE consists of an authority that generates a single
+master public key $\mpk$ for all its users, along with a master secret
+key $\msk$.  To encrypt a message, one needs to know the master public
+key $\mpk$ and the receiver's identity $\id$, which can be any string.
+A user with identity $\id$ obtains a secret key $\sk_{id}$ from the
+authority (typically after proving his identity in some way).  He can
+use this secret key to decrypt messages sent to him.
+
+Formally, an $\ibe$ scheme consists of four ppt algorithms:
+\begin{itemize}
+\item $\ibesetup(1^{n})$ outputs a master public key $\mpk$ and master
+  secret key $\msk$.  This algorithm is executed once by the authority
+  when setting up the system.
+\item $\ibeext(\msk, \id)$ outputs a secret key for every user based
+  on his $\id$.  Since only the authority should have access to
+  $\msk$, this algorithm is executed only by the authority after
+  checking a user's identity.
+\item $\ibeenc(\mpk, \id, m)$ outputs a ciphertext corresponding to a
+  message $m$.
+\item $\ibedec(\sk_{id}, c)$ decrypts a ciphertext and outputs a
+  message.
+\end{itemize}
+
+\subsection{Security Definition}
+\label{sec:security-definition}
+
+Here we present a formal definion of the notion of IND-CPA security
+for an $\ibe$ scheme.  The intuition behind this definition is that a
+message encrypted to a particular ``target'' identity $\id^*$ (chosen
+by the adversary) should remain secret, \emph{even if} the adversary
+gets the secret keys for a polynomial number of other identities that
+are different from $\id^*$.
+
+\begin{definition}
+  \label{def:ibe-ind-cpa}
+  An $\ibe$ scheme is IND-CPA-secure if:
+  \[\left\langle \mpk, \algo{E}(\cdot),
+    C^0(\id^*,m_0,m_1)\right\rangle \compind \left\langle \mpk,
+    \algo{E}(\cdot), C^1(\id^*,m_0,m_1)\right\rangle,\] where $(\mpk,
+  \msk) \gets \ibesetup$, and $\algo{E}(\id)$ returns
+  $\ibeext(\msk,\id)$, except if queried on $\id^*$ in which case it
+  returns $\bot$.  Furthermore, for an $\id^{*}$ different from all
+  prior queries to $\algo{E}$, the oracle $C^b(\id^*,m_0,m_1)$,
+  returns $\ibeenc(\mpk,\id^{*},m_b)$, defines $\id^{*}$ as the target
+  identity, and terminates.
+\end{definition}
+
+The definition can be strengthened in various ways, such as adding
+chosen-ciphertext security.  In such a definition the adversary would
+additionally get a decryption oracle for the identity $\id^{*}$ that
+it is allowed to query on any string except for the challenge
+ciphertext that was output by $C^{b}$.
+
+\section{Number Theory Background}
+\label{sec:numb-theory-backgr}
+
+Throughout this lecture we will let $N$ be a \textit{Blum integer},
+i.e., $N = pq$ for primes $p$ and $q$ that are both $3$ modulo $4$.
+We use $\QRN^*$ to denote the set of quadratic residues modulo $N$.
+We use $\left( \frac{a}{p} \right) = a^{p-1/2} = \pm 1 \bmod p$ to
+denote the Legendre symbol.  (The symbol itself is defined as an
+integer, not a quantity modulo $p$).
+
+A natural generalization of the Legendre symbol is the \emph{Jacobi
+  symbol}, defined as $\left( \frac{a}{pq}\right) = \left(
+  \frac{a}{p}\right)\cdot \left( \frac{a}{q}\right)$.  Note that
+$\left( \frac{-1}{p}\right) = \left( \frac{-1}{q} \right) = -1$, hence
+$\left( \frac{-1}{N}\right) = 1$ for a Blum integer $N$.  That is, $-1
+\in \JN^{*}$ but is a non-square.  Also note that $\left(
+  \frac{ab}{N}\right) = \left( \frac{a}{N}\right) \cdot \left(
+  \frac{b}{N}\right)$, by the multiplicative property of the Legendre
+symbol.  Finally, we define $\JN^{*} = \left\{ a \in \Z^*_N |
+  \left(\frac{a}{N}\right) = 1 \right\}$, which is a multiplicative
+subgroup of $\ZN^{*}$.  The following claim can be established easily.
+
+\begin{claim}
+  \label{compute_claim}
+  Given $a$ and $N$ (in binary), we can efficiently compute $\left(
+    \frac{a}{N}\right)$ without knowing the factoring of $N$.
+\end{claim}
+
+\begin{proof}
+  The following \emph{reciprocity laws} can be proved with some
+  effort.  We omit their proofs.
+  \begin{eqnarray}
+    \label{rec_1} \text{for odd $a$ and $N$}, \quad \left(\frac{a}{N}
+    \right) &=& \left(\frac{N}{a} \right) \cdot \left( -1
+    \right)^{\frac{a-1}{2}\cdot\frac{N-1}{2}} \\
+    \label{rec_2} \text{for any } N, \quad \left(\frac{-1}{N} \right) &=&
+    \left( -1 \right)^{\frac{N-1}{2}} \\
+    \label{rec_3}\left(\frac{2}{N} \right) &=& \left( -1
+    \right)^{\frac{N^2-1}{8}}
+  \end{eqnarray}
+
+  For any even number $a$, we can reduce the problem to the case when
+  $a$ is odd by using equation (\ref{rec_3}).  Using equations
+  (\ref{rec_1}) and (\ref{rec_2}) we can iteratively reduce $a$ or $N$
+  until one of them becomes eauls to $1$, when $\left(\frac{a}{N}
+  \right)$ can be calculated trivially.  The overall algorithm and its
+  complexity is analogous to Euclid's algorithm for finding the gcd of
+  two numbers.
+\end{proof}
+
+We also present another claim that would be useful in the following
+section.
+
+\begin{claim}
+  \label{equal_claim}
+  $\abs{\QRN^*} = \tfrac12 \abs{\JN^*}$.
+\end{claim}
+
+\begin{proof}
+  Let $a \in \Z_N^*$.  Note that $a \in \QRN^*$ iff $\left(
+    \frac{a}{p} \right) = \left( \frac{a}{q} \right) = 1$, so
+  $\abs{\QRN^{*}} = (p-1)(q-1)/4$.  Also, $a \in \JN^*$ iff $\left(
+    \frac{a}{p}\right) = \left( \frac{a}{q}\right) = \pm 1$, so
+  $\abs{\JN^*} = \frac{(p-1)(q-1)}{2}$.
+\end{proof}
+
+The security of Cocks' IBE is based on the following assumption which
+was proposed in the seminal work of Goldwasser and Micali on
+public-key encryption.
+
+\begin{conjecture}[Quadratic Residuosity Assumption]
+  \label{QR_conjecture}
+  For a modulus generator $S$,
+  \[ \left\langle N \leftarrow S(1^*), a \leftarrow \QRN^*
+  \right\rangle \compind \left\langle N \leftarrow S(1^*), a
+    \leftarrow \JN^* \setminus \QRN^* \right\rangle\]
+\end{conjecture}
+
+In words, the assumption says that given $N$, it is hard to
+distinguish between a random quadratic residue and a random quadratic
+nonresidue \emph{with Jacobi symbol $1$}.  Note that it is crucial
+that the element have Jacobi symbol $1$, otherwise the tuples could be
+distinguished trivially by computing the Jacobi symbol $\left(
+  \frac{a}{N} \right)$ using Claim~\ref{compute_claim}.
+
+\subsection{Interlude: Goldwasser-Micali Encryption Scheme}
+\label{sec:goldw-micali-pkc}
+
+As a warm-up to the IBE, we briefly recall the \emph{original}
+application of the quadratic residuosity assumption to standard
+public-key encryption.  The Goldwasser-Micali scheme for message space
+$\bit$ is defined as follows.
+\begin{itemize}
+\item $\pkcgen(1^n)$: Generate a Blum integer $\pk = N$ as a public
+  key with known factorization $\sk = (p,q)$.
+\item $\pkcenc(N,b \in \bit)$: Choose $r \gets \Z_N^*$ and output the
+  encryption of $b$ as $c = r^2 \cdot (-1)^b \bmod N$.
+\item $\pkcdec(\sk = (p,q), c)$: Return $m = 0$ if $c \in \QRN^*$, and
+  return $1$ otherwise.  This test can be done efficiently by testing
+  whether both $\left( \frac{c}{p} \right) = 1$ and $\left(
+    \frac{c}{q} \right) = 1$.
+\end{itemize}
+
+The proof of security follows directly from
+Conjecture~\ref{QR_conjecture}, which yields the following theorem.
+
+\begin{theorem}
+  Under QRA, the Goldwasser-Micali scheme is IND-CPA-secure.
+\end{theorem}
+
+\section{The Cocks IBE Scheme}
+\label{sec:cocks-scheme}
+
+In this section we define Cocks' $\ibe$ scheme and prove its security.
+To begin, we give a basic public key encryption scheme that works
+relative to a modulus $N$, but where decryption can be performed
+\emph{without needing the factorization of $N$}.  Instead, decryption
+will only require knowledge of a square root of a user's public key.
+Looking ahead, the factorization of $N$ will be the \emph{master}
+secret key of the system, which will allow the authority to extract a
+secret key for any user.  Later in Section~\ref{sec:making-id-based},
+we will convert this PKE into an $\ibe$ scheme.
+
+\subsection{Warm-Up: Public-Key Encryption Scheme}
+\label{sec:warm-up:-public}
+
+The PKE is for the message space $\set{\pm 1}$, and is defined by the
+following algorithms, which are all implicitly provided with the
+modulus $N$.
+\begin{itemize}
+\item $\pkcgen(1^n)$: Generate secret key $\sk = r \gets \ZN^{*}$ and
+  public key $\pk = r^2 = a \in \QRN^{*} \subseteq \ZN^{*}$.
+\item $\pkcenc(a, m \in \set{\pm 1})$: Choose uniformly random $t \in
+  \Z_N^*$ such that $\left( \frac{t}{N}\right) = m$.  (This can be
+  done by repetition, since the probability of success for a random
+  choice of $t$ is $1/2$.)  Output the ciphertext $c = t + a/t \bmod
+  N$.
+\item $\pkcdec(r,c)$: Output $\left( \frac{c+2r}{N} \right)$.
+\end{itemize}
+
+From inspection it is not immediately apparent that decryption is
+correct, but the following claim establishes that this is so.
+
+\begin{claim}
+  \label{dec_correct}
+  For any $r \in \sqrt{a} \bmod N$ and any message $m \in \set{\pm
+    1}$, we have $\pkcdec(r, \pkcenc(a, m)) = m$.
+\end{claim}
+
+\begin{proof}
+  Let $t$ be the random value chosen by $\pkcenc$ where $\left(
+    \frac{t}{N} \right) = m$.  The claim follows from the equations
+  given below.
+  \begin{eqnarray*}
+    \left( \frac{c+2r}{N} \right) &=& \left( \frac{t + r^2/t + 2r}{N}
+    \right) \cdot \left( \frac{t}{N} \right)^2  \\
+    &=& \left( \frac{t^2 + r^2 + 2rt}{N} \right) \cdot \left(
+      \frac{t}{N} \right)  \\
+    &=& \left( \frac{(t+r)^2}{N} \right) \cdot \left( \frac{t}{N}
+    \right) \\
+    &=& \left( \frac{t}{N} \right). \qedhere
+  \end{eqnarray*}
+\end{proof}
+
+In the remainder of this section we will argue that the above scheme
+is IND-CPA secure under the QRA by showing that if the public key $\pk
+= a$ is instead an element of $\JN^{*} \setminus \QRN^{*}$, then the
+encryption algorithm $\pkcenc$ is ``lossy,'' i.e., the distributions
+of $\pkcenc(a, +1)$ and $\pkcenc(a, -1)$ are \emph{identical}.  The
+following claim establishes this lossy property.  Following the claim,
+we easily prove that this lossiness property implies IND-CPA security.
+
+\begin{claim}
+  \label{claim:lossy}
+  If $\pk = a \in \JN^{*} \setminus \QRN^{*}$, then $\pkcenc(a, +1)
+  \equiv \pkcenc(a, -1)$.
+\end{claim}
+
+\begin{proof}
+  Note that $\left( \frac{a}{p} \right) = \left( \frac{a}{q} \right) =
+  -1$.  Let $c = t+a/t$ (for some $t \in \ZN^{*}$) be some fixed
+  ciphertext that could be output by $\pkcenc(a, \cdot)$.  For this
+  fixed $c$ and public key $a$, consider all solutions $t$ to this
+  equation $c = t+a/t$.  Let $t = t_0 \in \Z_N^*$ be an arbitrary such
+  solution.  Written using the Chinese remainder representation of
+  $\ZN^{*}$, there are a total of four solutions:
+  \begin{itemize}
+  \item $\left\langle t_0 \bmod p ; t_0 \bmod q \right\rangle$ has
+    Jacobi symbol $\left( \frac{t_0}{N} \right)$.
+  \item $\left\langle a/t_0 \bmod p ; t_0 \bmod q \right\rangle$ has
+    Jacobi symbol $-1 \cdot \left( \frac{t_0}{N} \right)$, because
+    $\left( \frac{a/t_{0}}{p} \right) = \left( \frac{a}{p} \right)
+    \left( \frac{t_{0}}{p} \right)^{-1} = -1 \left( \frac{t_{0}}{p}
+    \right)$.
+  \item $\left\langle t_0 \bmod p ; a/t_0 \bmod q \right\rangle$ has
+    Jacobi symbol $-1 \cdot \left( \frac{t_0}{N} \right)$, for similar
+    reasons.
+  \item $\left\langle a/t_0 \bmod p ; a/t_0 \bmod q \right\rangle$ has
+    Jacobi symbol $\left( \frac{t_0}{N} \right)$.
+  \end{itemize}
+  Hence, $\Pr \left[ \pkcenc(a, 1) = c \right] = \Pr \left[ \pkcenc(a,
+    -1) = c \right]$, and the proof is complete.
+\end{proof}
+
+\begin{corollary}
+  \label{cor:ind-cpa-cocks-basic}
+  Under the QRA, the basic Cocks public-key encryption scheme is
+  IND-CPA secure.
+\end{corollary}
+
+\begin{proof}
+  By the QRA, composition lemma, and Claim~\ref{claim:lossy}, we have
+  the following:
+  \begin{eqnarray*}
+    \langle N, a \gets \QRN^{*}, \pkcenc(a, +1) \rangle & \compind &
+    \langle N, a \gets \JN^{*} \setminus \QRN^{*}, \pkcenc(a, +1)
+    \rangle \\
+    & \equiv & \langle N, a \gets \JN^{*} \setminus \QRN^{*},
+    \pkcenc(a, -1) \rangle \\
+    & \compind & \langle N, a \gets \QRN^{*}, \pkcenc(a, -1) \rangle. \qedhere
+  \end{eqnarray*}
+\end{proof}
+
+\subsection{Making It Identity-Based}
+\label{sec:making-id-based}
+% hashing $\id$ to two public keys: one in $\QRN^{*}$, on in $\JN^{*}
+% \backslash \QRN^{*}$.  extracting secret keys using $\msk$, the
+% factorization of $N$.
+
+We make the scheme identity-based in the random oracle model.  Let $H
+\colon \bit^{*} \to \JN^{*}$ be modelled as a truly random function,
+which will maps identities to public keys in the basic scheme.  (Note
+that such a function can be obtained from a random function $H'
+\bit^{*} \to \bit$ by using the random output bits of $H'$ to sample
+from $\JN^{*}$.)  There is only one subtlety: we cannot detect whether
+the output of the hash function $H$ is a ``proper'' or ``lossy''
+public key.  The solution is to encrypt (using independent randomness)
+to both $a_{0} = H(\id)$ and $a_{1} = -H(\id)$, both of which have
+Jacobi symbol $1$, and exactly one of which is a quadratic residue
+(because $-1 \in \JN^{*} \setminus \QRN^{*}$).
+
+\begin{itemize}
+\item $\ibesetup(1^{n})$ chooses a Blum integer $\mpk = N = pq$ as the
+  master public key, and lets $\msk = (p,q)$ be the master secret key.
+\item $\ibeext^{H}(\msk, \id)$ lets $a_0 = H(\id)$ and $a_1 = -1 \cdot
+  H(\id)$.  It returns $r_{\id} \in \ZN^{*}$ as a \emph{random} square
+  root of $a_0$ or $a_1$, whichever is a quadratic residue.
+\item $\ibeenc^{H}(\mpk = N, \id, m \in \set{\pm 1})$ lets $a_0 =
+  H(\id)$ and $a_1 = -1 \cdot H(\id)$, and outputs $c_0 =
+  \pkcenc(a_0,m)$ and $c_1 = \pkcenc(a_1,m)$ where $\pkcenc(\cdot,
+  \cdot)$ is the encryption algorithm of the basic scheme as defined
+  in Section~\ref{sec:warm-up:-public}
+\item $\ibedec(\sk_{id} = \sqrt{a_b}, c = (c_0,c_1))$ outputs
+  $\pkcdec(\sk_{id}, c_b)$, where $\pkcdec(\cdot,\cdot)$ is the
+  decryption algorithm of the basic scheme as defined in
+  Section~\ref{sec:warm-up:-public}.
+\end{itemize}
+
+We now provide an outline of the proof of security for the above
+scheme; a good exercise is to fill in the details carefully.  In order
+to prove security, we need to give a simulator $\Sim(N,a)$ that
+attempts to solve the QR problem using an adversary for the IBE
+scheme.  The simulator must provide an $\msk$, and answer oracle
+queries $H(\cdot)$ and extraction queries $\ibeext_{\msk}(\cdot)$ for
+arbitrary identities (but without knowing the $\msk$!).  The basic
+idea is that $\Sim$ sets $\msk = N$, and ``programs'' the random
+oracle $H$ so that it knows a random square root for $\pm H(\id)$ for
+all but a single $H(\id^*) := \pm a$, where $\id^{*}$ is a randomly
+chosen query to $H$ that $\Sim$ ``guesses'' will be the adversary's
+declared target identity.  If $\Sim$ does happen to guess this
+identity correctly, then it prepares a challenge ciphertext by using
+the basic scheme to encrypt two \emph{opposite} bits in random order
+(i.e., either $+1, -1$ or $-1, +1$) under $a$ and $-a$, respectively.
+Note that by the lossiness property, such a ciphertext is distributed
+identically as either $\ibeenc(\id^{*}, +1)$ or $\ibeenc(\id^{*},
+-1)$, depending on whether $a$ or $-a$ is a quadratic residue.  Based
+on whether the adversary identifies the ciphertext as an encryption of
+$+1$ or $-1$, then, the simulator answers whether $a \in \QRN^{*}$ or
+not.
+
+\end{document}
+
+%%% Local Variables: 
+%%% mode: latex
+%%% TeX-master: t
+%%% End: 

@@ -1,0 +1,374 @@
+\documentclass[11pt]{article}
+
+\usepackage{fullpage}
+\usepackage{times}
+\usepackage{hyperref,microtype,pdfsync}
+\usepackage{amsmath,amsfonts,amssymb,amsthm}
+\usepackage{mathtools}
+\usepackage{fancyhdr}
+
+\usepackage[noend]{algorithmic}
+\usepackage{algorithm}
+\usepackage{verbatim}
+
+\input{header}
+
+% VARIABLES
+
+\newcommand{\lecturenum}{14}
+\newcommand{\lecturetopic}{Random Oracle Signatures}
+\newcommand{\scribename}{Steven Ehrlich}
+
+% END OF VARIABLES
+
+\lecheader
+
+\pagestyle{plain}               % default: no special header
+
+\begin{document}
+
+\thispagestyle{fancy}           % first page should have special header
+
+% LECTURE MATERIAL STARTS HERE
+
+\section{Recap and Looking Ahead}
+\label{sec:recap-looking-ahead}
+
+Previously we demonstrated a signature scheme that was derived from
+any one-way function, plus a collision-resistant hash family; this
+latter assumption can be replaced with a slightly weaker primitive
+that also follows from one-way functions.  This means that even though
+they are a ``public-key'' object, signature schemes exist in
+minicrypt.
+
+Unfortunately our scheme was quite inefficient.  Now we'll consider an
+alternative signature scheme that is efficient and simpler to analyse.
+To do this, we'll rely on stronger assumptions: we will rest our
+scheme on trapdoor permutations instead of just OWFs, and the security
+analysis will be in an \emph{idealized} setting called the Random
+Oracle Model.
+
+\section{Random Oracle Model}
+\label{sec:random-oracle-model}
+
+A random oracle is a ``public truly random function:''
+\begin{itemize}
+\item Anyone can query it as a ``black box.''
+\item It gives a \emph{consistent}, \emph{uniform}, and
+  \emph{independent} random output for each distinct input.
+\end{itemize}
+
+Is a random oracle substantially different from a PRF?  On the
+surface, no: a PRF can be queried, and gives consistent outputs that
+appear uniformly random and independent.  However, the point of having
+a random oracle is for it to be \emph{public}.  If the seed of a PRF
+is revealed, then it loses all its security guarantees.
+
+\subsection{Methodology}
+\label{sec:ro-methodology}
+
+\href{http://cseweb.ucsd.edu/users/mihir/papers/ro.html}{Bellare and
+  Rogaway} introduced a methodology for using random oracles in
+cryptography:
+\begin{enumerate}
+\item Design a scheme in the RO model: all algorithms (of the scheme,
+  and the adversary) have ``black-box'' access to the oracle.
+\item Analyze/prove security (in the RO model) by giving a security
+  reduction.
+\item \emph{Instantiate} the oracle with a ``sufficiently crazy''
+  public hash function (such as SHA-1), and hope that this does not
+  introduce any security vulnerabilities in the scheme.
+\end{enumerate}
+
+\subsection{Advantages and Caveats}
+\label{sec:advantages-caveats}
+
+Why does having a random oracle help?  In the RO model, security is
+often easier to prove, even for very simple and efficient schemes.
+Generally speaking, this is because the simulator/security reduction
+has some extra flexibility: it gets to provide the view of the oracle
+to the adversary.  This not only allows the simulator to know what
+queries the adversary makes, but also to `control' (or `program') the
+oracle outputs that the adversary sees.  We shall see both of these
+properties used in the security proof below.
+
+However, there is (sometimes heated) dispute over the value of a
+security proof in the random oracle model.  The difficulty lies with
+the \emph{instantiation} step.  Because its code is fixed and public,
+a given hash function is \emph{not} a black box, nor does it give
+uniformly random and independent outputs.  In fact,
+\href{http://arxiv.org/abs/cs.CR/0010019}{Canetti, Goldreich, and
+  Halevi} showed that there exists (under standard assumptions) a
+signature scheme that is secure in the random oracle model, but which
+becomes \emph{trivially breakable} with \emph{any} public
+instantiation of the oracle!  In this sense, the random oracle
+methodology does \emph{not} yield secure schemes in general.  However,
+the problematic CGH signature scheme is very contrived, and would
+never be proposed for practice.  Most signature schemes used in the
+real world are much more ``natural,'' and don't seem to have obvious
+(or even non-obvious) flaws when instantiated with strong hash
+functions.
+
+\section{A Signature Scheme in the RO Model}
+\label{sec:signature-scheme-ro}
+
+\href{https://wiki.cc.gatech.edu/theory/images/7/75/Lec10.pdf}{Recall
+  the definition of a trapdoor permutation family:} it is a set
+$\set{f_{s} \colon D_{s} \to D_{s}}$ of permutations where $f_{s}$ is
+easy to invert with knowledge of the trapdoor (which is generated
+along with the index $s$), and otherwise hard to invert on uniformly
+random values $y \in D_{s}$.  The RSA and Rabin function families are
+plausible trapdoor permutation candidates.
+
+\href{https://wiki.cc.gatech.edu/theory/images/7/75/Lec12.pdf}{Previously},
+we attempted to design a secure signature scheme based on trapdoor
+permutations.  Our old scheme was simple: the public verification key
+was a function $f_{s}$, the secret signing key was its trapdoor (also
+produced by the function sampler $\algo{S}$), and the signature for a
+message $m \in D_{s}$ was $f_{s}^{-1}(m)$.  Unfortunately, this
+succumbs to a trivial attack: first pick some signature $\sigma \in
+D_{s}$, then set $m=f_s(\sigma)$.  Then $(m,\sigma)$ is clearly is a
+valid message/signature pair.
+
+Fortunately, we can resurrect this scheme in the random oracle model,
+with a small change: we first \emph{hash} the message using the
+oracle, then invert the hash.  The following scheme $\sig$, often
+called \emph{full-domain hash}, uses a trapdoor permutation family
+$\set{f_{s}}$ (where the domain of every $f_{s}$ is $\bit^{n}$, for
+convenience) and a function $H : \bit^{*} \to \bit^{n}$, modelled as a
+random oracle.
+\begin{itemize}
+\item $\siggen^{H}$: choose $(s,t) \gets \algo{S}$ and output $\vk=s$,
+  $\sk=t$.
+\item $\sigsign^{H}_{t}(m \in \bit^{*})$: output $\sigma =
+  f_s^{-1}\parens*{H(m)}$.
+\item $\sigver^{H}_{s}(m,\sigma \in \bit^{n})$: accept if
+  $f_s(\sigma)=H(m)$, otherwise reject.
+\end{itemize}
+
+Despite the similarly with our previous signature scheme, we cannot
+apply the same kind of attack: after choosing $\sigma \in \bit^{n}$,
+we would then have to find a message $m$ such that $H(m) =
+f_{s}(\sigma)$.  Because $H$ is a random oracle, this could only be
+done by brute-force search, which would take about $2^{n}$ attempts.
+
+Of course, just because \emph{this} attack is thwarted does not mean
+that our scheme is secure.  Happily, we can prove security in the
+idealized model.
+
+\begin{theorem}
+  \label{thm:fdh-uf-cma}
+  The $\sig$ scheme described above is strongly unforgeable under
+  chosen-message attack (in the RO model), assuming that $\set{f_{s}}$
+  is a TDP family.
+\end{theorem}
+
+\begin{proof}
+  First note that for any oracle $H$, every message $m$ has exactly
+  one signature, so to proving strong unforgeability it suffices to
+  prove standard unforgeability.
+
+  We want to design a simulator algorithm $\Sim(s,y)$ that uses a
+  hypothetical forger $\For$ to find $x = f_{s}^{-1}(y)$, given $s$
+  generated by $\algo{S}$ and uniformly random $y \gets \bit^{n}$.
+  (Note that $y = f_{s}(x) \in \bit^{n}$ is uniformly random because
+  $x \gets \bit^{n}$ is, and because $f_{s}$ is a permutation.)  The
+  basic idea is that $\Sim$ will answer the random oracle queries
+  (``program the oracle'') so that it knows the preimages (under
+  $f_{s}$) of all but one of them, which it answers as its challenge
+  value $y$.  This allows the simulator to answer signing queries for
+  all but one message, which it hopes is the message that $\For$ will
+  forge, in which case the forged signature is exactly
+  $f_{s}^{-1}(y)$, as desired.
+
+  We now proceed in more detail.  Without loss of generality, we may
+  make some simplifying assumptions about $\For$.  In particular, we
+  assume that:
+  \begin{itemize}
+  \item \emph{$\For$ makes at most $q=\poly(n)$ queries to $H$.}
+    Because $\For$ runs in polynomial time, it can't make more than
+    $\poly(n)$ queries no matter what its execution path is.
+  \item \emph{$\For$ always outputs some (possibly invalid) forgery
+      $(m^{*}, \sigma^{*})$.}  We can always ``wrap'' $\For$ in a
+    program that outputs an arbitrary ``junk'' forgery if $\For$
+    fails to.
+  \item \emph{$\For$ always queries $H(m)$ (or $H(m^{*})$) before
+      querying $\sigsign(m)$ (or outputting its forgery
+      $(m^*,\sigma^*)$, respectively).}  We can wrap $\For$ in another
+    algorithm that inserts the needed queries, and ignores the
+    results.
+  \item \emph{$\For$ never repeats any query to $H$.}  We can always
+    wrap $\For$ in another algorithm that watches all of $\For$'s
+    queries, and store all queries/response pairs in a table.  Before
+    forwarding each query to the random oracle, it first checks its
+    table and returns the answer if it is already known.  (We note
+    that we can enforce this condition on either the forger's end, or
+    in the simulator's responses, with the same effect.)
+  \end{itemize}
+
+  The forger $\For$ expects to perform a chosen-message attack against
+  the scheme, which means that $\Sim$ must provide it with access to:
+  \begin{enumerate}
+  \item a verification key $\vk$;
+  \item a signing oracle $\sigsign_{\sk}(\cdot)$;
+  \item a random oracle $H$.
+  \end{enumerate}
+
+  Our simulator $\Sim(s,y)$ works as follows: it first chooses $i^*
+  \gets [q]$ uniformly at random; this is a ``guess'' as to which
+  query to $H$ will correspond to the message in the eventual forgery.
+  It then invokes $\For$ on $\vk = s$, and simulates the oracles $H$
+  and $\sigsign(\cdot)$ as follows:
+
+  \begin{algorithm}
+    \caption{Simulation of $H(\cdot)$.}
+    \begin{algorithmic}[1]
+      \STATE On $\For$'s $i$th query $m_{i} \in \bit^{*}$,
+      \IF {$i=i^*$}
+      \STATE Store $(\bot, y, m_{i^{*}})$ in an internal table.
+      \RETURN $y_{i^*}=y$ to $\For$
+      \ELSE 
+      \STATE Choose $x_i\gets \bit^n$
+      \STATE Let $y_i=f_s(x_i)$
+      \STATE Store $(x_i,y_i,m_i)$ in the internal table.
+      \RETURN $y_i$ to $\For$
+      \ENDIF
+    \end{algorithmic}
+  \end{algorithm}
+
+  \begin{algorithm}
+  \caption{Simulation of $\sigsign(\cdot)$.}
+  \begin{algorithmic}[1]
+  \STATE On a query $m \in \bit^{*}$, look up $(x,y,m)$ in the
+  internal table.
+  \COMMENT{Such an entry exists because $\For$ always queries $H(m)$ before
+    querying $\sigsign(m)$.}
+  \IF {$x\neq \bot$} 
+  \RETURN $x$ to $\For$
+  \ELSE
+  \STATE Abort the simulation and fail.
+  \ENDIF
+  \end{algorithmic}
+  \end{algorithm}
+
+  Finally, when $\For$ outputs its purported forgery $(m^*,\sigma^*)$,
+  check that $m^*=m_{i^*}$.  If so, $\Sim$ outputs $\sigma^*$;
+  otherwise, it fails.
+
+  We shall analyze the simulation in the claims below.  By
+  Lemma~\ref{lem:adv-Sim} below, we conclude that the existence of a
+  forger of non-negligible advantage implies that we have a
+  non-negligible advantage in inverting the trapdoor permutation, as
+  desired.
+\end{proof}
+
+\subsection{Analysis}
+
+\begin{lemma}
+  \label{lem:adv-Sim}
+  For the above simulation strategy,
+  \[ \advan_{\scheme{TDP}}(\Sim) = \frac{1}{q} \cdot \advan_{\sig}(\For). \]
+\end{lemma}
+
+\noindent This fact follows from two claims:
+
+\begin{claim}
+  Conditioned on not failing, $\Sim(s,y)$ simulates the chosen-message
+  attack perfectly, and hence outputs $f_{s}^{-1}(y)$ with probability
+  $\advan_{\sig}(\For)$.
+\end{claim}
+
+\begin{proof}
+  We first note that $\vk=s$ is distributed precisely as in $\sig$,
+  because $\Sim$ is playing the TDP inversion game.  Next, $\Sim$
+  simulates the oracle $H$ perfectly: every answer $y_{i}$ is
+  uniformly random and independent, because it equals $f_{s}(x_{i})$
+  for some uniformly random $x_{i} \in \bit^{n}$, and $f_{s}$ is a
+  bijection.  (Also $y_{i^{*}} = y$ is uniformly random, because
+  $\Sim$ is playing the TDP inversion game.)  Lastly, because $\Sim$
+  did not fail, it answered every signing query with its unique valid
+  signature.
+
+  Now $\Sim$ does not fail exactly when $m^{*}$ is $\For$'s $i^{*}$th
+  query to $H$, where $(m^{*}, \sigma^{*})$ is $\For$'s output
+  forgery.  Observe that in this case, $\sigma^*$ is a valid signature
+  if and only if $\sigma^*=f_{s^{-1}}(y)$.  Because $\Sim$ simulates
+  the chosen-message attack perfectly, $\For$ outputs such
+  $\sigma^{*}$ with probability $\advan_{\sig}(\For)$, as desired.
+\end{proof}
+
+\begin{claim}
+  The probability of $\Sim$ not failing equals $1/q$.
+\end{claim}
+
+\begin{proof}
+  By assumption, $\For$ must query $H$ on $m^{*}$ before outputting
+  its forgery $(m^{*}, \sigma^{*})$.  By construction of $\Sim$, it
+  does not fail exactly when $m^{*}$ is the $i^*$th query to $H$.
+  Moreover, we claim that $m^{*}$ is the $i^{*}$th query to $H$ with
+  probability exactly $1/q$.  This is because we can imagine an
+  alternative experiment in which \emph{every} query to $\sigsign$ is
+  answered correctly, and $i^{*}$ is chosen uniformly; in such an
+  experiment, $i^{*}$ is independent of $\For$'s view an hence $m^{*}$
+  is the $i^{*}$th query with probability $1/q$.
+\end{proof}
+    
+\section{Variants}
+\label{sec:variants}
+
+Notice the factor of $\frac{1}{q}$ in the advantage of the simulator.
+The reduction (from breaking the TDP to breaking the signature scheme)
+is ``loose'' in the sense that the simulator's probability of
+inverting is much less than the forger's probability of forging.  For
+concrete security, this might mean that we need to use a large
+security parameter for our TDP in order to achieve a small enough
+forging probability for our signature scheme.  Also notice that $q$ is
+the number of \emph{hash} queries, not signing queries.  In practice,
+the number of times an attacker can compute the hash function is
+probably much larger than the number of signatures to which it has
+access.
+
+People have tried to improve the ``quality'' of the reduction in a
+number of ways.  One notable way, due to
+\href{http://www.cs.umd.edu/~jkatz/papers/CCCS03_sigs.pdf}{Katz and
+  Wang}, is to use ``claw-free'' pairs of TDPs; these are analogous to
+collision-resistant hash functions.  In a claw-free family, the
+function sampler generates two functions $f_{s_{0}}$ and $f_{s_{1}}$,
+and the security property is that it should be hard to find a pair of
+(not necessarily distinct) inputs $x_{0}, x_{1} \in \bit^{n}$ such
+that $f_{s_{0}}(x_{0}) = f_{s_{1}}(x_{1})$.  As usual, there are
+trapdoors that make it easy to invert the functions.  (The connection
+to collision resistance is the following: define $f(b,x) =
+f_{s_{b}}(x)$.  Then $f$ maps $n+1$ bits to $n$ bits, and a collision
+in $f$ immediately gives us a claw in $f_{s_{0}}, f_{s_{1}}$; the
+values of $b$ must be different because the functions $f_{s_{b}}$ are
+permutations.)
+
+We can tweak the signature scheme so that the public verification key
+consists of two functions $f_{s_{0}}, f_{s_{1}}$, and the signing
+algorithm on message $m$ chooses one of the functions at random and
+inverts it on $H(m)$.\footnote{If the forger queries the signing
+  oracle on the same message more than once, the signer should invert
+  the same function every time; this can be enforced by keeping state
+  or using a PRF.  Without this condition, it is easy to see that the
+  signer will eventually give away a claw!}  In the security proof,
+the simulator is attempting to find a claw in $f_{s_{0}}, f_{s_{1}}$.
+When simulating the random oracle on each new message $m_{i}$, it
+\emph{always} chooses a fresh $x_{i}$ and applies one of the two
+functions (chosen at random) to compute and return $y_{i}$.  If the
+forger later queries the signing oracle on $m_{i}$, the simulator can
+always reply with a properly distributed signature.  (But it only
+knows \emph{one} valid signature, which is why the real scheme must
+also give away only one distinct signature for each message.)
+Finally, when the forger outputs a forgery, half of the time it will
+end up forging using the same function that the simulator used (so we
+fail), and the other half of the time it finds a preimage under the
+other function, yielding a claw.  So the simulator's advantage is
+\emph{half} that of the forger, which is a drastic improvement!
+
+\end{document}
+
+%%% Local Variables: 
+%%% mode: latex
+%%% TeX-master: t
+%%% End: 

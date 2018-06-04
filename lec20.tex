@@ -1,0 +1,388 @@
+\documentclass[11pt]{article}
+
+\usepackage{fullpage}
+\usepackage{tabularx}
+\usepackage{times}
+\usepackage{hyperref,microtype,pdfsync}
+\usepackage{amsmath,amsfonts,amssymb,amsthm}
+\usepackage{mathtools}
+\usepackage{fancyhdr}
+
+\input{header}
+
+% VARIABLES
+
+\newcommand{\lecturenum}{20}
+\newcommand{\lecturetopic}{Secure 2-Party Computation}
+\newcommand{\scribename}{Anand Louis}
+
+\newcommand{\defeq}{\stackrel{\textup{def}}{=}}
+
+% END OF VARIABLES
+
+\lecheader
+
+\pagestyle{plain}               % default: no special header
+
+\begin{document}
+
+\thispagestyle{fancy} % first page should have special header
+
+% LECTURE MATERIAL STARTS HERE
+
+\section{Introduction}
+
+Consider the {\em Billionaire's Problem}: {\em Larry} and {\em Sergey}
+are both wealthy men.  They want to design a protocol to find out
+whose net worth is higher, without having to reveal their net worths
+to each other.  Since they are business partners, they trust each
+other to follow the protocol truthfully (i.e., to use their true worth
+as inputs and to follow the protocol instructions faithfully), but
+they still do not want the protocol to reveal more about their net
+worths than is absolutely necessary.  Can this be achieved?  More
+fundamentally, how do we define the notion of security for this goal?
+
+Note that ``total'' privacy cannot be achieved, as they will each
+learn something new about the other's wealth, namely, whether it is
+greater or less than his own.  In some special cases, Larry can infer
+Sergey's net worth \emph{entirely} from just this single piece of
+knowledge.  For example, if Larry's net worth is \$1 and Sergey's net
+worth is \$0, then when Larry learns that Sergey's worth is less than
+his own, he can infer that Sergey's net worth is exactly \$0 (we
+ignore the possibility of Sergey being in debt).  However, this
+leakage of knowledge is \emph{inherent in the task they are carrying
+  out for these values}, and therefore should not should not be
+considered a deficiency of any particular protocol they might use.
+
+Alternatively, Larry might start with some prior knowledge about
+Sergey's wealth that might enable him to infer Sergey's exact net
+worth from just knowing whose net worth is higher.  For example, if
+Larry knows that Sergey's net worth is either \$4 billion or \$5
+billion, and his own worth is \$4.5 billion, then learning who is
+wealthier immediately reveals Sergey's net worth to Larry.  This also
+should not be considered a violation of our security goal.
+
+In both of these examples, we must be content to let Larry learn
+whatever he can infer from the final result (i.e., who is wealthier)
+--- \emph{but we want him to learn nothing more than that}!  So in
+defining security, we will aim to restrict the ``\emph{relative
+  knowledge}'' revealed by a protocol, versus what is learned from the
+outcome alone.  Similarly to the setting of zero knowledge, we will do
+so using the notion of an efficient simulator that is given only the
+input and output of the party, and must simulate the entire view of
+that party in the protocol.
+
+\section{Secure Two-Party Computation}
+\label{sec:2pc}
+
+Here we formalize a model and security definition for the informal
+goals described above.
+
+\subsection{Model}
+\label{sec:model}
+
+We will consider a very simplified model that does not capture many
+real-world concerns, but is still rich enough to make the problem
+interesting and non-trivial.
+
+\begin{enumerate}
+\item There are two parties (more formally, two ppt algorithms) $P_1$
+  and $P_2$, who have inputs $x_1$ and $x_2$ respectively, and wish to
+  evaluate a public polynomial time-computable function
+  $f(\cdot,\cdot)$ on those inputs.  For example, in the billionaire's
+  problem, $f(x_{1}, x_{2}) = [x_{1} > x_{2}]$.
+
+  Without loss of generality, we may assume that $f$ is a
+  \emph{deterministic} function that outputs a \emph{single} value
+  that is given to both parties.  If we wish for $P_{1}$ and $P_{2}$
+  to receive the outputs of two possibly different deterministic
+  functions $f_{1}(\cdot, \cdot)$, $f_{2}(\cdot,\cdot)$
+  (respectively), this can be emulated using a single function
+  $f'((x_1,r_1),(x_2,r_2)) = (f_1(x_1,x_2) \oplus r_1 \| f_2(x_1,x_2)
+  \oplus r_2 )$, where each $P_{i}$ augments its own input $x_{i}$ by
+  a uniformly random string $r_{i}$ of appropriate length.  Since
+  $r_1$ and $r_2$ are chosen uniformly at random and are independent
+  of everything else, the output $f_{1}(x_{1}, x_{2})$ is perfectly
+  hidden from $P_{2}$, as is $f_{2}(x_{1}, x_{2})$ from $P_{1}$.
+
+  We can also evaluate a \emph{randomized} function $f$ by emulating
+  it with a deterministic function (showing how to do this is one of
+  your homework problems).  However, security becomes quite a bit
+  subtler to define in this case; see below.
+
+\item We assume that the parties are {\em semi-honest}, often called
+  ``honest but curious.''  That is, they run the protocol exactly as
+  specified (no deviations, malicious or otherwise), but may try to
+  learn as much as possible about the input of the other party from
+  their views of the protocol.  Hence, we want the view of each party
+  not to leak more knowledge than necessary.
+
+\item As usual, the view of a party $P_i$ in an interaction with the
+  other party on their inputs $x_{1}, x_{2}$, denoted
+  $\view_{P_{i}}[P_{1}(x_{1}) \leftrightarrow P_{2}(x_{2})]$, consists
+  of its input $x_i$, the random coins $r_{P_i}$ used by $P_{i}$, and
+  all the messages received from the other party.  The final output of
+  $P_{i}$ is denoted $\out_{P_{i}}[P_{1}(x_{1}) \leftrightarrow
+  P_{2}(x_{2})]$.
+\end{enumerate}
+
+\subsection{Security Definition}
+\label{sec:security-definition}
+
+\begin{definition}
+  \label{def:two-party}
+  A pair of ppt machines $(P_1,P_2)$ is a secure 2-party protocol (for
+  static, semi-honest adversaries) for a deterministic polynomial
+  time-computable function $f(\cdot,\cdot)$ if the following
+  properties hold:
+  \begin{enumerate}
+  \item \emph{Completeness}: for all $i \in \set{1,2}$ and all $x_1,
+    x_2 \in \bit^{*}$, we have (with probability $1$): \[
+    \out_{P_{i}}[P_{1}(x_{1}) \leftrightarrow P_{2}(x_{2})] =
+    f(x_1,x_2). \]
+
+  \item \emph{Privacy}: there exist nuppt simulators $\Sim_1, \Sim_2$
+    such that for all $x_{1}, x_{2} \in \bit^{*}$ and all $i \in
+    \set{1,2}$, \[ \view_{P_{i}}[P_{1}(x_{1}) \leftrightarrow
+    P_{2}(x_{2})] \compind \Sim_{i}(x_{i}, f(x_{1}, x_{2})). \]
+  \end{enumerate}
+\end{definition}
+
+A few remarks are in order.  First, privacy is \emph{per-instance}:
+the only knowledge leaked to a party by the protocol on inputs $x_{1},
+x_{2}$ is whatever can be inferred (efficiently) from the party's own
+input and the value of $f(x_{1}, x_{2})$.  For example, if the inputs
+are such that $f(x_{1}, x_{2})$ reveals nothing at all, then the
+execution of the protocol on those inputs should also reveal nothing;
+conversely, if the output reveals everything about both parties'
+inputs, then the protocol is allowed to leak everything as well.
+Second, any ``prior knowledge'' that the parties have about each
+others' inputs is captured by the non-uniformity of the simulator (and
+implicit distinguisher) in the definition of privacy.
+
+\subsection{Definition for Randomized Functions}
+\label{sec:defin-rand-funct}
+
+Definition~\ref{def:two-party} is relatively straightforward due to
+the simplicities of our model, in particular, the deterministic nature
+of $f$.  We briefly discuss some of the issues that arise in defining
+security for randomized functions.  First, how should completeness be
+defined?  It no longer makes sense to demand that $\out_{P_{1}} =
+f(x_{1}, x_{2})$, since we now have a random variable $f(x_{1}, x_{2};
+r)$ over the choice of $r$ (which neither party should be able to
+influence).  Instead, we want that both $\out_{P_{1}}$ and
+$\out_{P_{2}}$ in a \emph{single} execution of the protocol are
+\emph{simultaneously} distributed as $f(x_{1}, x_{2}; r)$ for
+\emph{the same} random $r$.  This is so that the protocol between
+$P_{1}$ and $P_{2}$ has the effect of emulating a single, consistent
+randomized evaluation of $f$.  Formally, we want that for all $x_{1},
+x_{2}$, \[ (\out_{P_{1}}, \out_{P_{2}})[P_{1}(x_{1}) \leftrightarrow
+P_{2}(x_{2})] \compind (f(x_{1}, x_{2}; r), f(x_{1}, x_{2}; r)), \]
+where $r$ is uniformly random and the same in both appearances of $f$.
+
+The next natural question is how to define \emph{privacy} against a
+semi-honest party.  Again, simultaneity of the respective views of
+$P_{1}$ and $P_{2}$ is an important issue, and is even more subtle to
+get right.  It turns out that the proper way of addressing all these
+concerns is to define correctness and privacy \emph{all together} by
+comparing two \emph{joint} distributions: the ``real world''
+distribution of the parties' outputs and the semi-honest party's view,
+versus the ``ideal world'' distribution of the function output and
+simulated view (again, for a \emph{single} randomized evaluation of
+$f$).  Formally, we require that there exist nuppt simulators
+$\Sim_{1}$, $\Sim_{2}$ such that for all $x_{1}, x_{2}$ and all $i \in
+\set{1,2}$, \[ (\out_{P_{1}}, \out_{P_{2}},\view_{P_i})[P_1(x_1)
+\leftrightarrow P_2(x_2)] \compind (f(x_{1}, x_{2}; r),
+f(x_1,x_2;r),S_i(x_i,f(x_1,x_2;r))). \] Note that the above condition
+automatically implies the correctness condition above, so it is the
+only one needed to prove security.
+
+\subsection{Secure Protocol for Addition}
+\label{sec:secure-prot-addit}
+
+As a brief test case, we consider a contrived protocol for evaluating
+the addition function $f(x_{1}, x_{2}) = x_{1} + x_{2}$.
+
+\begin{center}
+  \begin{tabular}{ccc}
+    $P_1(x_1)$ & & $P_2(x_2)$ \\
+    & $\underrightarrow{\quad x_1 \quad}$ & \\
+    & $\underleftarrow{\quad x_2 \quad}$ & \\
+    \text{output} $x_1 + x_2$ &  &  \text{output} $x_1 + x_2$
+  \end{tabular}
+\end{center}
+
+Clearly the protocol is complete.  For privacy, since $P_1$ is
+entitled to know the value of $x_1 + x_2$, and also already knows
+$x_1$, he can trivially infer the value of $x_2$.  Formally, we can
+give a simulator $\Sim_{1}(x_{1}, s = f(x_{1}, x_{2}) = x_{1}+x_{2})$
+that just outputs the view consisting of input $x_{1}$, empty
+randomness, and a single message $s-x_{1}$ coming from $P_{2}$.
+Clearly, this view is identical to $P_{1}$'s view in the real
+protocol.
+
+\section{Secure Protocol for Arbitrary Circuits}
+\label{sec:secure-prot-circuits}
+
+We now describe a protocol, originally described by Yao, for
+evaluating an \emph{arbitrary} function $f$ represented as a boolean
+(logical) circuit.  We describe the basic idea for just a single logic
+gate, and then outline how it generalizes to arbitrary circuits.
+
+Let $g : \bit \times \bit \to \bit$ be an arbitrary logic gate on two
+input bits (e.g., the NAND function).  Party $P_1$ holds the first
+input bit $x_1 \in \bit$ and party $P_2$ holds the second input bit
+$x_2 \in \bit$.  Together they wish to compute $g(x_1,x_2)$ securely,
+in the sense of Definition~\ref{def:two-party}.
+
+At a high level, the protocol works like this:
+\begin{center}
+  \begin{tabular}{ccc}
+    $P_1(x_1)$ & & $P_2(x_2)$ \\
+    & $\underrightarrow{\quad \text{``garbled'' gate $g$} \quad}$ & \\
+    & $\underrightarrow{\quad \text{``garbled'' input $x_{1}$} \quad}$ & \\
+    & \fbox{$\underrightarrow{\quad \text{oblivious transfer of
+          ``garbled'' input $x_{2}$} \quad}$} & \\
+    & & compute garbled output \\
+    & $\underrightarrow{\quad \text{``dictionary'' for garbled outputs}
+    \quad}$ &
+    \\
+    & & look up actual value $g(x_{1}, x_{2})$ \\
+    & $\underleftarrow{\quad g(x_{1}, x_{2}) \quad}$ & \\
+    output $g(x_1,x_2)$ & & output $g(x_1,x_2)$
+  \end{tabular}
+\end{center}
+
+For intuition, the crucial points for security are:
+\begin{itemize}
+\item $P_{2}$ never sees $x_{1}$ in an ``ungarbled'' form, so
+  $P_{2}$ learning nothing about $x_{1}$.
+\item By the security of the ``oblivious transfer'' sub-protocol
+  (described below), $P_{1}$ learns nothing about $x_{2}$.
+\item Using the garbled inputs $x_{1}$, $x_{2}$ with the garbled gate,
+  $P_{2}$ can ``obliviously'' compute the garbled output for
+  \emph{only} the correct value of $g(x_{1}, x_{2})$.
+\end{itemize}
+
+Concretely, these ideas are implemented using basic symmetric-key
+encryption.  The idea is the following: each ``wire'' of the gate (the
+two inputs and one output) is associated with a pair of random
+symmetric encryption keys, chosen by $P_{1}$; the two keys correspond
+to the two possible ``values'' (0 or 1) that the wire can take.  For
+$i= 1,2$, let $k^i_0, k^i_1$ be the keys corresponding to the input
+wire $x_{i}$, and let $k^{o}_0, k^o_1$ be the keys corresponding to
+the output wire.  The ``garbled circuit'' that $P_1$ sends to $P_2$ is
+a table of four doubly encrypted values, presented in a \emph{random}
+order:
+
+\begin{center}
+  \begin{tabular}{|c|}
+    \hline
+    $\skcenc_{k^1_0}(\skcenc_{k^2_0}(k^o_{g(0,0)}))$ \\
+    $\skcenc_{k^1_0}(\skcenc_{k^2_1}(k^o_{g(0,1)}))$ \\
+    $\skcenc_{k^1_1}(\skcenc_{k^2_0}(k^o_{g(1,0)}))$ \\
+    $\skcenc_{k^1_1}(\skcenc_{k^2_1}(k^o_{g(1,1)}))$ \\ \hline
+  \end{tabular}
+\end{center}
+
+Observe that if $P_{2}$ knows (say) $k^{1}_{0}$ and $k^{2}_{1}$, i.e.,
+the keys corresponding to inputs $x_{1}=0$ and $x_{2} = 1$, then
+$P_{1}$ can decrypt $k^{o}_{g(0,1)}$, the key corresponding to the
+output value of the gate, \emph{but none of the other entries!}  (Note
+that this requires the encryption scheme to satisfy some simple
+properties, such as the ability to detect when a ciphertext has
+decrypted successfully.  These properties are easy to obtain.)  The
+random order of the table prevents $P_{1}$ from learning the
+``meaning'' of the keys that it knows, otherwise this information
+would be leaked by which of the table entries decrypt properly.  In
+conclusion, knowing exactly one key for each input wire allows $P_{2}$
+to learn exactly one key (the correct one) for the output wire,
+without learning the meanings of any of the keys.
+
+The only remaining question is how $P_{2}$ obtains the right keys for
+the input wires.  For $x_{1}$, this is easy: $P_1$ just sends $P_2$
+the key $k^{1}_{x_{1}}$ corresponding to its input bit $x_{1}$.  Note
+that $P_2$ learns nothing about $x_1$ from this.  Next, $P_1$ and
+$P_2$ run an ``oblivious transfer'' protocol (described in the next
+subsection) which allows $P_2$ to learn $k^{2}_{x_{2}}$, and
+\emph{only} $k^{2}_{x_{2}}$, without revealing anything about the
+value of $x_{2}$ to $P_{1}$.
+
+Finally, $P_{1}$ tells $P_{2}$ the ``meanings'' of the two possible
+output keys $k^{o}_{0}, k^{o}_{1}$, which reveals to $P_{2}$ the value
+of $g(x_{1}, x_{2})$.  Then $P_{2}$ sends this value to $P_{1}$ as
+well (recall that both parties are semi-honest, so neither will lie).
+
+For more complex circuits $f$, the protocol generalizes in a
+straightforward manner: $P_{1}$ chooses two keys for every wire in the
+circuit, and constructs a garbled table for each gate, using the
+appropriate keys for the input and output wires.  $P_{2}$ can compute
+the garbled gates iteratively, while remaining oblivious to the
+meanings of the intermediate wires.  Then $P_{1}$ finally reveals the
+meanings of just the output wires.
+
+A proof of security for this construction is beyond the scope of this
+lecture, but contains no surprises; see the paper by Lindell and
+Pinkas for a full rigorous proof.  The key point is that a simulator
+can construct garbled gates that \emph{always} result in the same key
+being decrypted (irrespective of which inputs keys were used), thus
+allowing the simulator to ``force'' $P_{2}$ to output the correct
+value $f(x_{1}, x_{2})$.  Security of the symmetric encryption scheme
+prevents $P_{2}$ from detecting these malformed garbled gates, since
+$P_{2}$ can only decrypt one entry from each gate.
+
+\section{Oblivious Transfer}
+\label{sec:oblivious-transfer}
+
+We conclude by describing how to perform an oblivious transfer between
+the two parties.  We will consider the specific form of oblivious
+transfer that is required to complete our protocol: $P_1$ is holding
+two bits $b_0,b_1$ and wants to transfer \emph{exactly one} of them to
+$P_2$, according to $P_{2}$'s choice bit $\sigma = x_{2}$, while
+learning nothing about which one was received.  (To transfer entire
+keys $k_{0}, k_{1} \in \bit^{n}$, the parties can just run the
+protocol $n$ times, using the same choice bit $\sigma$ and the
+corresponding pairs of bits from $k_{0}, k_{1}$).
+
+Our protocol relies on a family of trapdoor permutations $\set{f_{s}
+  \colon \bit^{n} \to \bit^{n}}$ with hard-core predicate $h \colon
+\bit^{n} \to \bit$.
+
+\begin{center}
+  \begin{tabular}{ccc}
+    $P_1(b_0,b_1)$ & & $P_2(\sigma)$ \\ 
+    choose $(f_s, f_{s}^{-1})$ & & \\
+    & $\underrightarrow{\quad f_s \quad}$ & \\
+    & & $v_{\sigma} \gets \bit^{n}$ \\
+    & & $w_{\sigma} = f_{s}(v_{\sigma})$ \\
+    & & $w_{1-\sigma} \gets \bit^{n}$ \\
+    & $\underleftarrow{\quad w_{0}, w_{1} \quad}$ & \\
+    let $v_{0} = f_{s}^{-1}(w_{0})$, $v_{1} = f_{s}^{-1}(w_{1})$ &
+    & \\
+    & $\underrightarrow{\quad c_{0} = h(v_{0}) \oplus b_{0}, c_{1} =
+      h(v_{1}) \oplus b_{1} \quad}$ & \\
+    & & output $h(v_{\sigma}) \oplus c_{\sigma}$
+  \end{tabular}
+\end{center}
+
+In words, $P_1$ picks a random function $f_s$ (with trapdoor) from the
+family and sends it to $P_2$.  Then $P_2$ chooses uniformly random
+$w_{0}, w_{1} \in \bit^{n}$ so that it knows the preimage of
+\emph{only} $w_{\sigma}$, and sends these to $P_{1}$.  (Observe that
+this reveals no information about $\sigma$ to $P_{1}$ because $w_{0},
+w_{1}$ are uniform and independent.)  Next, $P_{1}$ encrypts its two
+bits $b_{0}, b_{1}$ using the hard-core predicate $h$ on the preimages
+of $w_{0}, w_{1}$, respectively.  Finally $P_{2}$, knowing the
+preimage $w_{\sigma}$, can decrypt $b_{\sigma}$, but it learns nothing
+about $b_{1-\sigma}$ due to the hardness of~$h$.  Note that the
+protocol crucially relies on the fact that $P_{2}$ is semi-honest,
+otherwise it could choose $w_{0}, w_{1}$ so that it knew both
+preimages.  (A full, formal proof of security for this protocol is not
+too hard, and is a worthwhile exercise.)
+ 
+\end{document}
+
+%%% Local Variables: 
+%%% mode: latex
+%%% TeX-master: t
+%%% End: 

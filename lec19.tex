@@ -1,0 +1,101 @@
+\documentclass[11pt]{article}
+
+\usepackage{fullpage}
+\usepackage{times}
+\usepackage{hyperref,microtype,pdfsync}
+\usepackage{amsmath,amsfonts,amssymb,amsthm}
+\usepackage{mathtools}
+\usepackage{fancyhdr}
+
+\input{header}
+
+% VARIABLES
+
+\newcommand{\lecturenum}{19}
+\newcommand{\lecturetopic}{ZK Potpourri}
+\newcommand{\scribename}{YOUR NAME HERE}
+
+% END OF VARIABLES
+
+\lecheader
+
+\pagestyle{plain}              % default: no special header
+
+\begin{document}
+
+\thispagestyle{fancy}          % first page should have special header
+
+% LECTURE MATERIAL STARTS HERE
+
+\section{Recap}
+\label{sec:recap}
+
+Relation $R$.  ZK with efficient prover for a relation.
+
+\section{Witness Indistinguishability}
+\label{sec:witn-indist}
+
+A relaxation of ZK and its uses.
+
+\subsection{Definition}
+\label{sec:definition}
+
+\begin{definition}
+  \label{def:wi}
+  An efficient prover $P(\cdot,\cdot)$ for a relation $R$ is
+  \emph{witness indistinguishable} if for all nuppt $V^{*}$, for all
+  $x \in L_{R}$ and any $w_{0}, w_{1} \in R(x)$, \[
+  \view_{V^{*}}[P(x,w_{0}) \leftrightarrow V^{*}(x)] \compind
+  \view_{V^{*}}[P(x,w_{1}) \leftrightarrow V^{*}(x)]. \]
+\end{definition}
+
+\begin{lemma}
+  \label{lem:zk-implies-wi}
+  Let $(P,V)$ be a proof system (with efficient prover) for a relation
+  $R$.  If $(P,V)$ is zero-knowledge, then it is
+  witness-indistinguishable.
+\end{lemma}
+
+\begin{proof}
+  TODO.
+\end{proof}
+
+Is the converse of Lemma~\ref{lem:zk-implies-wi} true?  That is, does
+witness indistinguishability imply zero-knowledge?
+
+\subsection{Properties}
+\label{sec:properties}
+
+\begin{lemma}
+  \label{lem:wi-parallel}
+  Witness indistinguishability is preserved under parallel repetition.
+\end{lemma}
+
+\begin{corollary}
+  \label{cor:3col-parallel-wi}
+  The protocol for $\problem{3COL}$ repeated $n^{3}$ times in parallel
+  is a $3$-round witness-indistinguishable protocol having soundness
+  error at most $2^{-n}$.
+\end{corollary}
+
+\begin{proof}[Proof of Lemma~\ref{lem:wi-parallel}]
+  TODO.
+\end{proof}
+
+\subsection{Applications}
+\label{sec:applications}
+
+TODO: describe high-level idea behind $O(1)$-round protocol (with
+$\negl(n)$ soundness error) for any $\NP$ language.
+
+\section{Noninteractive Zero Knowledge}
+\label{sec:nonint-zero-knowl}
+
+
+
+\end{document}
+
+%%% Local Variables:
+%%% mode: latex
+%%% TeX-master: t
+%%% End:

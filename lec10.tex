@@ -1,0 +1,417 @@
+\documentclass[11pt]{article}
+
+\usepackage{fullpage}
+\usepackage{times}
+\usepackage{hyperref,microtype,pdfsync}
+\usepackage{amsmath,amsfonts,amssymb,amsthm}
+\usepackage{mathtools}
+\usepackage{fancyhdr}
+
+\input{header}
+
+% VARIABLES
+
+\newcommand{\lecturenum}{10}
+\newcommand{\lecturetopic}{Asymmetric Encryption}
+\newcommand{\scribename}{Joel Odom}
+
+% END OF VARIABLES
+
+\lecheader
+
+\pagestyle{plain}               % default: no special header
+
+\begin{document}
+
+\thispagestyle{fancy}          % first page should have special header
+
+% LECTURE MATERIAL STARTS HERE
+
+\newcommand{\challenge}{\algo{C}}
+
+\section{Symmetric Encryption}
+\label{sec:symm-encrypt}
+
+\subsection{Recap}
+\label{sec:recap}
+
+Recall that in the last lecture we discussed cryptographic security in
+the symmetric setting.  The typical arrangement is that Alice and Bob
+share a common key that they use for encryption and decryption.  This
+shared secret creates an distinction between the communicating parties
+(Alice and Bob) and the adversarial eavesdropper (Eve).  The goal in
+this setting is to ensure that without the shared secret key, Eve will
+not be able to learn anything about the messages being sent between
+Alice and Bob (except, of course, the fact that Alice and Bob are
+communicating via messages from a known space).
+
+Perfect secrecy (equivalently, Shannon secrecy) is typically
+impractical in the symmetric setting because it requires that the
+shared key be at least as large as any message sent, and each key may
+only be used once.  For practicality, we relaxed our notion of perfect
+secrecy to allow for a computationally bounded adversary, and we
+arrived at the notion of \emph{indistinguishability under (adaptive)
+  chosen plaintext attack} (IND-CPA).  In this security notion, we
+allow a computationally bounded adversary access to an encryption
+oracle $\skcenc_{k}(\cdot)$ and a challenge oracle
+$\challenge_{k}^{b}(\cdot, \cdot)$. The adversary may make (a
+polynomially bounded number of) calls to the encryption oracle,
+adapting its queries to the answers it has already received.  The
+adversary may make a single call to the challenge oracle, passing two
+messages of his choice.  The challenge oracle encrypts one of the two
+messages (determined by the bit $b$) and returns the ciphertext to the
+adversary.  The adversary examines the returned ciphertext and
+attempts to determine which of the two messages was encrypted.  If
+there does not exist \emph{any} efficient adversary that can tell
+which message was encrypted (with better than negligible advantage),
+then the scheme is considered IND-CPA secure.  Formally, the pairs of
+oracle \[ \langle \skcenc_{k}(\cdot), \challenge_{k}^{b}(\cdot, \cdot)
+:= \skcenc_{k}(m_{b}) \rangle \] are indistinguishable for $b = 0,1$
+(over the random choice of $k \gets \skcgen$ and any randomness of the
+oracles).
+
+Last time, we constructed the following symmetric cryptosystem $\skc$
+with $\msgspace = \keyspace = \bit^{n}$, based on a PRF family
+$\set{f_{k} : \bit^{n} \to \bit^{n}}$.
+
+\begin{itemize}
+\item $\skcgen$: output $k \gets \bit^{n}$.
+\item $\skcenc_{k}(m)$: choose $r \gets \bit^{n}$ and output $c = (r,
+  f_{k}(r) \oplus m)$
+\item $\skcdec_{k}(r, c = (r,c'))$: output $f_{k}(r) \oplus c$
+\end{itemize}
+Completeness is evident by inspection.
+
+\subsection{Security}
+\label{sec:security}
+
+\begin{theorem}
+  The $\skc$ scheme described above is IND-CPA-secure (assuming
+  $\set{f_{k}}$ is a PRF family).
+\end{theorem}
+
+\begin{proof}
+  Note that it suffices to show that for either $b \in \bit$, \[
+  \langle \skcenc_{k}(\cdot), \challenge_{k}^{b}(\cdot, \cdot) \rangle
+  \compind \langle \algo{U}(\cdot), \algo{U}(\cdot,\cdot) \rangle, \]
+  where the oracles $\algo{U}$ answer each query with a fresh
+  uniformly random $(r,c') \gets U_{2n}$.  This is because the hybrid
+  lemma allows us to transition from $b=0$ to $b=1$ in the IND-CPA
+  definition via $\langle \algo{U}(\cdot), \algo{U}(\cdot,\cdot)
+  \rangle$.
+
+  We construct three hybrid experiments, $H_{0}$, $H_{1}$, and
+  $H_{2}$, which each define the two oracles with which a adversary
+  (attacking the cryptosystem) expects to interact.  Experiment
+  $H_{0}$ will correspond to the IND-CPA attack on our actual
+  cryptosystem (for arbitrary $b \in \bit$); experiment $H_{1}$ will
+  correspond to the IND-CPA attack on our cryptosystem \emph{as if it
+    were implemented with a truly random function}; and experiment
+  $H_{2}$ will correspond to $\langle \algo{U}(\cdot),
+  \algo{U}(\cdot,\cdot) \rangle$.  Then we will show that $H_{0}
+  \compind H_{1} \statind H_{2}$, proving the theorem.
+
+  \begin{itemize}
+  \item $H_{0}$: choose $k \gets \bit^{n}$.
+
+    Answer each query $m$ to the first (encryption) oracle by choosing
+    $r \gets \bit^{n}$ and answering $(r, f_{k}(r) \oplus m)$.
+
+    Answer the query $(m_{0}, m_{1})$ to the second (challenge) oracle
+    by choosing $r \gets \bit^{n}$ and answering $(r, f_{k}(r) \oplus
+    m_{b})$.
+
+  \item $H_{1}$: this experiment ``lazily'' constructs a truly random
+    function $F : \bit^{n} \to \bit^{n}$, defining its output values
+    as needed.  That is, whenever the value of $F(r)$ is desired, it
+    checks whether $F(r)$ has already been defined, and if so, uses
+    that value.  Otherwise, it defines $F(r)$ to be a fresh uniformly
+    random value in $\bit^{n}$.
+
+    Answer each query $m$ to the first (encryption) oracle by choosing
+    $r \gets \bit^{n}$, and answering $(r, F(r) \oplus m)$.
+
+    Answer the query $(m_{0}, m_{1})$ to the second (challenge) oracle
+    by choosing $r \gets \bit^{n}$ and answering $(r, F(r) \oplus
+    m_{b})$.
+
+  \item $H_{2}$: answer each query (to either oracle) by a fresh
+    uniformly random value in $\bit^{2n}$.
+  \end{itemize}
+
+  The difference between $H_{0}$ and $H_{1}$ is simply that we have
+  replaced $f_{k}$ with a truly uniform $F$.  Using the fact that
+  $\set{f_{k}}$ is a PRF family, we would like to show that $H_{0}
+  \compind H_{1}$.  This is done by constructing an (nuppt) simulator
+  $\Sim^{g}$ that emulates either $H_{0}$ or $H_{1}$, depending on
+  whether $g$ is drawn from $\set{f_{k}}$ or is a uniformly random
+  function, respectively.  $\Sim^{g}$ works in the obvious way: it
+  answers encryption queries $m$ by choosing $r \gets \bit^{n}$ and
+  returning $(r, g(r) \oplus m)$, and answers the challenge query
+  $(m_{0}, m_{1})$ by choosing $r \gets \bit^{n}$ and returning $(r,
+  g(r) \oplus m_{b})$.
+
+  The difference from $H_{1}$ to $H_{2}$ is that we answer every query
+  by a uniformly random reply.  A cursory inspection of $H_{1}$ and
+  $H_{2}$ may lead one to believe that $H_{1}$ and $H_{2}$ are
+  \emph{identical}, but this is not quite the case: we must consider
+  the case where $H_{1}$ happens to choose the same $r$ when answering
+  two queries to its oracles.  In $H_{1}$, the value $F(r)$ used in
+  the second component of the ciphertext remains the same, whereas in
+  $H_{2}$, the second component of the ciphertext is still chosen
+  uniformly at random.
+
+  Fortunately, it is the case that $H_{1}$ and $H_{2}$ are identical,
+  \emph{conditioned on the event that distinct queries choose distinct
+    values of $r$}.  This is because in this event, both $H_{1}$ and
+  $H_{2}$ produce a uniformly random and independent second ciphertext
+  component for each query.  Therefore, we just need to bound the
+  probability of the ``bad'' event, that some two queries choose the
+  same $r$.  Because the adversary makes a total of at most $q =
+  \poly(n)$ queries to its oracles, this probability is at most
+  $q^{2}/2^{n} = \negl(n)$, by taking a union bound over all pairs of
+  queries.  This means that there is a negligible statistical distance
+  between $H_{1}$ and $H_{2}$, and $H_{1} \statind H_{2}$ as desired.
+
+  Notice that the above argument is not just a ``technicality'' of the
+  proof --- it is crucial for the actual security of the scheme!
+  Suppose that in a real attack, the challenge oracle happens to
+  choose the same $r$ as in one of the encryption queries.  The
+  adversary can easily compute the value of $f_{k}(r)$ from that
+  query, and therefore can trivially determine which of the two
+  messages was encrypted by the challenge oracle!
+\end{proof}
+
+\subsection{Summary of Symmetric Cryptography}
+\label{sec:summ-symm-key}
+
+In the lectures to date, we have seen the following implications
+(among others):
+\[ \text{weak-OWF} \Rightarrow \text{OWF} \Rightarrow \text{PRG}
+\Rightarrow \text{PRF} \Rightarrow \text{SKC}. \] Thus, a ``world'' in
+which one-way functions exists is very rich, allowing us to do a lot
+of cryptography (and we will see even more applications later on).
+This world is often called ``minicrypt,'' because it follows from the
+minimal cryptographic assumption of a (weak) OWF.  Minicrypt is fairly
+well-understood, though new applications are still being found today.
+
+Next, we will move beyond minicrypt into the brave new world of \[
+\textbf{CRYPTOMANIA}, \] in which we shall observe even more
+mind-boggling, seemingly paradoxical notions.  However, as we will
+see, it is less clear what is the ``minimal'' assumption for
+Cryptomania to exist.
+
+\section{Asymmetric Encryption}
+\label{sec:asymm-encrypt}
+
+In the 1970s, people started asking a dangerous question: must Alice
+and Bob share the \emph{same} key to perform secure encryption?  We
+present here a cryptographic model called asymmetric (or
+``public-key'') encryption, in which Alice and Bob may communicate
+securely without a shared secret.  Specifically, Bob (and the rest of
+the world) will encrypt messages to Alice using her \emph{public}
+encryption key, and Alice will decrypt those messages using a related
+\emph{secret} decryption key that only she knows.  (If Bob wants to
+receive encrypted messages, he will generate his own pair of
+asymmetric keys.)
+
+Our formal model for a public-key cryptosystem $\pkc$ with message
+space $\msgspace$ is as follows:
+\begin{itemize}
+\item $\pkcgen(1^{n})$ outputs a public key $\pk$ and secret key
+  $\sk$.
+\item $\pkcenc_{\pk}(m) := \pkcenc(\pk, m)$ for a message $m \in
+  \msgspace$ outputs a ciphertext $c$.
+\item $\pkcdec_{\sk} := \pkcdec(\sk, c)$ outputs a message $m \in
+  \msgspace$.
+\end{itemize}
+
+The notion of completeness is as expected: for $(\pk, \sk) \gets
+\pkcgen$, we ask that $\pkcdec_{sk}(\pkcenc_{pk}(m)) = m$ for all $m
+\in \msgspace$.
+
+What about security?  If we just define IND-CPA security exactly as in
+the symmetric setting (giving the adversary oracle access to
+$\pkcenc_{\pk}(\cdot)$ and $\challenge_{\pk}^{b}$), we miss a crucial
+point: the adversary knows the public key explicitly!  (After all, it
+is public information.)  Notice, then, that there is no point in
+giving \emph{oracle} access to the encryption algorithm
+$\pkcenc_{\pk}$, because the adversary can run the algorithm itself
+(possibly even on ``bad'' randomness or messages, if it likes).  We
+are therefore left with providing $\pk$ and the challenge oracle,
+$\challenge_{pk}^{b}$, and a notion of indistinguishability between $b
+= 0$ and $b = 1$ that is the same as in the symmetric-key setting.
+
+\begin{definition}[Indistinguishability under chosen-plaintext attack
+  for asymmetric encryption]
+  \label{def:ind-cpa-pkc}
+  We say that $\pkc$ is IND-CPA secure if the following are
+  computationally indistinguishable for $b = 0,1$: \[ \langle pk,
+  \challenge^{b}_{\pk}(m_{0}, m_{1}) := \pkcenc_{\pk}(m_{b})
+  \rangle. \]
+\end{definition}
+
+To simplify the definition even further, we can restrict the message
+space to $\msgspace = \bit$, yielding the following ``oracle-free''
+definition:
+\[ \langle \pk, \pkcenc_{\pk}(0) \rangle \compind \langle \pk,
+\pkcenc_{\pk}(1) \rangle. \] As an exercise, show that a secure scheme
+for single-bit messages implies an IND-CPA-secure scheme for any
+$\msgspace = \bit^{\poly(n)}$.
+
+As in the symmetric setting, note that $\pkcenc$ cannot be
+deterministic if it is to be IND-CPA-secure: an adversary could simply
+compare the challenge ciphertext with its own encryption of a $0$ or
+$1$.  Note also that it doesn't make a lot of sense to talk about a
+\emph{stateful} deterministic encryption algorithm in the public-key
+setting, because many different parties can encrypt with the same
+public key, and may not be able to keep joint state.
+
+\subsection{Constructions}
+\label{sec:constructions}
+
+Is public-key cryptography possible?  Attempts to construct public-key
+cryptosystems from one-way-functions generally fail, and there is some
+theoretical explanation why (which is beyond the scope of this
+course).  But we \emph{can} construct public-key cryptosystems from
+seemingly stronger assumptions.
+
+\subsubsection{From Trapdoor OWPs}
+\label{sec:from-trapdoor-owps}
+
+Informally, a \emph{trapdoor} OWP family is a family of one-way
+permutations where there is additionally some ``trapdoor'' that allows
+for efficient inversion.  Formally, $\set{f_{s}: D_{s} \to D_{s}}$ is a
+family of trapdoor OWPs if:
+\begin{itemize}
+\item there exists a PPT function sampler $\algo{S}(1^{n})$ that
+  outputs a function index $s$ and trapdoor $t$, and a poly-time
+  inversion algorithm $\algo{F}^{-1}$ such that $\algo{F}^{-1}(t, y) =
+  f_{s}^{-1}(y)$ for such $s,t$ and every $y \in D_{s}$.
+\item it is a OWP family with respect to $\algo{S}$, where as usual
+  the inverter is given $1^{n}$, $s$, and $f_{s}(x)$ (but $t$ is
+  withheld).
+\end{itemize}
+Note that the family still has a hard-core predicate, because it is
+one-way; the trapdoor is just an additional \emph{functional} property
+that is not exposed to the adversary.
+
+Using a trapdoor OWP family with hard-core predicate $h$, we can
+construct a public-key cryptosystem $\pkc$ for $\msgspace = \bit$ as
+follows:
+\begin{itemize}
+\item $\pkcgen$: $(s, t) \gets \algo{S}$.  Output $\pk = s$ and $\sk =
+  t$.
+\item $\pkcenc_{s}(m)$: choose $r \gets D_{s}$ and output $c =
+  (f_{s}(r), h(r) \oplus m)$.
+\item $\pkcdec_{t}(c = (y, c'))$: output $m' = h(f_{s}^{-1}(y)) \oplus
+  c'$ 
+\end{itemize}
+Completeness of the scheme is evident by inspection (note that
+$\pkcdec_{t}$ can compute $f_{s}^{-1}$ because it knows the trapdoor
+$t$).  It is important that we are using a \emph{hard-core} predicate
+$h(r)$ to conceal the message bit $m$, because in general $f_{s}$
+might reveal certain bits of $r$ while still being one-way.
+
+\begin{theorem}
+  \label{thm:td-owp-pkc}
+  The $\pkc$ scheme described above is IND-CPA-secure (assuming
+  $\set{f_{s}}$ is a trapdoor OWP family with hard-core predicate
+  $h$).
+\end{theorem}
+
+\begin{proof}
+  We need to show that \[ \langle s, f_{s}(r), h(r) \oplus 0 \rangle
+  \compind \langle s, f_{s}(r), h(r) \oplus 1 \rangle. \] By the
+  hypothesis that $h$ is hard-core, we have \[ \langle s, f_{s}(r),
+  h(r) \oplus 0 \rangle \compind \langle s, f_{s}(r), \algo{U}_{1}
+  \rangle \equiv \langle s, f_{s}(r), \algo{U}_{1} \oplus 1 \rangle
+  \compind \langle s, f_{s}(r), h(r) \oplus 1 \rangle. \qedhere \]
+\end{proof}
+
+Do trapdoor OWP families exist?  Here are some plausible candidates:
+\begin{enumerate}
+
+\item Rabin's function: $f_{N} \colon \QR_{N}^{*} \to \QR_{N}^{*}$,
+  defined as $f_{N}(x) = x^{2} \bmod N$, for $N$ a product of two
+  primes.
+
+\item RSA: $f_{N,e} \colon \ZN^{*} \to \ZN^{*}$, defined as $f_{N,
+    e}(x) = x^{e} \bmod N$, for $N = pq$ a product of two primes and
+  $e$ coprime with $\varphi(N) = (p-1)(q-1)$.  The trapdoor is $d =
+  e^{-1} \bmod \varphi(N)$, which can be used to calculate $f_{N,
+    e}^{-1}(y) = y^{d} \bmod N$.  This works because $x^{ed} = x^{ed
+    \bmod \varphi(N)} = x \in \ZN^{*}$, by Euler's theorem and the
+  fact that $\ZN^{*}$ has order $\varphi(N)$.
+
+\item What about modular exponentiation $f_{p,g}(x) = g^{x} \bmod p$?
+  It is unknown if there is any trapdoor for the discrete log problem.
+
+\item Assorted others: Paillier's function (works mod $N^{2}$),
+  ``lossy'' trapdoor functions (which are not permutations, but are
+  injective, which suffices for encryption), and injective TDFs based
+  on lattices.
+\end{enumerate}
+
+\subsubsection{From Diffie-Hellman}
+\label{sec:from-diffie-hellman}
+
+Even though we lack a \emph{trapdoor} for the discrete logarithm
+problem, it turns out that we can still construct a public-key
+cryptosystem that uses modular exponentiation.  The starting point is
+the Diffie-Hellman key-exchange protocol, which can be used by Alice
+and Bob to agree on a shared secret value over a public channel.
+
+Let $G = \langle g \rangle$ be a (multiplicative) cyclic group of
+known order $q$, with public generator $g$.  Alice chooses some $a
+\gets \Zq$ and Bob chooses some $b \gets \Zq$.  Alice sends $\alpha =
+g^{a}$ and Bob sends $\beta = g^{b}$.  They then can agree on a shared
+value $g^{ab}$: Alice by computing $\beta^{a}$, and Bob by computing
+$\alpha^{b}$.  It is conjectured that in certain groups, it is
+computationally infeasible for any algorithm to compute $g^{ab}$ given
+only $g$, $\alpha = g^{a}$, and $\beta = g^{b}$.  Moreover, it is
+believed that the shared value $g^{ab}$ ``looks random,'' even given
+those other values.
+
+\begin{conjecture}[DDH Assumption]
+  The Decision Diffie-Hellman assumption for a group $G = \langle g
+  \rangle$ of order $q$ says that
+  \[ (g, g^{a}, g^{b}, g^{ab}) \compind (g, g^{a}, g^{b}, g^{c}), \]
+  where $a, b, c \gets \Zq$ are uniformly random and
+  independent.\footnote{To be completely formal, to give a meaningful
+    asymptotic definition using computational indistinguishability, we
+    should define the DDH assumption over an \emph{infinite family} of
+    groups $G$.}
+\end{conjecture}
+
+For a prime $p$, is DDH true or false for $\Zp^{*}$?  It is actually
+\emph{false}!  Think about the probability that $a \cdot b$ is even,
+versus the probability that $c$ is even, and recall that in $\Zp^{*}$
+we can test whether $z$ is even, given $g^{z}$.  We can avoid this
+annoying property by working in the group of \emph{quadratic residues}
+$G = \QRp^{*}$, where $p=2q+1$ and $q$ itself is prime.  This group
+has order $(p-1)/2 = q$, and DDH is believed to hold in it (and some
+others, such as those defined over elliptic curves).
+
+By simply ``packaging'' the Diffie-Hellman protocol in the appropriate
+way, we obtain the \emph{ElGamal} public-key cryptosystem over the
+group $G$, with message space $\msgspace = G$.
+\begin{itemize}
+\item $\pkcgen$: choose secret key $\sk = a \gets \Zq$, and let $\pk =
+  \alpha = g^{a}$.
+\item $\pkcenc_{\alpha}(m)$: choose $b \gets \Zq$, and output $c =
+  (g^{b}, \alpha^{b} \cdot m)$.
+\item $\pkcdec_{a}(c = (\beta, c'))$: output $c' / \beta^{a}$.
+\end{itemize}
+Correctness is by inspection.  Security follows directly from the DDH
+assumption: it is a simple exercise to show that the view of the
+adversary is computationally indistinguishable from $(g, g^{a}, g^{b},
+g^{c})$ (where $a, b, c \gets \Zq$), no matter which message is
+encrypted by the challenger.
+
+\end{document}
+
+%%% Local Variables:
+%%% mode: latex
+%%% TeX-master: t
+%%% End:

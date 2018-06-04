@@ -1,0 +1,301 @@
+\documentclass[11pt]{article}
+
+\usepackage{fullpage}
+\usepackage{times}
+\usepackage{hyperref,microtype,pdfsync}
+\usepackage{amsmath,amsfonts,amssymb,amsthm}
+\usepackage{mathtools}
+\usepackage{fancyhdr}
+\usepackage{algorithm,algorithmic}
+
+\input{header}
+
+% VARIABLES
+
+\newcommand{\lecturenum}{5}
+\newcommand{\lecturetopic}{Indistinguishability, Pseudorandomness}
+\newcommand{\scribename}{Abhinav Shantanam}
+
+% END OF VARIABLES
+
+\lecheader
+
+\pagestyle{plain}               % default: no special header
+
+\begin{document}
+
+\thispagestyle{fancy}           % first page should have special header
+
+% LECTURE MATERIAL STARTS HERE
+
+\section{Indistinguishability}
+\label{sec:indistinguishability}
+
+We'll now start a major unit on \emph{indistinguishability} and
+\emph{pseudorandomness}.  These concepts are a cornerstone of modern
+cryptography, underlying several foundational applications such as
+pseudorandom generators, secure encryption, ``commitment'' schemes,
+and much more.
+
+For example, our most immediate application of indistinguishability
+will be to construct cryptographically strong \emph{pseudorandom bit
+  generators}.  These are algorithms that produce many
+``random-looking'' bits, while using very little ``true'' randomness.
+(In particular, the bits they output will necessarily be ``very far''
+from truly random, in a statistical sense.)  One easy-to-imagine
+application would be to use the pseudorandom bit stream as a one-time
+encryption pad, which would allow the shared secret key to be much
+smaller than the message.  But what does it \emph{mean} for a string
+of bits to be ``random-looking''?  And how can we be confident that
+using such bits does not introduce any unforeseen weaknesses in our
+system?
+
+More generally, the motivating question for our study is:
+\begin{center}
+  When can two (possibly different) objects be considered
+  \emph{effectively the same}?
+\end{center}
+The answer:
+\begin{center}
+  \emph{When they can't be told apart!}
+\end{center}
+Though seemingly glib, this answer encapsulates a very powerful
+mindset that will serve us well as we go forward.
+
+\subsection{Statistical Indistinguishability}
+\label{sec:stat-indist}
+
+We use probability theory to model (in)distinguishability.  If two
+distributions are identical, then they certainly should be considered
+indistinguishable.  We relax this condition to define
+\emph{statistical} indistinguishability, for when the
+\emph{statistical distance} between the two distributions is
+negligible.  The statistical distance between two distributions $X$
+and $Y$ over a domain $\Omega$ is defined as
+\[ \Delta(X,Y) := \sup_{A \subseteq \Omega} \abs{X(A) - Y(A)}. \] We
+view $A$ as a statistical ``test'' --- $X(A) = \sum_{w \in A}
+\Pr[X=w]$ being the probability that a draw from $X$ lands in $A$, and
+likewise likewise $Y(A)$.  Note that $A$ and $\bar{A}$ are effectively
+the same test, since \[ \abs{X(\bar{A})-Y(\bar{A})} =
+\abs{1-X(A)-(1-Y(A))} = \abs{Y(A)-X(A)} = \abs{X(A)-Y(A)}. \]
+
+\begin{lemma}
+  \label{lem:stat-dist}
+  For distributions $X,Y$ over a finite domain $\Omega$, \[
+  \Delta(X,Y) = \frac12 \sum_{w \in \Omega} \abs{X(w) - Y(w)}. \]
+\end{lemma}
+
+\begin{proof}
+  Let the test $A = \set{w \in \Omega\; :\; X(w) > Y(w)}$.  This makes
+  $X(A) - Y(A)$ as large as possible, so $\Delta(X,Y) = X(A)-Y(A) =
+  \sum_{w \in A} \abs{X(w)-Y(w)}$.  As noted above, we also have
+  $\Delta(X,Y) = Y(\bar{A})-X(\bar{A}) = \sum_{w \in \bar{A}}
+  \abs{X(w)-Y(w)}$.  Summing the two equations, we have $2\Delta(X,Y)
+  = \sum_{w \in \Omega} \abs{X(w)-Y(w)}$, as desired.
+\end{proof}
+
+Statistical distance is very robust, which enhances its usefulness.
+Using Lemma~\ref{lem:stat-dist}, the following facts are
+straightforward to prove.
+
+\begin{lemma}
+  Let $f$ be a (randomized) function on the domain of $X,Y$.  We have
+  $\Delta(f(X), f(Y)) \leq \Delta(X,Y)$.
+\end{lemma}
+
+In other words, statistical distance cannot be increased by the application
+of a (randomized) function.
+
+\begin{lemma}
+  Statistical distance is a metric; in particular, $\Delta(X,Z) \leq
+  \Delta(X,Y) + \Delta(Y,Z)$.
+\end{lemma}
+
+Statistical distance lets us say when two (sequences of) distributions
+are ``essentially the same,'' in an asymptotic sense.
+
+\begin{definition}
+  \label{def:stat-ind}
+  Let $\calX = \set{X_{n}}_{n \in \N}$ and $\calY = \set{Y_{n}}_{n \in
+    \N}$ be sequences of probability distributions, called
+  \emph{ensembles}.  We say that $\calX$ and $\calY$ are
+  \emph{statistically indistinguishable}, written $\calX \statind
+  \calY$, if \[ \Delta(X_{n}, Y_{n}) = \negl(n). \]
+\end{definition}
+
+\begin{example}
+  Let $X_{n}$ be the uniform distribution over $\bit^{n}$, and let
+  $Y_{n}$ be the uniform distribution over the nonzero strings
+  $\bit^{n} \backslash \set{0^{n}}$.  An optimal test $A$ is the
+  singleton set $A = \set{0^{n}}$, yielding $\Delta(X_{n}, Y_{n}) =
+  2^{-n} = \negl(n)$, so $\calX \statind \calY$.  (This can also be
+  seen by calculating the summation in Lemma~\ref{lem:stat-dist}.)
+  The analysis extends similarly to any $Y_{n}$ that leaves out a
+  $\negl(n)$ fraction of $\bit^{n}$.  From this we can say that such
+  ensembles $\calY$ are ``essentially uniform,'' or
+  \emph{statistically pseudorandom}.
+\end{example}
+
+Question: is a statistically peudorandom generator possible?  This
+depends on the definition of ``generator'' (which we give below), but
+for any meaningful definition of the term, it isn't possible!  This
+can be shown by explicitly demonstrating a subset (test) containing
+all the points outside the image of the generator, which make up a
+significant fraction of the range.
+
+\subsection{Computational Indistinguishability}
+\label{sec:comp-indist}
+
+We can define a natural analogue of statistical distance in the
+computational setting, where the ``test'' is implemented by an
+\emph{efficient algorithm}.  Namely, for distributions $X$ and $Y$ and
+an algorithm $\Adv$ (possibly randomized), define $\Adv$'s
+\emph{distinguishing advantage} between $X$ and $Y$ as \[
+\advan_{X,Y}(\Adv) = \abs*{\Pr[\Adv(X)=1] - \Pr[\Adv(Y)=1]}. \] (The
+output of $\Adv$ can be arbitrary, but we interpret $1$ as a special
+output indicating that the test implemented by $\Adv$ is
+``satisfied,'' and any other output as ``not satisfied.'')  We extend
+this to ensembles $\calX$ and $\calY$, making
+$\advan_{\calX,\calY}(\Adv)$ a function of $n \in \N$.
+
+\begin{definition}
+  \label{def:comp-ind}
+  Let $\calX = \set{X_{n}}$ and $\calY = \set{Y_{n}}$ be ensembles,
+  where $X_{n}$ and $Y_{n}$ are distributions over $\bit^{l(n)}$ for
+  $l(n) = \poly(n)$.  We say that $\calX$ and $\calY$ are
+  \emph{computationally indistinguishable}, written $\calX \compind
+  \calY$, if $\advan_{\calX,\calY}(\Adv) = \negl(n)$ for all
+  non-uniform PPT algorithms $\Adv$.  We say that $\calX$ is
+  (computationally) \emph{pseudorandom} if $\calX \compind
+  \set{U_{l(n)}}$, the ensemble of uniform distributions over
+  $\bit^{l(n)}$.
+\end{definition}
+
+The basic facts about statistical distance also carry over to
+computational indistinguishability, where all functions/tests are
+restricted to be efficient.
+
+\begin{lemma}[Composition lemma]
+  \label{lem:closure}
+  Let $\AdvB$ be a non-uniform PPT algorithm.  If $\set{X_{n}}
+  \compind \set{Y_{n}}$, then $\set{\AdvB(X_{n})} \compind
+  \set{\AdvB(Y_{n})}$.
+\end{lemma}
+
+\begin{proof}
+  Let $\Dist$ be any non-uniform PPT algorithm attempting to
+  distinguish $\set{\AdvB(X_{n})}$ from $\set{\AdvB(Y_{n})}$; we wish
+  to show that its advantage must be negligible.  Consider an
+  algorithm $\Adv$ that, given input $x$, runs $\Dist(\AdvB(x))$ and
+  outputs whatever $\Dist$ outputs.  Clearly $\Adv$ is non-uniform
+  PPT.  By construction, we have \[ \advan_{X_{n},Y_{n}}(\Adv) =
+  \advan_{\AdvB(X_{n}),\AdvB(Y_{n})}(\Dist).
+   \] The left-hand side is $\negl(n)$ by hypothesis, hence so is the
+   right-hand side, as desired.
+\end{proof}
+
+\begin{lemma}[Hybrid lemma]
+  \label{lem:hybrid}
+  Let $\calX^{i} = \set{X^{i}_{n}}$ for $i \in [m]$, where
+  $m=\poly(n)$.  If $\calX^{i} \compind \calX^{i+1}$ for every $i \in
+  [m-1]$, then $\calX^{1} \compind \calX^{m}$.
+\end{lemma}
+
+\begin{proof}
+  Let $\Dist$ be any non-uniform PPT algorithm attempting to
+  distinguish $\calX^{1}$ from $\calX^{m}$.  Let $p_{i} = p_{i}(n) =
+  \Pr[\Dist(X^{i}_{n}) = 1]$.  By the triangle inequality, we can
+  write $\Dist$'s advantage as
+  \[ \advan_{\calX^{1},\calX^{m}}(\Dist) = \abs{p_{1} - p_{m}} \leq
+  \sum_{i \in [m-1]} \abs{p_{i} - p_{i+1}} = \sum_{i \in [m-1]}
+  \advan_{\calX^{i}, \calX^{i+1}}(\Dist). \] Now by assumption, each
+  $\advan_{\calX^{i}, \calX^{i+1}}(\Dist) = \nu_{i}(n)$, where
+  $\nu_{i}(n)$ is a negligible function---which may be different for
+  each $i$.  The sum of $\poly(n)$-many negligible functions is indeed
+  negligible: letting $\nu(n) = \sum_{i} \nu_{i}(n)$, we need to show
+  that for all $c > 0$, there exists some $n_{0}$ such that $\nu(n)
+  \leq n^{-c}$ for all $n \geq n_{0}$.  By assumption, we know that
+  for each $i$, there is some $n_{i}$ such that $\nu_{i}(n) \leq
+  n^{-c}/m$ for \emph{all} $n \leq n_{i}$.  Letting $n_{0}$ be the
+  largest of these, it follows that $\nu(n) \leq n^{-c}$ for all $n
+  \geq n_{0}$, as desired.
+\end{proof}
+
+\begin{remark}
+  In the proof of the lemma, we used the triangle inequality on the
+  quantities $\advan_{\calX^{i},\calX^{i+1}}(\Dist)$ to conclude
+  something about $\advan_{\calX^{1}, \calX^{m}}(\Dist)$.
+  Syntactically this is unremarkable, but observe closely what we have
+  done: even though $\Dist$'s ``goal in life'' is to distinguish
+  between $\calX^{1}$ and $\calX^{m}$, by referring to the quantities
+  $\advan_{\calX^{i},\calX^{i+1}}(\Dist)$, we are implicitly
+  considering how $\Dist$ behaves on \emph{all} the hybrid ensembles
+  $\calX^{i}$ --- these are distributions on which $\Dist$ was never
+  ``designed'' to run!  Yet because $\Dist$ is ``just an algorithm,''
+  we can run it and use it for whatever purposes we like.  The hybrid
+  lemma says that in order for $\Dist$ to distinguish between
+  $\calX^{1}$ and $\calX^{m}$, it must also distinguish between
+  $\calX^{i}$ and $\calX^{i+1}$ for some $i$, which is impossible by
+  hypothesis.
+\end{remark}
+
+\section{Pseudorandom Generators}
+\label{sec:prgs}
+
+\begin{definition}
+  \label{def:prg}
+  A \emph{deterministic} function $G : \bit^{*} \to \bit^{*}$ is a
+  \emph{pseudorandom generator} (PRG) with output length $\ell(n) > n$
+  if:
+  \begin{itemize}
+  \item $G$ can be computed by a polynomial-time algorithm,
+  \item $\len{G(x)} = \ell(\len{x}) > \len{x}$ for all $x \in
+    \bit^{*}$, and
+  \item the ensemble $\set{G(U_{n})}$ is (computationally)
+    pseudorandom.
+  \end{itemize}
+  
+  This last property essentially says that $\set{G(U_{n})}$ and
+  $\set{U_{\ell(n)}}$ are computationally indistinguishable. By the
+  composition lemma, it follows that $G(U_{n})$ can be used in place
+  of $U_{\ell(n)}$ in \emph{any} (efficient) application!
+  (\emph{Exercise:} Show that a PRG cannot exist if we demand
+  \emph{statistical} pseudorandomness.)
+\end{definition}
+
+\subsection{Expansion of a PRG}
+\label{sec:properties}
+
+From the definition, it is easy to see that the ``weakest'' PRG we
+could ask for would be one that stretches its input by just 1 bit,
+i.e., $\ell(n) = n+1$.  Is there an upper limit on how much a PRG can
+stretch?  The following theorem says that there is (effectively)
+\emph{no limit}: if you can stretch by even just 1 bit, then you can
+stretch by essentially any (polynomial) amount!
+
+\begin{theorem}
+  \label{thm:expansion}
+  Suppose there exists a PRG $G$ with expansion $\ell(n)=n+1$.  Then
+  for any polynomial $t(\cdot) = \poly(n)$, there exists a PRG $G_t:
+  \bit^n \to \bit^{t(n)}$.
+\end{theorem}
+
+\noindent
+We will prove this theorem in the next lecture.
+
+\begin{remark}
+  This theorem says something extremely strong.  Observe that the
+  image $\set{G_{t}(s) : s \in \bit^{n}}$ of $G_t$ is an extremely
+  small fraction $2^{n-t(n)}$ of its range set $\bit^{t(n)}$.  Yet no
+  computationally bounded algorithm can distinguish a random element
+  from this small subset, from a truly random one over the whole
+  space!
+\end{remark}
+  
+
+\end{document}
+
+%%% Local Variables: 
+%%% mode: latex
+%%% TeX-master: t
+%%% End: 
