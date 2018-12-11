@@ -244,8 +244,8 @@ Formally, we define the following triplet of algorithms:
 \begin{itemize}
 \item $\siggen$: choose $(s,t) \gets \algo{S}$.  Output $\vk = s$ and
   $\sk = t$. 
-\item $\sigsign_{t} (m \in D_{s})$: output $f_{s}^{-1}(m)$.
-\item $\sigver_{s}(m , \sigma)$: accept if $f_{s}(m) = \sigma$,
+\item $\sigsign_{t} (m \in D_{s})$: output $\sigma = f_{s}^{-1}(m)$.
+\item $\sigver_{s}(m , \sigma)$: accept if $f_{s}(\sigma) = m$,
   otherwise reject.
 \end{itemize}
 
