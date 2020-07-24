@@ -44,7 +44,6 @@
 \theoremstyle{remark}           % following are remark style
 \newtheorem{remark}[theorem]{Remark}
 \newtheorem{note}[theorem]{Note}
-\newtheorem{exercise}[theorem]{Exercise}
 
 % equation numbering style
 \numberwithin{equation}{section}
@@ -257,3 +256,50 @@
   \setlength{\headheight}{20pt}
   \setlength{\headsep}{16pt}
 }
+
+
+%%% xsim settings
+
+\DeclareExerciseEnvironmentTemplate{QRef}
+{%
+    \par\vspace{\baselineskip}
+    \Needspace*{2\baselineskip}
+    \noindent
+    \hyperref[sol:\ExerciseID]{
+        \textbf{\XSIMmixedcase{\GetExerciseName}
+        ~\GetExerciseProperty{counter}}
+    }
+    \label{ques:\ExerciseID}
+}{}
+
+\DeclareExerciseEnvironmentTemplate{ARef}{%
+        \Needspace*{2\baselineskip}
+        \noindent
+        \hyperref[ques:\ExerciseID]{
+            \textbf{\XSIMmixedcase{\GetExerciseParameter{exercise-name}}
+            ~\GetExerciseProperty{counter}}
+        }
+        \label{sol:\ExerciseID}
+        \GetExerciseBody{exercise}
+        \newline
+        \textbf{\XSIMmixedcase{\GetExerciseName}}
+}{\par\vspace{\baselineskip}}
+
+\DeclareExerciseHeadingTemplate{simple}{%
+    \section*{\XSIMmixedcase{\GetExerciseParameter{solution-name}s}}
+}
+
+\DeclareExerciseType{question}{%
+    exercise-env = question,
+    solution-env = answer,
+    exercise-name = Question,
+    solution-name = Answer,
+    exercise-template = QRef,
+    solution-template = ARef,
+}
+
+\xsimsetup{%
+    print-solutions/headings-template=simple
+}
+
+\AtEndDocument{\printsolutions}
