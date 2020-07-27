@@ -265,20 +265,14 @@
     \par\vspace{\baselineskip}
     \Needspace*{2\baselineskip}
     \noindent
-    \hyperref[sol:\ExerciseID]{
-        \textbf{\XSIMmixedcase{\GetExerciseName}
-        ~\GetExerciseProperty{counter}}
-    }
+    \hyperref[sol:\ExerciseID]{\textbf{\XSIMmixedcase{\GetExerciseName}~\GetExerciseProperty{counter}}}
     \label{ques:\ExerciseID}
 }{}
 
 \DeclareExerciseEnvironmentTemplate{ARef}{%
         \Needspace*{2\baselineskip}
         \noindent
-        \hyperref[ques:\ExerciseID]{
-            \textbf{\XSIMmixedcase{\GetExerciseParameter{exercise-name}}
-            ~\GetExerciseProperty{counter}}
-        }
+        \hyperref[ques:\ExerciseID]{\textbf{\XSIMmixedcase{\GetExerciseParameter{exercise-name}}~\GetExerciseProperty{counter}}}
         \label{sol:\ExerciseID}
         \GetExerciseBody{exercise}
         \newline
