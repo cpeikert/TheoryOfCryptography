@@ -1,3 +1,5 @@
+\RequirePackage{mathtools}
+
 %%% BLACKBOARD SYMBOLS
 
 % hyperref package defines C and G, undefined to avoid conflicts
@@ -27,6 +29,8 @@
 
 %%% THEOREM COMMANDS
 
+\RequirePackage{amsthm}
+
 \theoremstyle{plain}            % following are "theorem" style
 \newtheorem{theorem}{Theorem}[section]
 \newtheorem{lemma}[theorem]{Lemma}
@@ -44,7 +48,6 @@
 \theoremstyle{remark}           % following are remark style
 \newtheorem{remark}[theorem]{Remark}
 \newtheorem{note}[theorem]{Note}
-\newtheorem{exercise}[theorem]{Exercise}
 
 % equation numbering style
 \numberwithin{equation}{section}
@@ -95,7 +98,6 @@
 
 %%% "LEFT-RIGHT" PAIRS OF SYMBOLS
 
-%% NOTE: this requires \usepackage{mathtools} in the document preamble
 
 % inner product
 \DeclarePairedDelimiter\inner{\langle}{\rangle}
@@ -245,6 +247,8 @@
 
 %%% COMMANDS FOR LECTURES/HOMEWORKS
 
+\RequirePackage{fancyhdr}
+
 \newcommand{\lecheader}{%
   \chead{\large \textbf{Lecture \lecturenum\\\lecturetopic}}
 
@@ -257,3 +261,49 @@
   \setlength{\headheight}{20pt}
   \setlength{\headsep}{16pt}
 }
+
+
+%%% xsim settings
+
+\RequirePackage{xsim}
+\RequirePackage{needspace}
+
+\DeclareExerciseEnvironmentTemplate{QRef}
+{%
+    \par\vspace{\baselineskip}
+    \Needspace*{2\baselineskip}
+    \noindent
+    \hyperref[sol:\ExerciseID]{\textbf{\XSIMmixedcase{\GetExerciseName}~\GetExerciseProperty{counter}}}
+    \label{ques:\ExerciseID}
+}{}
+
+\DeclareExerciseEnvironmentTemplate{ARef}{%
+        \Needspace*{2\baselineskip}
+        \noindent
+        \hyperref[ques:\ExerciseID]{\textbf{\XSIMmixedcase{\GetExerciseParameter{exercise-name}}~\GetExerciseProperty{counter}}}
+        \label{sol:\ExerciseID}
+        \GetExerciseBody{exercise}
+        \newline
+        \textbf{\XSIMmixedcase{\GetExerciseName}}
+}{\par\vspace{\baselineskip}}
+
+\DeclareExerciseHeadingTemplate{simple}{%
+    \section*{\XSIMmixedcase{\GetExerciseParameter{solution-name}s}}
+}
+
+\DeclareExerciseType{question}{%
+    exercise-env = question,
+    solution-env = answer,
+    exercise-name = Question,
+    solution-name = Answer,
+    exercise-template = QRef,
+    solution-template = ARef,
+}
+
+\xsimsetup{%
+  path = {questions},
+  file-extension = {aux},
+  print-solutions/headings-template=simple
+}
+
+\AtEndDocument{\pagebreak\printsolutions}
