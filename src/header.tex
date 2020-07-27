@@ -1,3 +1,5 @@
+\RequirePackage{mathtools}
+
 %%% BLACKBOARD SYMBOLS
 
 % hyperref package defines C and G, undefined to avoid conflicts
@@ -26,6 +28,8 @@
 \newcommand{\QRp}{\ensuremath{\QR_{p}}}
 
 %%% THEOREM COMMANDS
+
+\RequirePackage{amsthm}
 
 \theoremstyle{plain}            % following are "theorem" style
 \newtheorem{theorem}{Theorem}[section]
@@ -94,7 +98,6 @@
 
 %%% "LEFT-RIGHT" PAIRS OF SYMBOLS
 
-%% NOTE: this requires \usepackage{mathtools} in the document preamble
 
 % inner product
 \DeclarePairedDelimiter\inner{\langle}{\rangle}
@@ -243,6 +246,8 @@
 \newcommand{\view}{\text{view}}
 
 %%% COMMANDS FOR LECTURES/HOMEWORKS
+
+\RequirePackage{fancyhdr}
 
 \newcommand{\lecheader}{%
   \chead{\large \textbf{Lecture \lecturenum\\\lecturetopic}}
