@@ -327,13 +327,6 @@ without one-way functions.
   domain, so that the entire inversion experiment can be executed
   efficiently.
 
-\item Ideally, we would like to require $\Inv$'s advantage to be $0$,
-  i.e., the function can \emph{never} be inverted.  But this is too
-  strong: after all, $\Inv$ can always guess $x$ with probability
-  $2^{-n}$ (without even looking at $f(x)$)!  In cryptography, when we
-  can't achieve the ``ideal,'' we can often do the next best thing by
-  using a negligible function to mean ``effectively zero.''
-  
 \item In contrast to some other notions of hardness you may have seen,
   this definition is inherently \emph{average-case} rather than
   \emph{worst-case}.  A worst-case definition would say that every
@@ -350,6 +343,21 @@ without one-way functions.
   that all algorithms are given the security parameter (in unary), and
   may run in time polynomial in it.
 \end{enumerate}
+
+\begin{question}
+    Notice that our model allows for \(\Inv\) to have some advantage, even if it is
+    negligible. Would a stronger model that requires \(\Inv\) to have an advantage of 0
+    (i.e. a model that requires that it be impossible to find a preimage in
+    polynomial time) be possible? Why or why not?
+\end{question}
+\begin{answer}
+    No. Consider an \(\Inv\) that ignores the \(f(x)\) it is given and simply guesses a
+    uniformly random preimage from \(\bit^n\). This can be done in polynomial time and
+    has a nonzero probability of \(2^{-n}\) of succeeding. Hence, there are no functions
+    that could be considered one-way if we defined it this way. In cryptography, when we
+    can't achieve the ``ideal,'' we can often do the next best thing by using a
+    negligible function to mean `effectively zero.''
+\end{answer}
 
 \subsection{Candidates}
 \label{sec:candidates}
