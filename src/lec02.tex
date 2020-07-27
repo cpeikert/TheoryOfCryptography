@@ -260,6 +260,17 @@ concept of a negligible function is a \emph{useful} and
 \emph{well-behaved} abstraction, though at times we will need to be
 more precise in our manipulations of probabilities.
 
+\begin{question}
+    Is the product of a negligible function and a non-negligible function always
+    negligible, always non-negligible, or neither?
+\end{question}
+\begin{answer}
+    Neither, it depends on the functions. Consider \(f(n) = 2^{-n}\) (negligible) and
+    \(g(n) = 2^n\) (non-negligible).  Then, \(f(n) \cdot g(n) = 1\) which is clearly
+    non-negligible. On the other hand, suppose \(f(n) = 2^{-n}\) (negligible) and \(g(n)
+    = 1\) (non-negligible). Then \(f(n) \cdot g(n) = 2^{-n}\) which is negligible.
+\end{answer}
+
 \section{One-Way Functions}
 \label{sec:one-way-functions}
 
