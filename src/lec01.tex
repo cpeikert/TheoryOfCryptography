@@ -200,6 +200,23 @@ For completeness (pun not intended), let's update our correctness
 condition: for every $k \in \keyspace$ and $m \in \msgspace$, we
 should have $\skcdec_{k}(\skcenc_{k}(m)) = m$.
 
+\begin{question}
+    In such a scheme, how does \(\abs{\ctspace}\) compare with \(\abs{\msgspace}\)? Is
+    there anything we can infer about \(\abs{\keyspace}\) from this definition?
+\end{question}
+\begin{answer}
+    In order for decryption to be possible, \(\skcenc_k\) can never encrypt two distinct
+    plaintexts to the same ciphertext, else decryption would be impossible. In other
+    words, \(\skcenc_k\) must be injective. Thus, there must be at least as many
+    possible ciphertexts as there are plaintexts, so \(\abs{\ctspace} \geq
+    \abs{\msgspace}\).\\\\
+    This definition does not give us any information on the size of the key space, aside
+    from the fact that it is finite and nonzero (since \(\skcgen\) must output
+    something if executed). One could conceive of a (completely insecure) encryption
+    scheme with \(\abs{\keyspace} = 1\) wherein encryption and decryption
+    are simply the identity function.
+\end{answer}
+
 \subsection{Shannon / Perfect Secrecy}
 \label{sec:shannon-perfect-secrecy}
 
@@ -379,6 +396,34 @@ to completely ``randomize'' the message, but in a reversible way
   proof.
 \end{proof}
 
+\begin{question}
+Imagine a scheme similar to the One-Time-Pad where \(\oplus\) is replaced with
+\(\land\). Would this be a valid encryption scheme? Is it Shannon secure?
+\end{question}
+\begin{answer}
+    This is not a valid encryption scheme because the encryption function
+    (\(\skcenc_k(m) = m \land k\)) is
+    not injective. Concretely, suppose the \(k = 0^n\), then for all messages \(m \in
+    \bit^n\), \(\skcenc_k(m) = m \land 0^n = 0^n\). Hence, decryption is impossible. 
+\end{answer}
+
+\begin{question}
+    How could we generalize the One-Time-Pad scheme to alphabets larger than just two
+    characters? Without loss of generality, you may assume that an alphabet of size
+    \(b\)
+    is simply \(\set{0,1,\ldots, b-1}\), so \(\msgspace = \keyspace = \set{0,1, \ldots,
+    b-1}^n\).
+\end{question}
+\begin{answer}
+    Instead of using \(\oplus\), we can simply use addition modulo \(b\) (this is
+    unsurprising since exclusive-or is identical to addition modulo 2). Concretely,
+    given a key \(k \in \keyspace\) and \(m \in \msgspace\), our encryption function
+    would output a ciphertext \(c\) such that \(c_i = k_i + m_i \pmod{b}\) for all \(i\).
+    Given a ciphertext \(c\) and key \(k\), the decryption function would output a
+    plaintext \(m\) such that \(m_i = c_i - k_i \pmod{b}\). It isn't difficult to adapt 
+    the proof of \label{thm:otp-perfect} to show the completeness and perfect secrecy of
+    this scheme.
+\end{answer}
 
 \end{document}
 
