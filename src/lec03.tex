@@ -81,17 +81,34 @@ investigating whether they could be one-way functions:
   \]
 \end{enumerate}
 
-First consider $f_{\text{ss}}$; clearly it can be computed in
-polynomial time.  The subset-sum problem is a famous $\NP$-complete
-problem, hence if $\P \neq \NP$ there is no poly-time algorithm to
-solve it, and $f_{\text{ss}}$ must be one-way, right?  Not exactly:
-subset-sum is $\NP$-complete in the \emph{worst case}, but for
-$f_{\text{ss}}$ to be one-way we need it be hard on the
-\emph{average}.  Nevertheless, many believe that this form of
-subset-sum is indeed average-case hard, and hence $f_{\text{ss}}$ is
-conjectured to be one-way.
+First consider $f_{\text{ss}}$; clearly, it can be computed in polynomial time. It is
+based on subset-sum, the famous $\NP\text{-complete}$ problem, and is conjectured to be
+one-way.
 
-Now consider $f_{\text{mult}}$; again, it can be computed in
+\begin{question}
+    Assuming \(\P \neq \NP\), is the fact that subset-sum is an \(\NP\text{-Complete}\)
+    problem enough to prove that \(f_{ss}\) is an OWF? 
+\end{question}
+\begin{answer}
+    No. The fact that subset-sum is \(\NP\text{-Complete}\) means that subset-sum can not
+    be solved in polynomial time in the \emph{worst case}. However, in the one-way
+    function game, the input to \(f_{ss}\) chosen uniformly at random; in other words, a
+    \emph{random} instance of the subset-sum problem is chosen, not necessarily the
+    ``worst'' one. Just because it is difficult to solve subset-sum in the worst case,
+    doesn't mean that it is hard to solve in the average case. However, 
+\end{answer}
+\par\vspace{\baselineskip}
+
+%First consider $f_{\text{ss}}$; clearly it can be computed in
+%polynomial time.  The subset-sum problem is a famous $\NP$-complete
+%problem, hence if $\P \neq \NP$ there is no poly-time algorithm to
+%solve it, and $f_{\text{ss}}$ must be one-way, right?  Not exactly:
+%subset-sum is $\NP$-complete in the \emph{worst case}, but for
+%$f_{\text{ss}}$ to be one-way we need it be hard on the
+%\emph{average}.  Nevertheless, many believe that this form of
+%subset-sum is indeed average-case hard, and hence $f_{\text{ss}}$ is
+%conjectured to be one-way.
+Consider $f_{\text{mult}}$; again, it can be computed in
 poly-time.  Inverting $f_{\text{mult}}$ means factoring $xy$ (into
 non-trivial factors), and factoring is hard, right?  Again, we need to
 be more careful: consider the following inverter $\Inv(z)$: if $z$ is

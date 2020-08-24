@@ -1,4 +1,4 @@
-\documentclass[11pt]{article}
+documentclass[11pt]{article}
 
 \usepackage{fullpage}
 \usepackage{newtxtext}
@@ -111,7 +111,7 @@ functions.
 \section{A Signature Scheme in the RO Model}
 \label{sec:signature-scheme-ro}
 
-\href{https://wiki.cc.gatech.edu/theory/images/7/75/Lec10.pdf}{Recall
+\href{https://github.com/cpeikert/TheoryOfCryptography/blob/master/lec10.pdf}{Recall
   the definition of a trapdoor permutation family:} it is a set
 $\set{f_{s} \colon D_{s} \to D_{s}}$ of permutations where $f_{s}$ is
 easy to invert with knowledge of the trapdoor (which is generated
@@ -119,7 +119,7 @@ along with the index $s$), and otherwise hard to invert on uniformly
 random values $y \in D_{s}$.  The RSA and Rabin function families are
 plausible trapdoor permutation candidates.
 
-\href{https://wiki.cc.gatech.edu/theory/images/7/75/Lec12.pdf}{Previously},
+\href{https://github.com/cpeikert/TheoryOfCryptography/blob/master/lec12.pdf}{Previously},
 we attempted to design a secure signature scheme based on trapdoor
 permutations.  Our old scheme was simple: the public verification key
 was a function $f_{s}$, the secret signing key was its trapdoor (also
@@ -261,6 +261,19 @@ idealized model.
   desired.
 \end{proof}
 
+\begin{question}[ID=oracle-sim]
+    Justify that the \(H(\cdot)\) constructed by \(\Sum\) actually behaves as a random
+    oracle from the point of view of \(\For\).
+\end{question}
+\begin{answer}
+    First, clearly \(H\) returns the same result when queried on the same input
+    thanks to the internal table. When \(i \neq i^*\), the string returned by \(H\) is
+    uniformly random as expected. When \(i = i^*\), \(y\) is returned. Recall that in
+    the trapdoor permutation game, \(y =
+    f_s(x)\) for an \(x\) that is chosen uniformly at random. Since \(x\) is uniformly
+    random and \(f_s\) is a permutation, \(y\) is uniformly random as well.
+\end{answer}
+
 \subsection{Analysis}
 
 \begin{lemma}
@@ -279,12 +292,8 @@ idealized model.
 
 \begin{proof}
   We first note that $\vk=s$ is distributed precisely as in $\sig$,
-  because $\Sim$ is playing the TDP inversion game.  Next, $\Sim$
-  simulates the oracle $H$ perfectly: every answer $y_{i}$ is
-  uniformly random and independent, because it equals $f_{s}(x_{i})$
-  for some uniformly random $x_{i} \in \bit^{n}$, and $f_{s}$ is a
-  bijection.  (Also $y_{i^{*}} = y$ is uniformly random, because
-  $\Sim$ is playing the TDP inversion game.)  Lastly, because $\Sim$
+  because $\Sim$ is playing the TDP inversion game.  As you saw in Question
+  \ref{ques:oracle-sim}, $\Sim$ simulates \(H\) perfectly.  Lastly, because $\Sim$
   did not fail, it answered every signing query with its unique valid
   signature.
 
