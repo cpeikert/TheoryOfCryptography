@@ -261,14 +261,17 @@ concept of a negligible function is a \emph{useful} and
 more precise in our manipulations of probabilities.
 
 \begin{question}
-    Is the product of a negligible function and a non-negligible function always
-    negligible, always non-negligible, or neither?
+  Is the product of a negligible function and a non-negligible
+  function always negligible, always non-negligible, or neither?
 \end{question}
+  
 \begin{answer}
-    Neither, it depends on the functions. Consider \(f(n) = 2^{-n}\) (negligible) and
-    \(g(n) = 2^n\) (non-negligible).  Then, \(f(n) \cdot g(n) = 1\) which is clearly
-    non-negligible. On the other hand, suppose \(f(n) = 2^{-n}\) (negligible) and \(g(n)
-    = 1\) (non-negligible). Then \(f(n) \cdot g(n) = 2^{-n}\) which is negligible.
+  Neither; it depends on the functions. Consider \(f(n) = 2^{-n}\)
+  (which is negligible) and \(g(n) = 2^n\) (which is non-negligible).
+  Then, \(f(n) \cdot g(n) = 1\), which is clearly non-negligible. On
+  the other hand, consider \(h(n) = 1\) (which is
+  non-negligible). Then \(f(n) \cdot h(n) = 2^{-n}\), which is
+  negligible.
 \end{answer}
 
 \section{One-Way Functions}
@@ -345,25 +348,45 @@ without one-way functions.
 \end{enumerate}
 
 \begin{question}
-    Notice that our model allows for \(\Inv\) to have some advantage, even if it is
-    negligible. Would a stronger model that requires \(\Inv\) to have an advantage of 0
-    (i.e. a model that requires that it be impossible to find a preimage in
-    polynomial time) be possible? Why or why not?
+  Notice that Definition~\ref{def:owf} allows for \(\Inv\) to have
+  some non-zero (positive) advantage, though it must be
+  negligible. Consider a stronger definition that requires \(\Inv\) to
+  have advantage 0 (i.e., it is impossible to find a preimage in
+  polynomial time). Is this definition plausibly satisfiable?  Why or
+  why not?
 \end{question}
+  
 \begin{answer}
-    No. Consider an \(\Inv\) that ignores the \(f(x)\) it is given and simply guesses a
-    uniformly random preimage from \(\bit^n\). This can be done in polynomial time and
-    has a nonzero probability of \(2^{-n}\) of succeeding. Hence, there are no functions
-    that could be considered one-way if we defined it this way. In cryptography, when we
-    can't achieve the ``ideal,'' we can often do the next best thing by using a
-    negligible function to mean ``effectively zero.''
+  It is impossible to satisfy this modified definition. Consider an
+  \(\Inv\) that ignores the \(f(x)\) it is given and simply outputs a
+  uniformly random string from \(\bit^n\) as its ``guess'' for a
+  preimage of \(f(x)\). This strategy is obviously polynomial time,
+  and it has a nonzero success probability of (at least)
+  \(2^{-n}\). (There is a \(2^{-n}\) probability of guessing the very
+  same value of \(x\) as was used to compute \(f(x)\), and there might
+  be other $n$-bit preimages of \(f(x)\) as well, which can only
+  increase the probability of success.) Hence, no function can satisfy
+  the stronger definition. In cryptography, when we can't achieve the
+  ``ideal'' of making a task completely impossible, we usually do the
+  next-best thing by using a negligible function to mean ``effectively
+  zero.''
 \end{answer}
 
 \begin{question}
-    Let \(f\) be a one-way function. Is \(g(x) = f(x) \concat 0\) also one-way?
+  Let \(f\) be a one-way function. Is the function
+  \(g(x) = f(x) \concat 0\) necessarily one-way?
 \end{question}
+
 \begin{answer}
-    Yes. Intuitively 
+  Yes, it is. Observe that any $g$-preimage of $g(x) = f(x) \concat 0$
+  is also an $f$-preimage of $f(x)$, so any potential inverter for~$g$
+  is ``effectively'' also an inverter for~$f$. Since the latter can
+  have only negligible advantage (because~$f$ is one-way), the same
+  goes for the former, and hence~$g$ is one-way. In future lectures we
+  will formalize this argument using a \emph{reduction}: for any
+  hypothetical efficient $g$-inverter~$\Inv_{g}$, we will use it as a
+  ``black box'' to construct an efficient $f$-inverter~$\Inv_{f}$ such
+  that $\advan_{f}(\Inv_{f}) = \advan_{g}(\Inv_{g})$.
 \end{answer}
 
 \subsection{Candidates}
