@@ -109,26 +109,42 @@ $\NP\text{-complete}$ problem, and is conjectured to be one-way.
   \(\NP\text{-complete}\) subset-sum problem in the worst case.
 \end{answer}
 
-Now consider $f_{\text{mult}}$; again, it can be computed in
-polynomial time.  Inverting $f_{\text{mult}}$ means factoring $xy$
-(into non-trivial factors), and factoring is hard, right?  Again, we
-need to be more careful: consider the following inverter $\Inv(z)$: if
-$z$ is even, then output $(2, z/2)$, otherwise fail.  Notice that
-$\Inv$ outputs a valid preimage of $z$ exactly when $z = xy$ is even,
-which occurs with probability $3/4$ when $x, y$ are chosen
-independently and uniformly from $[1,2^{n}]$.
+Now consider $f_{\text{mult}}$, which also can be computed in
+polynomial time. Syntactically, inverting $f_{\text{mult}}$ means
+factoring~$xy$ into non-trivial integer factors.
 
-The problem here is that while \emph{some} natural numbers seem hard
-to factor, a large fraction of them (e.g., those that are even)
-certainly are not.  There are two common ways to deal with this.  The
-first is to ``tweak'' the function (actually, its input distribution)
-to focus on the instances that we believe to be hard.  For the
-factoring problem, it is believed (but not proved!) that the hardest
-numbers to factor are those that are the product of exactly two primes
-of about the same size.  More specifically, define \[ \Pi_{n} = \set{
-  p\; :\; p \in [1,2^{n}] \text{ is prime}} \] to be the set of
-``$n$-bit prime numbers.''  Then we may make the following plausible
-conjecture:
+\begin{question}
+  Factoring integers is conjectured to be a hard problem. Does this
+  assumption imply that \(f_{\text{mult}}\) is a one-way function?
+\end{question}
+
+\begin{answer}
+  No! In fact, \(f_{\text{mult}}\) is certainly \emph{not} a one-way
+  function as we have defined it, for the reasons given following the
+  text of this question.
+\end{answer}
+
+The answer is no: \(f_{\text{mult}}\) is \emph{not} a one-way function
+as we have defined it, and this is due to the difference between
+factoring in the worst case versus the average case. While \emph{some}
+integers seem hard to factor, a large fraction of integers are very
+easy to factor. Concretely, consider the following inverter $\Inv(z)$:
+if $z$ is even, then output $(2, z/2)$, otherwise fail.  Notice that
+$\Inv$ outputs a valid preimage of $z$ exactly when $z = xy$ is even,
+which occurs with non-negligible probability $3/4$ when $x, y$ are
+chosen independently and uniformly from $[1,2^{n}]$ (because $xy$ is
+even exactly when at least one of $x,y$ is even).
+
+There are two common ways to deal with this difference between the
+worst case and average case.  The first is to ``tweak'' the
+function---actually, its input distribution---to focus on the
+instances that we believe to be hard.  For the factoring problem, it
+is believed (but not proved!) that the hardest numbers to factor are
+those that are the product of exactly two primes of about the same
+size.  More specifically, define
+\[ \Pi_{n} = \set{ p\; :\; p \in [1,2^{n}] \text{ is prime}} \] to be
+the set of ``$n$-bit prime numbers.''  Then we may make the following
+plausible conjecture:
 
 \begin{conjecture}[Factoring Assumption]
   \label{conj:fact-primes-hard}
@@ -136,7 +152,7 @@ conjecture:
   \[ \Pr_{p,q \gets \Pi_{n}} [\Adv(p \cdot q) = (p,q)] = \negl(n). \]
 \end{conjecture}
 
-Let's next change the input distribution of $f_{\text{mult}}$ so that
+Let's now change the input distribution of $f_{\text{mult}}$ so that
 $x,y$ are chosen uniformly and independently from $\Pi_{n}$.  Now, the
 one-wayness property for $f_{\text{mult}}$ is syntactically identical
 to Conjecture~\ref{conj:fact-primes-hard}, so for that property we
@@ -178,11 +194,11 @@ versa, or both).  This introduces a tiny bias into the output
 distribution of $\algo{GenPrime}$, which we can fold into a negligible
 error term that we won't need to worry about.\footnote{Another
   alternative is to use \emph{deterministic} primality tests which
-  only have proofs of correctness under unproved (but widely-believed)
+  only have proofs of correctness under unproved (but widely believed)
   number-theoretic assumptions.  These are less common in practice
   because they aren't so fast.}  (Later on we will rigorously define
 what ``negligible error term'' means.  We may study primality tests in
-more detail.)
+more detail later.)
 
 The second question, about the running time of $\algo{GenPrime}$, is
 also very interesting.  The probability that a particular iteration
@@ -190,7 +206,7 @@ terminates is exactly $\abs{\Pi_{n}} / 2^{n}$ (assuming a perfect
 primality test).  How does $\abs{\Pi_{n}}$ compare to $2^{n}$, i.e.,
 how ``dense'' are the $n$-bit primes?  It is easy to show that there
 are an infinite number of primes, but this is not strong enough for
-our purposes --- primes could be so vanishingly rare that
+our purposes---primes could be so vanishingly rare that
 $\algo{GenPrime}$ effectively runs forever.  Fortunately, it turns out
 that the primes are quite dense.  For an integer $N > 1$, let $\pi(N)$
 denote the number of primes not exceeding $N$.  We have the following:
@@ -203,26 +219,26 @@ denote the number of primes not exceeding $N$.  We have the following:
 says that $\pi(N)$ asymptotically approaches $\frac{N}{\ln N}$.  We
 will not give a proof of Lemma~\ref{lem:chebyshev-primes} now, but
 there is an elementary one in the Pass-shelat notes.)  Using
-Lemma~\ref{lem:chebyshev-primes}, we have \[
-\frac{\abs{\Pi_{n}}}{2^{n}} = \frac{\pi(2^{n})}{2^{n}} >
-\frac{2^{n}}{2^{n} \cdot 2 \log_{2}(2^{n})} = \frac{1}{2n}. \]
+Lemma~\ref{lem:chebyshev-primes}, we have
+\[ \frac{\abs{\Pi_{n}}}{2^{n}} = \frac{\pi(2^{n})}{2^{n}} >
+  \frac{2^{n}}{2^{n} \cdot 2 \log_{2}(2^{n})} = \frac{1}{2n}. \]
 Finally, since all the iterations of $\algo{GenPrime}$ are
 independent, the probability that it fails to terminate after (say)
-$2n^{2}$ iterations is \[ (1-\tfrac{1}{2n})^{2n \cdot n} \leq
-(1/2)^{n}, \] which is exponentially small.\footnote{To be completely
-  formal, in order to say that $\algo{GenPrime}$ is polynomial-time,
-  we should modify it so that if it has not terminated after $2n^{2}$
-  iterations, it just outputs some fixed value (say, $1$).  This
-  introduces only an exponentially small bias in its output
-  distribution.}
+$2n^{2}$ iterations is
+\[ (1-\tfrac{1}{2n})^{2n \cdot n} \leq (1/2)^{n}, \] which is
+exponentially small.\footnote{To be completely formal, in order to say
+  that $\algo{GenPrime}$ is polynomial time, we should modify it so
+  that if it has not terminated after $2n^{2}$ iterations, it just
+  outputs some fixed value (say, $1$).  This introduces only an
+  exponentially small bias in its output distribution.}
 
 \subsection{Weak OWFs and Hardness Amplification}
 \label{sec:hardn-ampl}
 
 The second way of dealing with the above difficulty of ``somewhere
 hard'' functions is more general, but also most costly and technically
-more complex.  Suppose we were not confident where the ``hard'' inputs
-to a OWF were likely to be, but we did believe that they weren't too
+more complex.  Suppose we are not confident where the ``hard'' inputs
+to a OWF were likely to be, but we do believe that they aren't too
 rare.  We would then have a $\delta$-\emph{weak} one-way function,
 where the ``hard to invert'' property from Definition~\ref{def:owf} is
 relaxed to the following:
@@ -232,18 +248,20 @@ relaxed to the following:
   1-\delta, \] for some $\delta = \delta(n) = 1/\poly(n)$.
 \end{itemize}
 The only change is that we have replaced the $\negl(n)$ success
-probability by $1-\delta$.  This definition allows for $f$ to be
-easily invertible for a large fraction of inputs (e.g., all the even
-numbers), but not ``almost everywhere:'' a $\delta$-fraction of the
-inputs remain hard.
+probability by $1-\delta$. (To contrast with the ``$\delta$-weak''
+nomenclature, we sometimes say that the original condition defines a
+\emph{strong} OWF.) This new definition allows for~$f$ to be easily
+invertible for a large fraction of inputs (e.g., all the even numbers,
+all those divisible by three, perfect squares, and the like), but not
+``almost everywhere:'' a $\delta$-fraction of the inputs remain hard.
 
-Suppose that $f$ is a $\delta$-weak OWF.  Can we get a (strong) OWF
-from it?  The answer is yes; this kind of result lies within the area
-called \emph{hardness amplification} (for obvious reasons).  Assume
-that we have a function $f$; then define its $m$-wise \emph{direct
-  product} \[ f'(x_{1}, \ldots, x_{m}) = (f(x_{1}), \ldots,
-f(x_{m})), \] where we parse the input so that $\len{x_{1}} = \cdots
-= \len{x_{m}}$.  We have the following theorem:
+Suppose that~$f$ is some arbitrary $\delta$-weak OWF.  Can we always
+get a (strong) OWF from it?  The answer is yes; this kind of result
+lies within the area called \emph{hardness amplification}.  For a
+function~$f$, define its $m$-wise \emph{direct product} as
+\[ f'(x_{1}, \ldots, x_{m}) = (f(x_{1}), \ldots, f(x_{m})), \] where
+we parse the input so that $\len{x_{1}} = \cdots = \len{x_{m}}$.  We
+have the following theorem:
 
 \begin{theorem}
   \label{thm:weak-strong-owf}
@@ -251,61 +269,93 @@ f(x_{m})), \] where we parse the input so that $\len{x_{1}} = \cdots
   one-way function for any $\poly(n)$-bounded $m \geq 2n/\delta$.
 \end{theorem}
 
-\textbf{Proof idea:} The intuition here is that inverting $f'$
-requires inverting $f$ on $m$ independently chosen values.  If each
+\begin{question}
+  Does inverting~$f'(x_{1}, \ldots, x_{m})$ require
+  inverting~$f(x_{i})$ for all $i=1,\ldots,m$?  Since an nuPPT
+  algorithm can have advantage at most $1-\delta$ in inverting a
+  single~$f(x_{i})$, does this imply that an nuPPT algorithm can have
+  advantage at most
+  $(1-\delta)^{m} \leq (1-\delta)^{2n/\delta} \leq (1/e)^{2n} =
+  \negl(n)$ in inverting~$f'$?
+\end{question}
+
+\begin{answer}
+  The answer to the first question is yes: any preimage of
+  $f'(x_{1}, \ldots, x_{m}) = (f(x_{1}), \ldots, f(x_{m}))$ is a tuple
+  $(x_{1}^{*}, \ldots, x_{m}^{*})$ of equal-length strings~$x_{i}^{*}$
+  where $f(x_{i}^{*}) = f(x_{i})$, i.e., each~$x_{i}^{*}$ is a
+  preimage of~$f(x_{i})$. (This argument assumes that the output
+  tuple of~$f'$ is encoded so that it is uniquely parseable into
+  its~$m$ components.)
+
+  The answer to the second question is no: that reasoning is not
+  valid, because while the components $y_{i} = f(x_{i})$ are
+  independent, an adversary attacking them \emph{need not treat each
+    of the inversion subtasks independently}; it might correlate its
+  successes and failures. See the text following the original question
+  for further elaboration, and the proof of
+  Theorem~\ref{thm:weak-strong-owf} for a rigorous argument.
+\end{answer}
+
+\paragraph{Proof idea:} The intuition here is that inverting~$f'$
+requires inverting~$f$ on~$m$ independently chosen values.  If each
 component is inverted independently with probability at most
 $1-\delta$, then the probability of inverting all of them should be at
-most \[ (1-\delta)^{2n/\delta} \approx (1/e)^{2n} = \negl(n). \]
-Rigorously proving that this intuition is correct, however, turns out
-to be quite subtle.  The reason is that an adversary $\Inv'$ attacking
-$f'$ does not have to treat each of the inversion sub-tasks $y_{1} =
-f(x_{1}), \ldots, y_{m} = f(x_{m})$ independently.  For example, it
-might look at all of the $y_{i}$s at once, and either invert
-\emph{all} of them (with some non-negligible probability overall), or
-none of them.  So the individual events (that $\Inv'$ succeeds in the
-sub-task of inverting $y_{i} = f(x_{i})$) can be highly correlated.
+most
+\[ (1-\delta)^{m} \leq (1-\delta)^{2n/\delta} \leq (1/e)^{2n} =
+  \negl(n). \] Rigorously proving that this intuition is correct,
+however, turns out to be quite subtle.  The reason is that an
+adversary $\Inv'$ attacking~$f'$ does not have to treat each of the
+inversion subtasks $y_{1} = f(x_{1}), \ldots, y_{m} = f(x_{m})$
+independently.  For example, it might look at all of the $y_{i}$ at
+once, and either invert \emph{all} of them (with some non-negligible
+probability overall), or none of them.  So the individual events (that
+$\Inv'$ succeeds in the sub-task of inverting $y_{i} = f(x_{i})$) can
+be highly correlated, and we cannot simply say that the overall
+success probability is bounded by $(1-\delta)^{m}$.
 
 To give a correct proof of the theorem, we need to perform a
-\emph{reduction} from inverting $f$ with advantage $> 1-\delta$ to
-inverting $f'$ with some non-negligible advantage.  Unpacking this a
-bit, we want to prove the contrapositive: suppose there is some
-(efficient) adversary $\Inv'$ that manages to break the (strong)
-one-wayness of $f'$, i.e., it inverts with some non-negligible
-advantage $\advan_{f'}(\Inv') = \alpha = \alpha(n)$.  Then we will
-construct another (efficient) adversary $\Inv$ that manages to break
-the $\delta$-weak one-wayness of $f$, i.e., it inverts $f$ with
-advantage $\advan_{f}(\Inv) > 1-\delta$.  In doing so, we will use
-$\Inv'$ as a ``black box,'' invoking it on inputs of our choice and
-using its outputs in whatever way may be useful.  However, we cannot
-assume that $\Inv'$ ``works'' in any particular way; we can only rely
-on the hypothesis that it violates the strong one-wayness of $f'$.
+\emph{reduction} from inverting~$f$ with advantage $> 1-\delta$ to
+inverting~$f'$ with some non-negligible advantage.  Unpacking this a
+bit, we want to prove the contrapositive: suppose there is some nuPPT
+adversary~$\Inv'$ that manages to break the (strong) one-wayness
+of~$f'$, i.e., it inverts with some non-negligible advantage
+$\advan_{f'}(\Inv') = \alpha = \alpha(n)$.  Then we will construct
+another nuPPT adversary~$\Inv$ that manages to break the $\delta$-weak
+one-wayness of~$f$, i.e., it inverts~$f$ with advantage
+$\advan_{f}(\Inv) > 1-\delta$.  In doing so, we will use~$\Inv'$ as a
+``black box,'' invoking it on inputs of our choice and using its
+outputs in whatever way may be useful.  However, we cannot assume
+that~$\Inv'$ ``works'' in any particular way; we can only rely on the
+hypothesis that it violates the strong one-wayness of~$f'$.
 
 The basic idea of the reduction is this: $\Inv$ is given $y = f(x)$
-and wants to use $\Inv'$ to invert $y$.  An obvious first attempt is
-to ``plug in'' the value $y$ as part of the output of $f'$, i.e., to
-run $\Inv'$ on \[ y' = (y_{1} = y = f(x), y_{2} = f(x_{2}), \ldots,
-y_{m} = f(x_{m})) = f'(x_{1} = x, x_{2}, \ldots, x_{m}) \] for some
-random $x_{2}, \ldots, x_{m}$ chosen by $\Inv$.  When $\Inv'$ produces
-a (candidate) preimage $x'=(x'_{1},\ldots,x'_{m})$, then $\Inv$ just
-outputs $x'_{1}$ as its candidate preimage of $y=f(x)$.  Notice that
-if $\Inv'$ happens to invert $y'$ successfully, then in particular
-$x_{1} \in f^{-1}(y)$ as required.
+and wants to use $\Inv'$ to invert~$y$.  An obvious first attempt is
+to ``plug in'' the value~$y$ as part of the output of~$f'$, i.e., to
+run $\Inv'$ on
+\[ y' = (y_{1} = y = f(x), y_{2} = f(x_{2}), \ldots, y_{m} = f(x_{m}))
+  = f'(x_{1} = x, x_{2}, \ldots, x_{m}) \] for some random
+$x_{2}, \ldots, x_{m}$ chosen by $\Inv$.  When $\Inv'$ produces a
+potential preimage $x'=(x'_{1},\ldots,x'_{m})$, then $\Inv$ just
+outputs $x'_{1}$ as its potential preimage of $y=f(x)$.  Notice that
+if~$\Inv'$ happens to invert~$y'$ successfully, then in particular
+$x_{1} \in f^{-1}(y)$, as required.
 
 Unfortunately, this simple idea does not quite work.  The problem is
-that $\Inv'$ inverts only with non-negligible probability $\alpha$,
+that~$\Inv'$ inverts only with non-negligible probability $\alpha$,
 whereas we need $\Inv$ to invert with (typically larger) probability
-$> 1-\delta$, to violate the weak one-wayness of $f$.  We might hope
-to fix this problem by running $\Inv'$ a large number of times, using
+$> 1-\delta$, to violate the weak one-wayness of~$f$.  We might hope
+to fix this problem by running~$\Inv'$ a large number of times, using
 the same $y_{1} = f(x)$ but \emph{fresh} random $x_{2}, \ldots, x_{m}$
 each time, expecting $\Inv'$ to successfully invert at least once.
-(Note that we can check whether $\Inv'$ succeeded in inverting $f'$ on
-a particular tuple, because $f'$ is efficiently computable.)  This
+(Note that we can check whether~$\Inv'$ succeeded in inverting~$f'$ on
+a particular tuple, because~$f'$ is efficiently computable.)  This
 strategy is better, but still flawed: the problem is that the runs are
 \emph{not independent}, since we use the same $y_{1} = f(x)$ every
 time.  Indeed, $\Inv'$ might behave in a ``sneaky'' way to make this
 very strategy fail.  For example, $\Inv'$ might fix a certain
 $\alpha$-fraction of ``good'' values of $x_{1}$ for which it always
-inverts (ignoring $x_{2}, \ldots, x_{m}$), and fail on \emph{all}
+inverts (ignoring $x_{2}, \ldots, x_{m}$), and fail for \emph{all}
 other values of $x_{1}$.  Notice that such $\Inv'$ has overall
 advantage $\alpha$, as required.  But no matter how many time we
 repeatedly run $\Inv'$ with $y_{1}=y=f(x)$, we will eventually succeed
@@ -313,16 +363,16 @@ only if the original $x$ is ``good,'' which happens with probability
 only $\alpha$.
 
 A better reduction (which will turn out to work) just applies the
-above ``plug-and-repeat'' strategy for \emph{each} position $i = 1,
-\ldots, m$.  As it turns out, we can show that \emph{some} position
-must have a very large ($> 1-\delta/2$) fraction of ``good''
-$x_{i}$'s, for a suitable definition of good.  Conditioned on the $x$
-from our given instance $y = f(x)$ being good, by repeatedly calling
-$\Inv'$ a polynomial number of times (using fresh $x_{2}, \ldots,
-x_{m}$ each time), the probability that $\Inv'$ inverts successfully
-in at least one call will be extremely close to 1, so our overall
-advantage in inverting $f$ will be $\approx 1-\delta/2 > 1-\delta$, as
-desired.
+above ``plug-and-repeat'' strategy for \emph{every} position
+$i = 1, \ldots, m$.  As it turns out, we can show that \emph{some}
+position must have a very large ($> 1-\delta/2$) fraction of ``good''
+$x_{i}$'s, for a suitable definition of good.  Conditioned on the~$x$
+from our given instance $y = f(x)$ being good, by repeatedly
+calling~$\Inv'$ a polynomial number of times (using fresh
+other~$x_{i}$ values each time), the probability that~$\Inv'$ inverts
+successfully in at least one call will be extremely close to 1, so our
+overall advantage in inverting~$f$ will be
+$\approx 1-\delta/2 > 1-\delta$, as desired.
 
 We now give the formal proof.
 
