@@ -81,41 +81,42 @@ investigating whether they could be one-way functions:
   \]
 \end{enumerate}
 
-First consider $f_{\text{ss}}$; clearly, it can be computed in polynomial time. It is
-based on subset-sum, the famous $\NP\text{-complete}$ problem, and is conjectured to be
-one-way.
+First consider $f_{\text{ss}}$; clearly, it can be computed in
+polynomial time. It syntactically matches subset-sum, the famous
+$\NP\text{-complete}$ problem, and is conjectured to be one-way.
 
 \begin{question}
-    Assuming \(\P \neq \NP\), is the fact that subset-sum is an \(\NP\text{-Complete}\)
-    problem enough to prove that \(f_{ss}\) is an OWF? 
+  Recall that subset-sum is an \(\NP\text{-complete}\) problem, so,
+  assuming \(\P \neq \NP\), it has no polynomial-time algorithm. Does
+  this prove that \(f_{ss}\) is a one-way function?
 \end{question}
-\begin{answer}
-    No. The fact that subset-sum is \(\NP\text{-Complete}\) means that subset-sum can not
-    be solved in polynomial time in the \emph{worst case}. However, in the one-way
-    function game, the input to \(f_{ss}\) chosen uniformly at random; in other words, a
-    \emph{random} instance of the subset-sum problem is chosen, not necessarily the
-    ``worst'' one. Just because it is difficult to solve subset-sum in the worst case,
-    doesn't mean that it is hard to solve in the average case. However, 
-\end{answer}
-\par\vspace{\baselineskip}
 
-%First consider $f_{\text{ss}}$; clearly it can be computed in
-%polynomial time.  The subset-sum problem is a famous $\NP$-complete
-%problem, hence if $\P \neq \NP$ there is no poly-time algorithm to
-%solve it, and $f_{\text{ss}}$ must be one-way, right?  Not exactly:
-%subset-sum is $\NP$-complete in the \emph{worst case}, but for
-%$f_{\text{ss}}$ to be one-way we need it be hard on the
-%\emph{average}.  Nevertheless, many believe that this form of
-%subset-sum is indeed average-case hard, and hence $f_{\text{ss}}$ is
-%conjectured to be one-way.
-Consider $f_{\text{mult}}$; again, it can be computed in
-poly-time.  Inverting $f_{\text{mult}}$ means factoring $xy$ (into
-non-trivial factors), and factoring is hard, right?  Again, we need to
-be more careful: consider the following inverter $\Inv(z)$: if $z$ is
-even, then output $(2, z/2)$, otherwise fail.  Notice that $\Inv$
-outputs a valid preimage of $z$ exactly when $z = xy$ is even, which
-occurs with probability $3/4$ when $x, y$ are chosen independently and
-uniformly from $[1,2^{n}]$.
+\begin{answer}
+  No. The fact that subset-sum is \(\NP\text{-complete}\) means that,
+  assuming \(\P \neq \NP\), no polynomial-time algorithm solves
+  subset-sum in the \emph{worst case}, i.e., on \emph{any} given
+  instance. However, in the one-way function inversion game, the input
+  to \(f_{ss}\) is chosen uniformly \emph{at random}, and is not
+  necessarily a ``hardest'' instance of subset-sum. In other words, an
+  inverter for \(f_{ss}\) only needs to solve subset-sum \emph{on the
+    average} and with good enough probability, not necessarily in the
+  worst case and with probability one. While we \emph{conjecture} that
+  almost all instances of subset-sum are hard, and hence~\(f_{ss}\) is
+  one-way, as far as we know it could be the case that a large
+  fraction of subset-sum instances are easy to solve, yet a rare few
+  are hard. This would allow a polynomial-time inverter to attain
+  non-negligible advantage against \(f_{ss}\) without solving the
+  \(\NP\text{-complete}\) subset-sum problem in the worst case.
+\end{answer}
+
+Now consider $f_{\text{mult}}$; again, it can be computed in
+polynomial time.  Inverting $f_{\text{mult}}$ means factoring $xy$
+(into non-trivial factors), and factoring is hard, right?  Again, we
+need to be more careful: consider the following inverter $\Inv(z)$: if
+$z$ is even, then output $(2, z/2)$, otherwise fail.  Notice that
+$\Inv$ outputs a valid preimage of $z$ exactly when $z = xy$ is even,
+which occurs with probability $3/4$ when $x, y$ are chosen
+independently and uniformly from $[1,2^{n}]$.
 
 The problem here is that while \emph{some} natural numbers seem hard
 to factor, a large fraction of them (e.g., those that are even)
