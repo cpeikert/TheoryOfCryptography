@@ -268,14 +268,13 @@
 \RequirePackage{xsim}
 \RequirePackage{needspace}
 
-\DeclareExerciseEnvironmentTemplate{QRef}
-{%
-    \par\vspace{\baselineskip}
+\DeclareExerciseEnvironmentTemplate{QRef}{%
+    \par\addvspace{\baselineskip}
     \Needspace*{2\baselineskip}
     \noindent
     \hyperref[ans:\GetExerciseProperty{ID}]{\textbf{\XSIMmixedcase{\GetExerciseName}~\GetExerciseProperty{counter}.}}
     \label{ques:\GetExerciseProperty{ID}}
-}{}
+}{\par\addvspace{\baselineskip}}
 
 \DeclareExerciseEnvironmentTemplate{ARef}{%
         \Needspace*{2\baselineskip}
@@ -285,7 +284,7 @@
         \GetExerciseBody{exercise}
         \par \medskip \noindent
         \textbf{\XSIMmixedcase{\GetExerciseName}.}
-}{\par\vspace{\baselineskip}}
+}{\par\addvspace{\baselineskip}}
 
 \DeclareExerciseHeadingTemplate{simple}{%
     \section*{\XSIMmixedcase{\GetExerciseParameter{solution-name}s}}
