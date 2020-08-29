@@ -1,4 +1,4 @@
-documentclass[11pt]{article}
+\documentclass[11pt]{article}
 
 \usepackage{fullpage}
 \usepackage{newtxtext}
@@ -262,16 +262,18 @@ idealized model.
 \end{proof}
 
 \begin{question}[ID=oracle-sim]
-    Justify that the \(H(\cdot)\) constructed by \(\Sum\) actually behaves as a random
-    oracle from the point of view of \(\For\).
+  Justify that the \(H(\cdot)\) constructed by \(\Sim\) actually
+  behaves as a random oracle from the point of view of \(\For\).
 \end{question}
+  
 \begin{answer}
-    First, clearly \(H\) returns the same result when queried on the same input
-    thanks to the internal table. When \(i \neq i^*\), the string returned by \(H\) is
-    uniformly random as expected. When \(i = i^*\), \(y\) is returned. Recall that in
-    the trapdoor permutation game, \(y =
-    f_s(x)\) for an \(x\) that is chosen uniformly at random. Since \(x\) is uniformly
-    random and \(f_s\) is a permutation, \(y\) is uniformly random as well.
+  First, clearly \(H\) returns the same result when queried on the
+  same input thanks to the internal table. When \(i \neq i^*\), the
+  string returned by \(H\) is uniformly random as expected. When
+  \(i = i^*\), \(y\) is returned. Recall that in the trapdoor
+  permutation game, \(y = f_s(x)\) for an \(x\) that is chosen
+  uniformly at random. Since \(x\) is uniformly random and \(f_s\) is
+  a permutation, \(y\) is uniformly random as well.
 \end{answer}
 
 \subsection{Analysis}
