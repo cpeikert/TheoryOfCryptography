@@ -260,6 +260,20 @@ concept of a negligible function is a \emph{useful} and
 \emph{well-behaved} abstraction, though at times we will need to be
 more precise in our manipulations of probabilities.
 
+\begin{question}
+  Is the product of a negligible function and a non-negligible
+  function always negligible, always non-negligible, or neither?
+\end{question}
+  
+\begin{answer}
+  Neither; it depends on the functions. Consider \(f(n) = 2^{-n}\)
+  (which is negligible) and \(g(n) = 2^n\) (which is non-negligible).
+  Then, \(f(n) \cdot g(n) = 1\), which is clearly non-negligible. On
+  the other hand, consider \(h(n) = 1\) (which is
+  non-negligible). Then \(f(n) \cdot h(n) = 2^{-n}\), which is
+  negligible.
+\end{answer}
+
 \section{One-Way Functions}
 \label{sec:one-way-functions}
 
@@ -316,13 +330,6 @@ without one-way functions.
   domain, so that the entire inversion experiment can be executed
   efficiently.
 
-\item Ideally, we would like to require $\Inv$'s advantage to be $0$,
-  i.e., the function can \emph{never} be inverted.  But this is too
-  strong: after all, $\Inv$ can always guess $x$ with probability
-  $2^{-n}$ (without even looking at $f(x)$)!  In cryptography, when we
-  can't achieve the ``ideal,'' we can often do the next best thing by
-  using a negligible function to mean ``effectively zero.''
-  
 \item In contrast to some other notions of hardness you may have seen,
   this definition is inherently \emph{average-case} rather than
   \emph{worst-case}.  A worst-case definition would say that every
@@ -339,6 +346,48 @@ without one-way functions.
   that all algorithms are given the security parameter (in unary), and
   may run in time polynomial in it.
 \end{enumerate}
+
+\begin{question}
+  Notice that Definition~\ref{def:owf} allows for \(\Inv\) to have
+  some non-zero (positive) advantage, though it must be
+  negligible. Consider a stronger definition that requires \(\Inv\) to
+  have advantage 0 (i.e., it is impossible to find a preimage in
+  polynomial time). Is this definition plausibly satisfiable?  Why or
+  why not?
+\end{question}
+  
+\begin{answer}
+  It is impossible to satisfy this modified definition. Consider an
+  \(\Inv\) that ignores the \(f(x)\) it is given and simply outputs a
+  uniformly random string from \(\bit^n\) as its ``guess'' for a
+  preimage of \(f(x)\). This strategy is obviously polynomial time,
+  and it has a nonzero success probability of (at least)
+  \(2^{-n}\). (There is a \(2^{-n}\) probability of guessing the very
+  same value of \(x\) as was used to compute \(f(x)\), and there might
+  be other $n$-bit preimages of \(f(x)\) as well, which can only
+  increase the probability of success.) Hence, no function can satisfy
+  the stronger definition. In cryptography, when we can't achieve the
+  ``ideal'' of making a task completely impossible, we usually do the
+  next-best thing by using a negligible function to mean ``effectively
+  zero.''
+\end{answer}
+
+\begin{question}
+  Let \(f\) be a one-way function. Is the function
+  \(g(x) = f(x) \concat 0\) necessarily one-way?
+\end{question}
+
+\begin{answer}
+  Yes, it is. Observe that any $g$-preimage of $g(x) = f(x) \concat 0$
+  is also an $f$-preimage of $f(x)$, so any potential inverter for~$g$
+  is ``effectively'' also an inverter for~$f$. Since the latter can
+  have only negligible advantage (because~$f$ is one-way), the same
+  goes for the former, and hence~$g$ is one-way. In future lectures we
+  will formalize this argument using a \emph{reduction}: for any
+  hypothetical efficient $g$-inverter~$\Inv_{g}$, we will use it as a
+  ``black box'' to construct an efficient $f$-inverter~$\Inv_{f}$ such
+  that $\advan_{f}(\Inv_{f}) = \advan_{g}(\Inv_{g})$.
+\end{answer}
 
 \subsection{Candidates}
 \label{sec:candidates}
