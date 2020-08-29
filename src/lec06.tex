@@ -209,6 +209,22 @@ elementary bur rather tedious, so we won't go through it today.)
     \ldots, g^{p-1}=1}$.
 \end{theorem}
 
+\begin{question}
+    Suppose you have a black-box \(\algo{B}\) which generates a uniformly-random element
+    of \(\Z_{p-1}\) for some prime \(p\). Using \(\algo{B}\) as your only source of
+    randomness, how could you construct an algorithm which samples a uniformly random
+    element of \(\Z_p^*\)?
+\end{question}
+\begin{answer}
+    By Theorem \ref{thm:Zps-cyclic}, there exists a generator \(g\) for \(\Z_p^*\). Our
+    algorithm \(\algo{A}\) simply returns \(g^{\algo{B}()}\). 
+    From Theorem \ref{thm:Zps-cyclic}, we know that \(\inner{g} = \set{g^1, \ldots,
+    g^{p-1}} = \Z_p^*\), and since \(\abs{\Z_p^*} = p - 1\), it must be the case that
+    for each \(x \in \Z_p^*\), there exists a \emph{unique} \(i \in \Z_{p-1}\) such that
+    \(x = g^i\). Hence, \(\Pr[\algo{A}() = x] = \Pr[g^{\algo{B}()} = g^i] = \Pr[\algo{B}()
+    = i] = 1/(p-1)\)
+\end{answer}
+
 \subsection{Discrete Logarithm Problem and One-Way Function}
 \label{sec:dlp-owf}
 
@@ -253,6 +269,8 @@ special case is $p = 2q+1$ for prime $q$, for which there are $q =
 (p-1)/2$ generators.  However, it is not even known whether there
 exist infinitely many such ``Sophie Germain'' primes of this form!
 (Empirically, though, they are abundant.)
+
+%% TODO: think of a question for the end of this section
 
 \subsection{Blum-Micali PRG}
 \label{sec:blum-micali-prg}

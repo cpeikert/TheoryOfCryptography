@@ -237,6 +237,34 @@ $\ZN^{*}$:
   $p = 1 \bmod 4$.
 \end{itemize}
 
+\begin{question}
+    Verify that the CRT isomorphism works in $\Z_{15}$ by checking that $h(7 \cdot 9) = h(7) \cdot h(9)$.
+\end{question}
+\begin{answer}
+    Note that $15$ is the product of two primes: $3$ and $5$, so \(\Z_{15} \cong \Z_3
+    \times \Z_5\).  First, we consider \(h(7 \cdot 9)\). \(7 \cdot 9 \equiv 3 \pmod{15}\)
+    and \(h(3) = (3 \bmod 3, 3 \bmod 5) = (0, 3)\). Next, \(h(7) = (7 \bmod{3}, 7
+    \bmod{5}) = (1,2)\) and \(h(9) = (9 \bmod{3}, 9 \bmod 5) = (0, 4)\). Finally we
+    multiply the pairs elementwise, recalling that the first elements of each pair are
+    from \(\Z_3\) and the second elements are from \(\Z_5\).  \((1,2) \cdot (0,4) =
+    (0,3)\) as expected.
+\end{answer}
+\begin{question}
+    Show that \(h^{-1}(x,y) = x \cdot c_p + y \cdot c_q\).
+\end{question}
+\begin{answer}
+    Consider,
+    \begin{align*}
+        (x,y) &= (x, 0) + (0, y) \\
+              &= h(x) \cdot (1,0) + h(y) \cdot (0,1) \\
+              &= h(x) \cdot h(c_p) + h(y) \cdot h(c_q) \\
+              &= h(x \cdot c_p + y \cdot c_q) \\
+        h^{-1}(x,y) &= x \cdot c_p + y \cdot c_q
+    \end{align*}
+\end{answer}
+
+
+
 \section{Factoring-Related Functions}
 \label{sec:fact-related}
 

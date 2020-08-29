@@ -200,6 +200,28 @@ For completeness (pun not intended), let's update our correctness
 condition: for every $k \in \keyspace$ and $m \in \msgspace$, we
 should have $\skcdec_{k}(\skcenc_{k}(m)) = m$.
 
+\begin{question}
+  In a scheme following this updated model, how must
+  \(\abs{\ctspace}\) and \(\abs{\msgspace}\) be related? Can we infer
+  anything about \(\abs{\keyspace}\) in relation to \(\abs{\ctspace}\)
+  and/or \(\abs{\msgspace}\)?
+\end{question}
+
+\begin{answer}
+  In order for decryption to always be correct, \(\skcenc_k\) can
+  never encrypt two distinct plaintexts to the same ciphertext. In
+  other words, \(\skcenc_k\) must be injective (for every
+  key~$k$). Thus, there must be at least as many possible ciphertexts
+  as there are plaintexts, so \(\abs{\ctspace} \geq \abs{\msgspace}\).
+  
+  The model itself does not tell us anything about the cardinality
+  \( \abs{\keyspace}\) of the key space, aside from the fact that it
+  is finite and nonzero (since \(\skcgen\) must output something if
+  executed). For example, one could conceive of a (completely
+  insecure) encryption scheme with \(\abs{\keyspace} = 1\), wherein
+  encryption and decryption are simply the identity function.
+\end{answer}
+
 \subsection{Shannon / Perfect Secrecy}
 \label{sec:shannon-perfect-secrecy}
 
@@ -379,6 +401,49 @@ to completely ``randomize'' the message, but in a reversible way
   proof.
 \end{proof}
 
+\begin{question}
+  Imagine a scheme similar to the One-Time Pad, where \(\oplus\) is
+  replaced with \(\land\) (bitwise AND). Is this a valid encryption
+  scheme? Is it Shannon/perfectly secure?
+\end{question}
+
+\begin{answer}
+  This is not a valid encryption scheme, because the encryption
+  function \(\skcenc_k(m) = m \land k\) is not injective for all
+  keys~$k$. Concretely, suppose \(k = 0^n\); then for all messages
+  \(m \in \bit^n\), \(\skcenc_k(m) = m \land 0^n = 0^n\). Hence,
+  correct decryption is impossible.
+
+  This scheme is also not Shannon/perfectly secure, because if any
+  ciphertext bit is~$1$ then the corresponding plaintext bit is
+  certainly~$1$ (because if the plaintext bit were~$0$, the
+  corresponding ciphertext bit would necessarily be $0 \land k =
+  0$). More formally, for the fixed ciphertext $\bar{c}=1^{n}$ and the
+  messages $m_{0}=0^{n}$ and $m_{1} = 1^{n}$, we have
+  $\Pr_{k \gets \bit^{n}}[\skcenc_{k}(m_{0})=\bar{c}] = 0$ whereas
+  $\Pr_{k \gets \bit^{n}}[\skcenc_{k}(m_{1})=\bar{c}] =
+  \Pr_{k}[k=1^{n}] = 2^{-n} \neq 0$.
+\end{answer}
+
+\begin{question}
+  How could we generalize the One-Time-Pad scheme to alphabets larger
+  than just two characters? Without loss of generality, you may assume
+  that an alphabet of size \(b\) is simply \(\set{0,1,\ldots, b-1}\),
+  so \(\msgspace = \keyspace = \set{0,1, \ldots, b-1}^n\).
+\end{question}
+
+\begin{answer}
+  Instead of using \(\oplus\), we can simply use addition modulo \(b\)
+  (note that exclusive-or is the special case of addition
+  modulo~2). Concretely, given a key \(k \in \keyspace\) and
+  \(m \in \msgspace\), our encryption function would output a
+  ciphertext \(c\) where \(c_i = k_i + m_i \pmod{b}\) for all \(i\).
+  Given a ciphertext \(c\) and key \(k\), the decryption function
+  would output a plaintext \(m\) where \(m_i = c_i - k_i
+  \pmod{b}\). It is straightforward to adapt the proof of
+  Theorem~\ref{thm:otp-perfect} to show the completeness and perfect
+  secrecy of this scheme.
+\end{answer}
 
 \end{document}
 

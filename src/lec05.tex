@@ -71,8 +71,19 @@ indistinguishable.  We relax this condition to define
 \emph{statistical distance} between the two distributions is
 negligible.  The statistical distance between two distributions $X$
 and $Y$ over a domain $\Omega$ is defined as
-\[ \Delta(X,Y) := \sup_{A \subseteq \Omega} \abs{X(A) - Y(A)}. \] We
-view $A$ as a statistical ``test'' --- $X(A) = \sum_{w \in A}
+\[ \Delta(X,Y) := \sup_{A \subseteq \Omega} \abs{X(A) - Y(A)}
+    \footnote{
+        For a set $A$, the \emph{suprenum} of $A$, denoted
+        $\sup(A)$, is the least upper bound of the set $A$.
+        The suprenum can be thought of as a generalization
+        of the notion of a maximum element to sets where no
+        such element exists. For example, there is no
+        maximum element of the set $[0,1) \subseteq \R$, but
+        the suprenum is 1 since it is the smallest real
+        number that is larger than every element of $[0,1)$.
+    }.
+\]
+We view $A$ as a statistical ``test'' --- $X(A) = \sum_{w \in A}
 \Pr[X=w]$ being the probability that a draw from $X$ lands in $A$, and
 likewise likewise $Y(A)$.  Note that $A$ and $\bar{A}$ are effectively
 the same test, since \[ \abs{X(\bar{A})-Y(\bar{A})} =
@@ -106,8 +117,13 @@ In other words, statistical distance cannot be increased by the application
 of a (randomized) function.
 
 \begin{lemma}
-  Statistical distance is a metric; in particular, $\Delta(X,Z) \leq
-  \Delta(X,Y) + \Delta(Y,Z)$.
+  Statistical distance is a metric; in particular, it has the following three
+  properties
+  \begin{itemize}
+      \item Identity of indiscernibles: $\Delta(X,Y) = 0 \iff X = Y$
+      \item Symmetry: $\Delta(X,Y) = \Delta(Y,X)$
+      \item Subadditivity: $\Delta(X,Z) \leq \Delta(X,Y) + \Delta(Y, Z)$
+  \end{itemize}
 \end{lemma}
 
 Statistical distance lets us say when two (sequences of) distributions
@@ -141,6 +157,16 @@ for any meaningful definition of the term, it isn't possible!  This
 can be shown by explicitly demonstrating a subset (test) containing
 all the points outside the image of the generator, which make up a
 significant fraction of the range.
+
+\begin{question}
+    Justify why it is the case that $\Delta(X,Y) = 0 \iff X = Y$.
+\end{question}
+\begin{answer}
+    In the forwards direction, $\Delta(X,Y) = 0$ means that for all $A$ $\abs{X(A) -
+    Y(A)} = 0$, or in other words $X(A) = Y(A)$. Hence, $X = Y$. On the other hand,
+    if $X = Y$, then by definition $X(A) - Y(A) = 0$ for all $A$, so $\Delta(X,Y)
+    = \sup(\set{0}) = 0$.
+\end{answer}
 
 \subsection{Computational Indistinguishability}
 \label{sec:comp-indist}
@@ -258,9 +284,27 @@ restricted to be efficient.
   $\set{U_{\ell(n)}}$ are computationally indistinguishable. By the
   composition lemma, it follows that $G(U_{n})$ can be used in place
   of $U_{\ell(n)}$ in \emph{any} (efficient) application!
-  (\emph{Exercise:} Show that a PRG cannot exist if we demand
-  \emph{statistical} pseudorandomness.)
 \end{definition}
+
+
+\begin{question}
+    Let \(G\) be a PRG. Is \(H(x) = \lnot G(x)\) also a PRG? \emph{Hint:} think about
+    the composition lemma.
+\end{question}
+\begin{answer}
+    Yes. The intuition here is that if \(G(x)\) looks random, then negating it
+    should look like the negation of a uniformly random string (which itself is
+    uniformly random).
+
+
+    \noindent The formal proof is a straightforward application of the composition lemma. Since
+    \(G\) is a PRG, \(G(U_n) \compind U_{\ell(n)}\). Consider an algorithm \(\AdvB\)
+    which accepts a bitstring \(x\) and returns \(\lnot x\). By the composition lemma,
+    \(\AdvB(G(U_n)) \compind \AdvB(U_{\ell(n)})\). Note that \(\AdvB(G(U_n)) = \lnot
+    G(U_n)\) which is precisely \(H(U_n)\). On the other hand, \(\AdvB(U_{\ell(n)}) =
+    \lnot U_{\ell(n)} = U_{\ell(n)}\) (any bijective function applied to the uniform
+    distribution yields the uniform distribution). Thus, \(H(U_n) \compind U_{\ell(n)}\).
+\end{answer}
 
 \subsection{Expansion of a PRG}
 \label{sec:properties}
@@ -290,6 +334,42 @@ We will prove this theorem in the next lecture.
   from this small subset, from a truly random one over the whole
   space!
 \end{remark}
+
+\begin{question}
+    Sketch out a proof that a PRG cannot exist if we demand \emph{statistical}
+    pseudorandomness. \emph{Hint} think about the size differential between
+    $\abs{G(\bit^n)}$ and $\abs{\bit^{\ell(n)}}$.
+\end{question}
+\begin{answer}
+    Since $G$ has $n$-bit seeds (of which there are $2^n$), there are only $2^n$
+    possible outputs of $G$ (which reside in $\bit^{\ell(n)}$). However, $\bit^{\ell(n)}$ is
+    \emph{much} larger than this; it has at least $2^{n+1}$ elements making it at
+    least twice as big as the image of \(G\). Informally, we
+    can think of our statistical test as checking whether or not a given string is in
+    the image of $G$. If not, our string was certainly drawn from $U_{\ell(n)}$. If
+    so, it \emph{might} have come from $G(U_n)$, so we'll guess that it did. Since the image of $G$ is so small
+    compared to the entirety of $\set{0,1}^{\ell(n)}$, the cases where we are
+    certainly right are going to vastly outnumber the cases where we might be, so
+    hopefully we will end up with a non-negligible probability of being right overall
+    once we work the numbers out.
+
+    \noindent More formally and in the language of statistical indistinguishably: let
+    $A = G(\bit^n)$ (i.e. the image of $G$ as suggested above). Then,
+    \begin{align*}
+        \abs{G(U_n)(A) - U_{\ell(n)}(A)} &= \abs{1 - U_{\ell(n)}(A)} \\
+                                         &= 1 - 2^{-\ell(n)}\abs{A} \\
+                                         &= 1 - 2^{-\ell(n)}\cdot 2^n \\
+                                         &= 1 - 2^{n - \ell(n)} \\
+        \intertext{Recall that $\ell(n) \geq n + 1$:}
+                                         &\geq 1 - 2^{-1} \\
+                                         &= \frac{1}{2} \\
+                                         &\neq \negl(n)
+    \end{align*}
+    Note that the particular $A$ we chose might not be the $A$ that maximizes
+    $\abs{G(U_n)(A) - U_{\ell(n)}(A)}$ (i.e., there might be better statistical
+    tests than the one we chose), however the suprenum over all possible $A$s cannot
+    possibly be smaller, so $\Delta(G(U_n), U_{\ell(n)}) \geq \frac{1}{2}$.
+\end{answer}
   
 
 \end{document}

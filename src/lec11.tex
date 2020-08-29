@@ -218,20 +218,56 @@ Our $\mac$ construction is as follows: let $\calH = \set{h_k \colon
   $1/\abs{\tagspace}$, as desired.
 \end{proof}
 
+\begin{question}[ID=one-time]
+    Although perfectly unforgeable, the above scheme is only one-time. Suppose
+    \(\mathcal{H}\) is the concrete hash family described in Example \ref{ex:pairwise-ind} and
+    show how an attacker with access to two message-tag pairs generated from the same
+    key can forge a new message-tag pair.
+\end{question}
+\begin{answer}
+    Let \((m_1, t_1)\) and \((m_2, t_2)\) be our two pairs. As it turns out, these
+    two pairs are enough to recover the secret key \((a,b)\), and from there we can
+    forge any message we want. By the construction of our
+    scheme we have that \(t_i = h_{a,b}(m_i) = am_i + b \pmod p\) for \(i = 1,2\). Here
+    we have a system of two equations with two unknowns and as such we can solve with
+    basic linear algebra.
+    \begin{align*}
+        \begin{pmatrix} m_1 & 1 \\ m_2 & 1 \end{pmatrix} \begin{pmatrix} a \\ b
+        \end{pmatrix} &= \begin{pmatrix} t_1 \\ t_2 \end{pmatrix} \pmod {p} \\
+        \begin{pmatrix} a \\ b \end{pmatrix} &= (m_1 - m_2)^{-1} \begin{pmatrix} 1 &
+        -1 \\ -m_2 & m_1 \end{pmatrix} \begin{pmatrix} t_1 \\ t_2 \end{pmatrix} \pmod{p} \\ 
+        a &= (m_1 - m_2)^{-1} (t_1 - t_2) \pmod {p} \\
+        b &= (m_1 - m_2)^{-1} (m_1t_2 - t_1m_2) \pmod{p}
+    \end{align*}
+\end{answer}
+\begin{question}
+    Just as a pairwise-independent hash function allowed us to construct a one-time
+    perfectly unforgeable MAC, a \(d\)-wise independent hash family can be used to
+    form a \((d-1)\)-time perfectly unforgeable MAC in precisely the same way (the
+    security proof is essentially the same). Using Example \ref{ex:pairwise-ind} as a
+    template, describe how one could construct such a family.
+\end{question}
+\begin{answer}
+    The key point to recognize is that the pairwise-independence of \(h_{a,b} = ax + b
+    \pmod{p}\) comes from the fact that a linear function has two degrees of freedom.
+    Supplying one pair \((m,t)\) such that \(h_{a,b}(m) = t\) fixes a relationship
+    between \(a\) and \(b\) but still leaves \(p\) possible combinations of what \(a\)
+    and \(b\) could be. To go from pairwise independence to \(d\)-wise independence, we
+    simply increase the degrees of freedom by using polynomials of degree \(d-1\).
+    Concretely, we define our family \(\mathcal{H} = \set{h_k}\) such that 
+    \[h_{c_0,
+    \ldots, c_{d-1}}(x) = c_0 + c_1x + \cdots + c_{d-1}x^{d-1} =  \sum_{i=0}^{d-1} c_i x^i.\]
+\end{answer}
+
 \subsubsection{Critiques}
 \label{sec:critiques-info-mac}
 
-The scheme is only one-time!  In fact, using our concrete pairwise
-independent hash family from Example~\ref{ex:pairwise-ind}, it can be
-broken trivially if $\For$ sees two message-tag pairs for distinct
-messages $m,m'$, by solving for the key $(a,b)$ using basic linear
-algebra.  This problem is a deficiency in our \emph{definition} of
-unforgeability, because it does not comport with the fact that we
-would like to use a $\mac$ scheme to tag multiple messages.  However,
-it can be shown that perfect (information-theoretic) unforgeability is
-impossible to achieve, if the forger gets to see enough message-tag
-pairs relative to the (fixed) secret key size.  So to have any hope of
-achieving security, we need to consider a computational definition
+As noted in Question \ref{ques:one-time}, the scheme is only one-time! This problem is a deficiency in our
+\emph{definition} of unforgeability, because it does not comport with the fact that we
+would like to use a $\mac$ scheme to tag multiple messages.  However, it can be shown
+that perfect (information-theoretic) unforgeability is impossible to achieve, if the
+forger gets to see enough message-tag pairs relative to the (fixed) secret key size.  So
+to have any hope of achieving security, we need to consider a computational definition
 instead.
 
 \subsection{Computational Treatment}
@@ -322,11 +358,43 @@ $\msgspace = \tagspace = \bit^n$, and $\set{f_k \colon \msgspace \to
   \negl(n) \Rightarrow \advan_{\mac}(\For) \in \negl(n)$ as needed.
 \end{proof}
 
-\begin{exercise} 
-  This scheme works for messages of fixed input length.  Is it
-  possible to extend the scheme to handle messages of unbounded
-  length?
-\end{exercise}
+\begin{question} 
+    Unfortunately, the above scheme only works for fixed-length \(n\)-bit messages where
+    \(n\) is the security parameter. The following is an attempt to use such a MAC and
+    construct a new MAC (\(\mac'\)) that works for arbitrary length messages. Show that
+    it is not UF-CMA secure.
+    \begin{itemize}
+        \item \(\macgen' := \macgen\)
+        \item \(\mactag'\) takes an arbitrary-length message \(m\) (whose length we
+            denote \(N\)), pads its length to be a multiple of \(n\), divides \(m\) into
+            \(n\)-bit blocks \((m_1, \ldots, m_{N/n})\) and outputs the tag \(t :=
+            \mactag(m_1) \concat \mactag(m_2) \concat \ldots \concat
+            \mactag(m_{N/n})\).
+        \item \(\macver'\) is defined in the natural way.
+    \end{itemize}
+    \leavevmode
+\end{question}
+\begin{answer}
+    This new MAC is subject to several different attacks. One attack would be for an
+    attacker to simply permute the blocks of a particular message. That is, they could
+    query \(m_1 \concat m_2\), receiving the tag \(t_1 \concat t_2\) and then return the
+    new pair \((m_2 \concat m_1, t_2 \concat t_1)\). \\
+
+    \noindent Another options would be a length-extension or reduction attack whereby the
+    attacker queries \(m_1 \concat m_2\), receives the tag \(t_1 \concat t_2\), and
+    either shortens the message -- returning the pair \((m_1, t_1)\)
+    -- or lengthens it -- returning the pair \((m_1 \concat m_1 \concat m_2, t_1
+    \concat t_1 \concat t_2)\). \\
+
+    \noindent One final attack would be to combine the blocks from two messages. That is,
+    the attacker could query \(m_1 \concat m_2\), receive the tag \(t_1 \concat t_2\),
+    query \(m_1' \concat m_2'\), recieve the tag \(t_1' \concat t_2'\) and then return
+    the pair \((m_1 \concat m_1', t_1 \concat t_1')\)
+\end{answer}
+
+%\begin{exercise}
+    %Construct a UF-CMA-secure MAC which can tag arbitrary-length messages.
+%\end{exercise}
 
 \section{Authenticated Encryption}
 \label{sec:auth-encrypt}

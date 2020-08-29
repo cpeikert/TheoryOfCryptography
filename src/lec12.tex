@@ -74,9 +74,9 @@ component causes the same bit in the underlying message to flip.  So
 if Alice's bid happened to be even, Eve can increment it by $1$ by
 flipping the least significant bit.  (If Even suspects that Alice's
 bid is odd, she can flip other bits to increase it by $1$ or more.)
-In the public-key setting, textbook RSA is similarly vulnerable: given
-Alice's ciphertext $c = b_{A}^{e} \bmod N$, Eve can (for example)
-double Alice's bid with $2^{e} \cdot c = (2b_{A})^{e} \bmod N$.
+%In the public-key setting, textbook RSA is similarly vulnerable: given
+%Alice's ciphertext $c = b_{A}^{e} \bmod N$, Eve can (for example)
+%double Alice's bid with $2^{e} \cdot c = (2b_{A})^{e} \bmod N$.
 
 The example illustrates some fine points:
 \begin{itemize}
@@ -143,8 +143,7 @@ encrypted messages sent to/from Bob.)
 \label{sec:achi-cca-secur}
 
 Our PRF-based scheme is not CCA-secure, as it is vulnerable to the
-bit-flipping attack described above.  (Exercise: how does the
-bit-flipping trick violate the precise definition above?)
+bit-flipping attack described above.  
 
 To design a CCA-secure scheme, we wish to use the notion of
 \emph{invalid ciphertexts}, i.e., we allow the decryption algorithm
@@ -162,6 +161,33 @@ yields Authenticated Encryption (AE), a concept from last lecture.
 Moreover, it can be proved that an Authenticated Encryption (AE)
 scheme is, in fact, IND-CCA-secure.  (You will prove these facts in
 your homework.)
+
+\begin{question}
+    Can textbook RSA ciphertexts be manipulated with predictable consequences to the
+    underlying plaintexts (similar to the PRF-based scheme)? Recall that RSA encryption
+    takes a plaintext \(m \in \Z_n\) (where \(n = pq\) for primes \(p\), \(q\)) and
+    returns \(m^e \pmod {n}\).
+\end{question}
+\begin{answer}
+    Yes. Multiplying a ciphertext that encrypts a message \(m\) by \(x^e\) yields a
+    ciphertext that encrypts \(m \cdot x\). \[
+        \pkcenc(m) \cdot x^e \equiv m^e \cdot x^e \equiv (mx)^e \equiv \pkcenc(mx)
+    \]
+\end{answer}
+
+\begin{question}
+    How does the ``bit-flipping'' trick for our PRF-based encryption scheme violate our
+    precise definition of CCA security?
+\end{question}
+\begin{answer}
+    Let \(m\) be any \(n-1\) bitstring. On input \(k\) an attacker simply queries
+    \(c^* \gets C_k^b(1\concat m, 0 \concat m)\), then queries the decryption oracle on
+    \(\overline{c^*}\) and outputs the first bit of the resulting plaintext. Note that
+    \(\overline{c^*} \neq c^*\) so the decryption oracle does not output \(\bot\).
+    Since \(D_k(\overline{c^*} = \overline{D_k(c^*)})\) by the ``bit-flipping`` trick,
+    the first bit of the resulting plaintext will be 0 if \(c^*\) is an encryption of
+    \(1 \concat m\) and 1 otherwise.
+\end{answer}
 
 \section{Digital Signatures}
 \label{sec:digital-signatures}
