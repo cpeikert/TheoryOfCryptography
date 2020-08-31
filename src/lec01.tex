@@ -258,10 +258,20 @@ of probability theory, giving the following definition.
 \begin{definition}[Shannon secrecy]
   \label{def:shannon-secrecy}
   A shared-key encryption scheme $(\skcgen,\skcenc,\skcdec)$ with
-  message space $\msgspace$ and ciphertext space $\ctspace$ is
+  message space~$\msgspace$ and ciphertext space~$\ctspace$ is
   \emph{Shannon secret with respect to a probability distribution $D$}
-  over $\msgspace$ if for all $\bar{m} \in \msgspace$ and all $\bar{c}
-  \in \ctspace$,
+  over $\msgspace$ if for all $\bar{m} \in \msgspace$ and all
+  $\bar{c} \in \ctspace$,\footnote{The careful reader will notice that
+    the conditional probability on the left-hand side is well defined
+    only for those values of~$\bar{c}$ in the ``support'' of $\skcenc$
+    (relative to~$D$ and $\skcgen$), i.e., those~$\bar{c}$ for which
+    $\Pr_{m \gets D, k \gets \skcgen}[\skcenc_{k}(m) = \bar{c}] > 0$
+    (otherwise, we are attempting to condition on a zero-probability
+    event). To address this, we really should restrict the
+    quantification from \emph{all} $\bar{c} \in \ctspace$ to just
+    those~$\bar{c}$ in the support. This issue does not arise in the
+    alternative definitions we consider, because they do not involve
+    conditional probabilities.}
   \begin{equation}
     \label{eq:shannon}
     \Pr_{m \gets D,\; k \gets \skcgen}[m = \bar{m}\; |\;
