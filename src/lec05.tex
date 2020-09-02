@@ -23,7 +23,7 @@
 
 \begin{document}
 
-\thispagestyle{fancy}           % first page should have special header
+\thispagestyle{fancy} % first page should have special header
 
 % LECTURE MATERIAL STARTS HERE
 
@@ -70,38 +70,39 @@ indistinguishable.  We relax this condition to define
 \emph{statistical} indistinguishability, for when the
 \emph{statistical distance} between the two distributions is
 negligible.  The statistical distance between two distributions $X$
-and $Y$ over a domain $\Omega$ is defined as
-\[ \Delta(X,Y) := \sup_{A \subseteq \Omega} \abs{X(A) - Y(A)}
-    \footnote{
-        For a set $A$, the \emph{suprenum} of $A$, denoted
-        $\sup(A)$, is the least upper bound of the set $A$.
-        The suprenum can be thought of as a generalization
-        of the notion of a maximum element to sets where no
-        such element exists. For example, there is no
-        maximum element of the set $[0,1) \subseteq \R$, but
-        the suprenum is 1 since it is the smallest real
-        number that is larger than every element of $[0,1)$.
-    }.
-\]
-We view $A$ as a statistical ``test'' --- $X(A) = \sum_{w \in A}
-\Pr[X=w]$ being the probability that a draw from $X$ lands in $A$, and
-likewise likewise $Y(A)$.  Note that $A$ and $\bar{A}$ are effectively
-the same test, since \[ \abs{X(\bar{A})-Y(\bar{A})} =
-\abs{1-X(A)-(1-Y(A))} = \abs{Y(A)-X(A)} = \abs{X(A)-Y(A)}. \]
+and $Y$ over a domain $\Omega$ is defined as\footnote{For a set~$S$ of
+  real numbers, its \emph{supremum} $\sup(S)$ is the least upper bound
+  of the elements of~$S$. The suprenum can be thought of as a
+  generalization of the maximum element to (infinite) sets where no
+  such element may exist. For example, there is no maximum element of
+  the set $[0,1) \subseteq \R$, but the suprenum is 1 since it is the
+  smallest real number that is larger than every element of
+  $[0,1)$. When~$S$ is finite, the supremum is simply the maximum.}
+\[ \Delta(X,Y) := \sup_{A \subseteq \Omega} \abs{X(A) - Y(A)}, \]
+where $X(A) = \sum_{w \in A} \Pr[X=w]$ is the probability that a draw
+from~$X$ lands in~$A$, and likewise for~$Y(A)$. We can
+view~$A \subseteq \Omega$ as a statistical ``test'' that has some
+probability of ``passing'' when given an element drawn from~$X$, or
+from~$Y$; the statistical distance is essentially the maximum
+difference between these two probabilities, taken over all tests.
+Note that $A$ and $\bar{A}$ are effectively the same test, since
+\[ \abs{X(\bar{A})-Y(\bar{A})} = \abs{1-X(A)-(1-Y(A))} =
+  \abs{Y(A)-X(A)} = \abs{X(A)-Y(A)}. \]
 
 \begin{lemma}
   \label{lem:stat-dist}
-  For distributions $X,Y$ over a finite domain $\Omega$, \[
-  \Delta(X,Y) = \frac12 \sum_{w \in \Omega} \abs{X(w) - Y(w)}. \]
+  For distributions $X,Y$ over a finite domain $\Omega$,
+  \[ \Delta(X,Y) = \frac12 \sum_{w \in \Omega} \abs{X(w) - Y(w)}. \]
 \end{lemma}
 
 \begin{proof}
   Let the test $A = \set{w \in \Omega\; :\; X(w) > Y(w)}$.  This makes
-  $X(A) - Y(A)$ as large as possible, so $\Delta(X,Y) = X(A)-Y(A) =
-  \sum_{w \in A} \abs{X(w)-Y(w)}$.  As noted above, we also have
+  $X(A) - Y(A)$ as large as possible, so
+  $\Delta(X,Y) = X(A)-Y(A) = \sum_{w \in A} \abs{X(w)-Y(w)}$.  As
+  noted above, we also have
   $\Delta(X,Y) = Y(\bar{A})-X(\bar{A}) = \sum_{w \in \bar{A}}
-  \abs{X(w)-Y(w)}$.  Summing the two equations, we have $2\Delta(X,Y)
-  = \sum_{w \in \Omega} \abs{X(w)-Y(w)}$, as desired.
+  \abs{X(w)-Y(w)}$.  Summing the two equations, we have
+  $2\Delta(X,Y) = \sum_{w \in \Omega} \abs{X(w)-Y(w)}$, as desired.
 \end{proof}
 
 Statistical distance is very robust, which enhances its usefulness.
@@ -109,64 +110,67 @@ Using Lemma~\ref{lem:stat-dist}, the following facts are
 straightforward to prove.
 
 \begin{lemma}
-  Let $f$ be a (randomized) function on the domain of $X,Y$.  We have
-  $\Delta(f(X), f(Y)) \leq \Delta(X,Y)$.
+  Let $f$ be a function (or more generally, randomized procedure) on
+  the domain of $X,Y$. Then $\Delta(f(X), f(Y)) \leq \Delta(X,Y)$.
 \end{lemma}
-
-In other words, statistical distance cannot be increased by the application
-of a (randomized) function.
+In other words, statistical distance cannot be increased by the
+application of any (randomized) procedure.
 
 \begin{lemma}
-  Statistical distance is a metric; in particular, it has the following three
-  properties
+  Statistical distance is a metric; in particular, it satisfies the
+  following three properties:
   \begin{itemize}
-      \item Identity of indiscernibles: $\Delta(X,Y) = 0 \iff X = Y$
-      \item Symmetry: $\Delta(X,Y) = \Delta(Y,X)$
-      \item Subadditivity: $\Delta(X,Z) \leq \Delta(X,Y) + \Delta(Y, Z)$
+  \item Identity of indiscernibles: $\Delta(X,Y) = 0 \iff X = Y$
+  \item Symmetry: $\Delta(X,Y) = \Delta(Y,X)$
+  \item Subadditivity (triangle inequality):
+    $\Delta(X,Z) \leq \Delta(X,Y) + \Delta(Y, Z)$
   \end{itemize}
 \end{lemma}
+
+\begin{question}
+  Justify why it is the case that $\Delta(X,Y) = 0 \iff X = Y$.
+\end{question}
+
+\begin{answer}
+  In the forward direction, because $\Delta(X,Y) = 0$ and all the
+  terms in the sum from Lemma~\ref{lem:stat-dist} are non-negligible,
+  we have that $\abs{X(w) - Y(w)} = 0$ for all $w \in \Omega$, i.e.,
+  $X(w) = Y(w)$. Hence, $X = Y$. In the other direction, if $X = Y$,
+  then by definition $X(A) - Y(A) = 0$ for all $A$, so
+  $\Delta(X,Y) = \sup(\set{0}) = 0$.
+\end{answer}
 
 Statistical distance lets us say when two (sequences of) distributions
 are ``essentially the same,'' in an asymptotic sense.
 
 \begin{definition}
   \label{def:stat-ind}
-  Let $\calX = \set{X_{n}}_{n \in \N}$ and $\calY = \set{Y_{n}}_{n \in
-    \N}$ be sequences of probability distributions, called
-  \emph{ensembles}.  We say that $\calX$ and $\calY$ are
-  \emph{statistically indistinguishable}, written $\calX \statind
-  \calY$, if \[ \Delta(X_{n}, Y_{n}) = \negl(n). \]
+  Let $\calX = \set{X_{n}}_{n \in \N}$ and
+  $\calY = \set{Y_{n}}_{n \in \N}$ be sequences of probability
+  distributions, called \emph{ensembles}.  We say that $\calX$ and
+  $\calY$ are \emph{statistically indistinguishable}, written
+  $\calX \statind \calY$, if \[ \Delta(X_{n}, Y_{n}) = \negl(n). \]
 \end{definition}
 
 \begin{example}
   Let $X_{n}$ be the uniform distribution over $\bit^{n}$, and let
   $Y_{n}$ be the uniform distribution over the nonzero strings
   $\bit^{n} \backslash \set{0^{n}}$.  An optimal test $A$ is the
-  singleton set $A = \set{0^{n}}$, yielding $\Delta(X_{n}, Y_{n}) =
-  2^{-n} = \negl(n)$, so $\calX \statind \calY$.  (This can also be
-  seen by calculating the summation in Lemma~\ref{lem:stat-dist}.)
-  The analysis extends similarly to any $Y_{n}$ that leaves out a
-  $\negl(n)$ fraction of $\bit^{n}$.  From this we can say that such
-  ensembles $\calY$ are ``essentially uniform,'' or
-  \emph{statistically pseudorandom}.
+  singleton set $A = \set{0^{n}}$, yielding
+  $\Delta(X_{n}, Y_{n}) = 2^{-n} = \negl(n)$, so
+  $\calX \statind \calY$.  (This can also be seen by calculating the
+  summation in Lemma~\ref{lem:stat-dist}.)  The analysis extends
+  similarly to any $Y_{n}$ that leaves out a $\negl(n)$ fraction of
+  $\bit^{n}$.  From this we can say that such ensembles $\calY$ are
+  ``essentially uniform,'' or \emph{statistically pseudorandom}.
 \end{example}
 
-Question: is a statistically peudorandom generator possible?  This
+Question: can a statistically peudorandom generator exist?  This
 depends on the definition of ``generator'' (which we give below), but
 for any meaningful definition of the term, it isn't possible!  This
-can be shown by explicitly demonstrating a subset (test) containing
-all the points outside the image of the generator, which make up a
-significant fraction of the range.
-
-\begin{question}
-    Justify why it is the case that $\Delta(X,Y) = 0 \iff X = Y$.
-\end{question}
-\begin{answer}
-    In the forwards direction, $\Delta(X,Y) = 0$ means that for all $A$ $\abs{X(A) -
-    Y(A)} = 0$, or in other words $X(A) = Y(A)$. Hence, $X = Y$. On the other hand,
-    if $X = Y$, then by definition $X(A) - Y(A) = 0$ for all $A$, so $\Delta(X,Y)
-    = \sup(\set{0}) = 0$.
-\end{answer}
+can be shown by explicitly demonstrating an appropriate subset (or
+test) that distinguishes strings output by the generator from
+uniformly random ones; see Question~\ref{ques:3} below.
 
 \subsection{Computational Indistinguishability}
 \label{sec:comp-indist}
@@ -175,10 +179,10 @@ We can define a natural analogue of statistical distance in the
 computational setting, where the ``test'' is implemented by an
 \emph{efficient algorithm}.  Namely, for distributions $X$ and $Y$ and
 an algorithm $\Adv$ (possibly randomized), define $\Adv$'s
-\emph{distinguishing advantage} between $X$ and $Y$ as \[
-\advan_{X,Y}(\Adv) = \abs*{\Pr[\Adv(X)=1] - \Pr[\Adv(Y)=1]}. \] (The
-output of $\Adv$ can be arbitrary, but we interpret $1$ as a special
-output indicating that the test implemented by $\Adv$ is
+\emph{distinguishing advantage} between $X$ and $Y$ as
+\[ \advan_{X,Y}(\Adv) = \abs*{\Pr[\Adv(X)=1] - \Pr[\Adv(Y)=1]}. \]
+(The output of $\Adv$ can be arbitrary, but we interpret $1$ as a
+special output indicating that the test implemented by $\Adv$ is
 ``satisfied,'' and any other output as ``not satisfied.'')  We extend
 this to ensembles $\calX$ and $\calY$, making
 $\advan_{\calX,\calY}(\Adv)$ a function of $n \in \N$.
@@ -188,12 +192,12 @@ $\advan_{\calX,\calY}(\Adv)$ a function of $n \in \N$.
   Let $\calX = \set{X_{n}}$ and $\calY = \set{Y_{n}}$ be ensembles,
   where $X_{n}$ and $Y_{n}$ are distributions over $\bit^{l(n)}$ for
   $l(n) = \poly(n)$.  We say that $\calX$ and $\calY$ are
-  \emph{computationally indistinguishable}, written $\calX \compind
-  \calY$, if $\advan_{\calX,\calY}(\Adv) = \negl(n)$ for all
-  non-uniform PPT algorithms $\Adv$.  We say that $\calX$ is
-  (computationally) \emph{pseudorandom} if $\calX \compind
-  \set{U_{l(n)}}$, the ensemble of uniform distributions over
-  $\bit^{l(n)}$.
+  \emph{computationally indistinguishable}, written
+  $\calX \compind \calY$, if $\advan_{\calX,\calY}(\Adv) = \negl(n)$
+  for all non-uniform PPT algorithms $\Adv$.  We say that $\calX$ is
+  (computationally) \emph{pseudorandom} if
+  $\calX \compind \set{U_{l(n)}}$, the ensemble of uniform
+  distributions over $\bit^{l(n)}$.
 \end{definition}
 
 The basic facts about statistical distance also carry over to
@@ -202,9 +206,9 @@ restricted to be efficient.
 
 \begin{lemma}[Composition lemma]
   \label{lem:closure}
-  Let $\AdvB$ be a non-uniform PPT algorithm.  If $\set{X_{n}}
-  \compind \set{Y_{n}}$, then $\set{\AdvB(X_{n})} \compind
-  \set{\AdvB(Y_{n})}$.
+  Let $\AdvB$ be a non-uniform PPT algorithm.  If
+  $\set{X_{n}} \compind \set{Y_{n}}$, then
+  $\set{\AdvB(X_{n})} \compind \set{\AdvB(Y_{n})}$.
 \end{lemma}
 
 \begin{proof}
@@ -213,37 +217,38 @@ restricted to be efficient.
   to show that its advantage must be negligible.  Consider an
   algorithm $\Adv$ that, given input $x$, runs $\Dist(\AdvB(x))$ and
   outputs whatever $\Dist$ outputs.  Clearly $\Adv$ is non-uniform
-  PPT.  By construction, we have \[ \advan_{X_{n},Y_{n}}(\Adv) =
-  \advan_{\AdvB(X_{n}),\AdvB(Y_{n})}(\Dist).
-   \] The left-hand side is $\negl(n)$ by hypothesis, hence so is the
-   right-hand side, as desired.
+  PPT.  By construction, we have
+  \[ \advan_{X_{n},Y_{n}}(\Adv) =
+    \advan_{\AdvB(X_{n}),\AdvB(Y_{n})}(\Dist).
+  \] The left-hand side is $\negl(n)$ by hypothesis, hence so is the
+  right-hand side, as desired.
 \end{proof}
 
 \begin{lemma}[Hybrid lemma]
   \label{lem:hybrid}
   Let $\calX^{i} = \set{X^{i}_{n}}$ for $i \in [m]$, where
-  $m=\poly(n)$.  If $\calX^{i} \compind \calX^{i+1}$ for every $i \in
-  [m-1]$, then $\calX^{1} \compind \calX^{m}$.
+  $m=\poly(n)$.  If $\calX^{i} \compind \calX^{i+1}$ for every
+  $i \in [m-1]$, then $\calX^{1} \compind \calX^{m}$.
 \end{lemma}
 
 \begin{proof}
   Let $\Dist$ be any non-uniform PPT algorithm attempting to
-  distinguish $\calX^{1}$ from $\calX^{m}$.  Let $p_{i} = p_{i}(n) =
-  \Pr[\Dist(X^{i}_{n}) = 1]$.  By the triangle inequality, we can
-  write $\Dist$'s advantage as
+  distinguish $\calX^{1}$ from $\calX^{m}$.  Let
+  $p_{i} = p_{i}(n) = \Pr[\Dist(X^{i}_{n}) = 1]$.  By the triangle
+  inequality, we can write $\Dist$'s advantage as
   \[ \advan_{\calX^{1},\calX^{m}}(\Dist) = \abs{p_{1} - p_{m}} \leq
-  \sum_{i \in [m-1]} \abs{p_{i} - p_{i+1}} = \sum_{i \in [m-1]}
-  \advan_{\calX^{i}, \calX^{i+1}}(\Dist). \] Now by assumption, each
+    \sum_{i \in [m-1]} \abs{p_{i} - p_{i+1}} = \sum_{i \in [m-1]}
+    \advan_{\calX^{i}, \calX^{i+1}}(\Dist). \] Now by assumption, each
   $\advan_{\calX^{i}, \calX^{i+1}}(\Dist) = \nu_{i}(n)$, where
   $\nu_{i}(n)$ is a negligible function---which may be different for
   each $i$.  The sum of $\poly(n)$-many negligible functions is indeed
   negligible: letting $\nu(n) = \sum_{i} \nu_{i}(n)$, we need to show
-  that for all $c > 0$, there exists some $n_{0}$ such that $\nu(n)
-  \leq n^{-c}$ for all $n \geq n_{0}$.  By assumption, we know that
-  for each $i$, there is some $n_{i}$ such that $\nu_{i}(n) \leq
-  n^{-c}/m$ for \emph{all} $n \leq n_{i}$.  Letting $n_{0}$ be the
-  largest of these, it follows that $\nu(n) \leq n^{-c}$ for all $n
-  \geq n_{0}$, as desired.
+  that for all $c > 0$, there exists some $n_{0}$ such that
+  $\nu(n) \leq n^{-c}$ for all $n \geq n_{0}$.  By assumption, we know
+  that for each $i$, there is some $n_{i}$ such that
+  $\nu_{i}(n) \leq n^{-c}/m$ for \emph{all} $n \leq n_{i}$.  Letting
+  $n_{0}$ be the largest of these, it follows that
+  $\nu(n) \leq n^{-c}$ for all $n \geq n_{0}$, as desired.
 \end{proof}
 
 \begin{remark}
@@ -274,8 +279,8 @@ restricted to be efficient.
   if:
   \begin{itemize}
   \item $G$ can be computed by a polynomial-time algorithm,
-  \item $\len{G(x)} = \ell(\len{x}) > \len{x}$ for all $x \in
-    \bit^{*}$, and
+  \item $\len{G(x)} = \ell(\len{x}) > \len{x}$ for all
+    $x \in \bit^{*}$, and
   \item the ensemble $\set{G(U_{n})}$ is (computationally)
     pseudorandom.
   \end{itemize}
@@ -286,24 +291,64 @@ restricted to be efficient.
   of $U_{\ell(n)}$ in \emph{any} (efficient) application!
 \end{definition}
 
+\begin{question}
+  Let \(G\) be a PRG. Is \(H(x) := \overline{G(x)}\)
+  \emph{necessarily} a PRG as well?  \emph{Hint:} think about the
+  composition lemma.
+\end{question}
+  
+\begin{answer}
+  Yes. The intuition here is that if \(G(x)\) looks random, then its
+  complement \(\overline{G(x)}\) should look like the complement of a
+  uniformly random string, which itself is uniformly random.
+
+  The formal proof is a straightforward application of the composition
+  lemma. Since \(G\) is a PRG, we have
+  \(G(U_n) \compind U_{\ell(n)}\), where $\ell(n)$ is $G$'s
+  expansion. Consider the efficient algorithm
+  \(\AdvB(x) := \overline{x}\). Observe that
+  \(H(x) = \overline{G(x)} = \AdvB(G(x))\) for any~$x$. By the
+  composition lemma, we have
+  \[ H(U_{n}) = \AdvB(G(U_n)) \compind \AdvB(U_{\ell(n)}) \equiv
+    U_{\ell(n)}, \] where the last equivalence holds because any
+  bijective function applied to the uniform distribution yields the
+  uniform distribution. Thus, \(H(U_n) \compind U_{\ell(n)}\), as
+  needed.
+\end{answer}
 
 \begin{question}
-    Let \(G\) be a PRG. Is \(H(x) = \lnot G(x)\) also a PRG? \emph{Hint:} think about
-    the composition lemma.
+  Prove (or at least sketch a proof) that a \emph{statistically}
+  pseudorandom generator cannot exist. \emph{Hint:} think about the
+  sizes of $G(\bit^n)$ and $\bit^{\ell(n)}$, and define an appropriate
+  statistical test (i.e., subset of $\bit^{\ell(n)}$).
 \end{question}
+
 \begin{answer}
-    Yes. The intuition here is that if \(G(x)\) looks random, then negating it
-    should look like the negation of a uniformly random string (which itself is
-    uniformly random).
+  Since $G$ has $n$-bit seeds (of which there are $2^n$), there are at
+  most $2^n$ possible outputs of $G$ (which reside in
+  $\bit^{\ell(n)}$). However, $\bit^{\ell(n)}$ is significantly larger
+  than this; it has $2^{\ell(n)} \geq 2^{n+1}$ elements, making it at
+  least twice as big as the image of \(G\). Informally, we can think
+  of our statistical test as checking whether or not its given string
+  is in the image of $G$. When the string is an output of~$G$, the
+  check always succeeds; when the string is uniformly random, there is
+  a significant (at least $1/2$) probability that the check fails.
 
-
-    \noindent The formal proof is a straightforward application of the composition lemma. Since
-    \(G\) is a PRG, \(G(U_n) \compind U_{\ell(n)}\). Consider an algorithm \(\AdvB\)
-    which accepts a bitstring \(x\) and returns \(\lnot x\). By the composition lemma,
-    \(\AdvB(G(U_n)) \compind \AdvB(U_{\ell(n)})\). Note that \(\AdvB(G(U_n)) = \lnot
-    G(U_n)\) which is precisely \(H(U_n)\). On the other hand, \(\AdvB(U_{\ell(n)}) =
-    \lnot U_{\ell(n)} = U_{\ell(n)}\) (any bijective function applied to the uniform
-    distribution yields the uniform distribution). Thus, \(H(U_n) \compind U_{\ell(n)}\).
+  More formally and in the language of statistical indistinguishably:
+  let $A = G(\bit^n) \subseteq \bit^{\ell(n)}$, i.e., the image of
+  $G$, as suggested above. Because~$G$ is deterministic, we have
+  $\abs{A} \leq 2^{n}$. Then
+  \begin{align*}
+    \abs{G(U_n)(A) - U_{\ell(n)}(A)} &= \abs{1 - U_{\ell(n)}(A)} \\
+                                     &= 1 - \abs{A} \cdot 2^{-\ell(n)}  \\
+                                     &\geq 1 - 2^{n-\ell(n)} \\
+                                     &\geq 1 - 2^{-1} = 1/2,
+  \end{align*}
+  which is (very much) non-negligible. Since we have demonstrated a
+  particular~$A$ for which
+  $\abs{G(U_n)(A) - U_{\ell(n)}(A)} \geq 1/2$, the suprenum over all
+  possible~$A$ cannot be smaller, so
+  $\Delta(G(U_n), U_{\ell(n)}) \geq 1/2$.
 \end{answer}
 
 \subsection{Expansion of a PRG}
@@ -319,8 +364,8 @@ stretch by essentially any (polynomial) amount!
 \begin{theorem}
   \label{thm:expansion}
   Suppose there exists a PRG $G$ with expansion $\ell(n)=n+1$.  Then
-  for any polynomial $t(\cdot) = \poly(n)$, there exists a PRG $G_t:
-  \bit^n \to \bit^{t(n)}$.
+  for any polynomial $t(\cdot) = \poly(n)$, there exists a PRG
+  $G_t: \bit^n \to \bit^{t(n)}$.
 \end{theorem}
 
 \noindent
@@ -334,43 +379,6 @@ We will prove this theorem in the next lecture.
   from this small subset, from a truly random one over the whole
   space!
 \end{remark}
-
-\begin{question}
-    Sketch out a proof that a PRG cannot exist if we demand \emph{statistical}
-    pseudorandomness. \emph{Hint} think about the size differential between
-    $\abs{G(\bit^n)}$ and $\abs{\bit^{\ell(n)}}$.
-\end{question}
-\begin{answer}
-    Since $G$ has $n$-bit seeds (of which there are $2^n$), there are only $2^n$
-    possible outputs of $G$ (which reside in $\bit^{\ell(n)}$). However, $\bit^{\ell(n)}$ is
-    \emph{much} larger than this; it has at least $2^{n+1}$ elements making it at
-    least twice as big as the image of \(G\). Informally, we
-    can think of our statistical test as checking whether or not a given string is in
-    the image of $G$. If not, our string was certainly drawn from $U_{\ell(n)}$. If
-    so, it \emph{might} have come from $G(U_n)$, so we'll guess that it did. Since the image of $G$ is so small
-    compared to the entirety of $\set{0,1}^{\ell(n)}$, the cases where we are
-    certainly right are going to vastly outnumber the cases where we might be, so
-    hopefully we will end up with a non-negligible probability of being right overall
-    once we work the numbers out.
-
-    \noindent More formally and in the language of statistical indistinguishably: let
-    $A = G(\bit^n)$ (i.e. the image of $G$ as suggested above). Then,
-    \begin{align*}
-        \abs{G(U_n)(A) - U_{\ell(n)}(A)} &= \abs{1 - U_{\ell(n)}(A)} \\
-                                         &= 1 - 2^{-\ell(n)}\abs{A} \\
-                                         &= 1 - 2^{-\ell(n)}\cdot 2^n \\
-                                         &= 1 - 2^{n - \ell(n)} \\
-        \intertext{Recall that $\ell(n) \geq n + 1$:}
-                                         &\geq 1 - 2^{-1} \\
-                                         &= \frac{1}{2} \\
-                                         &\neq \negl(n)
-    \end{align*}
-    Note that the particular $A$ we chose might not be the $A$ that maximizes
-    $\abs{G(U_n)(A) - U_{\ell(n)}(A)}$ (i.e., there might be better statistical
-    tests than the one we chose), however the suprenum over all possible $A$s cannot
-    possibly be smaller, so $\Delta(G(U_n), U_{\ell(n)}) \geq \frac{1}{2}$.
-\end{answer}
-  
 
 \end{document}
 
