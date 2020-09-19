@@ -49,17 +49,21 @@ equivalent to this one.)
   conditions:
   \begin{enumerate}
   \item \emph{Easy to sample a function:} there is a PPT algorithm
-    $\algo{S}$ such that $\algo{S}()$ outputs some $s \in S$
+    $\algo{S}$ such that $\algo{S}(1^n)$ outputs some $s \in S$
     (according to some arbitrary distribution).
   \item \emph{Easy to sample from domain:} there is a PPT algorithm
     $\algo{D}$ such that $\algo{D}(s)$ outputs some $x \in D_{s}$
     (according to some arbitrary distribution).
-  \item \emph{Easy to evaluate function:} there is a PPT algorithm
-    $\algo{F}$ such that $\algo{F}(s,x)=f_{s}(x)$ for all $s \in S$,
-    $x \in D_{s}$.
+  \item \emph{Easy to evaluate function:} there is an efficient
+    (deterministic) algorithm $\algo{F}$ such that
+    $\algo{F}(s,x)=f_{s}(x)$ for all $s \in S$, $x \in D_{s}$.
   \item \emph{Hard to invert:} for any non-uniform PPT algorithm
-    $\Inv$, \[ \Pr_{s \gets \algo{S}(1^n), x \gets \algo{D}(s)}
-    \bracks*{\Inv(s,f_{s}(x)) \in f_{s}^{-1}(f_{s}(x))} = \negl(n). \]
+    $\Inv$,
+    \[
+      \Pr_{s \gets \algo{S}(1^n), x \gets \algo{D}(s)}
+      \bracks*{\Inv(1^n, s,f_{s}(x)) \in f_{s}^{-1}(f_{s}(x))} =
+      \negl(n).
+    \]
   \end{enumerate}
 \end{definition}
 
@@ -138,11 +142,11 @@ and $y$) can be computed efficiently.
   Finally, observe that \[ \gcd(b,r) = bx' + ry' = bx' + (a - b \cdot
   q)y' = ay' + (x' - q \cdot y')b. \] Hence $\exteuclid$ correctly
   returns $(y', x' - q \cdot y')$.
-  
+
   For the running time, observe that all the basic operations (not
   including the recursive call) can be implemented in polynomial
   time.  The following claim establishes the overall efficiency.
-  
+
   \begin{claim}
     For $2^{n} > a \geq b > 0$, $\exteuclid$ makes at most $2n$
     recursive calls.
