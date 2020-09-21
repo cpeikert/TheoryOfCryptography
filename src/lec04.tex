@@ -181,13 +181,77 @@ integers modulo a positive integer $N$.
   multiplication are coordinate-wise.
 \item Clearly the isomorphism $h$ is efficiently computable.  Less
   obvious is that it is also efficiently \emph{invertible}.  Suppose
-  we know some elements $c_{p}, c_{q} \in \ZN$ such that $h(c_{p}) =
-  (1,0)$ and $h(c_{q}) = (0,1)$; such a pair is sometimes called a
-  \emph{CRT basis}.  Then given $(x,y) \in \Zp \times \Zq$, it is easy
-  to see that $h^{-1}(x,y) = x \cdot c_{p} + y \cdot c_{q}$.
-  Exercise: show how to compute $c_{p}, c_{q}$ efficiently (hint: use
-  $\exteuclid$ on $p,q$).
+  we know some elements $c_{p}, c_{q} \in \ZN$ such that
+  $h(c_{p}) = (1,0)$ and $h(c_{q}) = (0,1)$; such a pair is sometimes
+  called a \emph{CRT basis}.  Then given $(x,y) \in \Zp \times \Zq$,
+  it is easy to see that
+  $h^{-1}(x,y) = \bar{x} \cdot c_{p} + \bar{y} \cdot c_{q}$, where
+  $\bar{x}, \bar{y} \in \ZN$ are any elements such that
+  $\bar{x} = x \pmod{p}$ and $\bar{y} = y \pmod{q}$. (For example, we
+  could take the ``smallest'' elements in~$\ZN$ that have the required
+  residues modulo~$p$ and~$q$, respectively.)
 \end{itemize}
+
+\begin{question}
+  For the CRT isomorphism on $\Z_{15}$, verify that the following
+  example equations hold: $h(7 \cdot 9) = h(7) \cdot h(9)$ and
+  $h(6 + 11) = h(6) + h(11)$.
+\end{question}
+
+\begin{answer}
+  Note that $15$ is the product of two primes, $3$ and $5$, so
+  \(\Z_{15} \cong \Z_3 \times \Z_5\).
+
+  First, we consider \(h(7 \cdot 9)\). We have
+  \(7 \cdot 9 = 3 \pmod{15}\) and
+  \(h(3) = (3 \bmod 3, 3 \bmod 5) = (0, 3)\). Next,
+  \(h(7) = (7 \bmod{3}, 7 \bmod{5}) = (1,2)\) and
+  \(h(9) = (9 \bmod{3}, 9 \bmod 5) = (0, 4)\). Finally, we multiply
+  the pairs elementwise, recalling that the first elements of each
+  pair are from~\(\Z_3\) and the second elements are from~\(\Z_5\). We
+  see that \((1,2) \cdot (0,4) = (0 \bmod 3, 8 \bmod 5) = (0,3)\), as
+  expected.
+
+  Now we consider \(h(6 + 11)\). We have \(6 + 11 = 2 \pmod{15}\) and
+  \(h(2) = (2 \bmod 3, 2 \bmod 5) = (2,2)\). Next,
+  \(h(6) = (6 \bmod{3}, 6 \bmod{5}) = (0,1)\) and
+  \(h(11) = (11 \bmod{3}, 11 \bmod{5}) = (2,1)\). Finally, adding the
+  pairs elementwise (and reducing modulo the appropriate moduli)
+  yields \((0,1) + (2,1) = (2,2)\), as expected.
+\end{answer}
+
+\begin{question}
+  Show that \(h^{-1}(x,y) = \bar{x} \cdot c_p + \bar{y} \cdot c_q\),
+  as claimed above.
+\end{question}
+
+\begin{answer}
+  We use the CRT isomorphism several times:
+  \begin{align*}
+    (x,y) &= (x, 0) + (0, y) \\
+          &= h(\bar{x}) \cdot (1,0) + h(\bar{y}) \cdot (0,1) \\
+          &= h(\bar{x}) \cdot h(c_p) + h(\bar{y}) \cdot h(c_q) \\
+          &= h(\bar{x} \cdot c_p + \bar{y} \cdot c_q),
+  \end{align*}
+  and the result follows by applying the bijection~$h^{-1}$ to both
+  sides.
+\end{answer}
+
+\begin{question}
+  Show how to compute $c_{p}, c_{q}$ efficiently (hint: use
+  $\exteuclid$ on $p,q$).
+\end{question}
+
+\begin{answer}
+  Because $p,q$ are distinct primes, their gcd is 1, so
+  $\exteuclid(p,q)$ returns integers $a,b \in \Z$ such that
+  $a \cdot p + b \cdot q = 1$. We claim that
+  $c_{p} = b \cdot q \bmod{p}$ and $c_{q} = a \cdot p \bmod{q}$. To
+  see this, observe that $b \cdot q = 1 - a \cdot p = 1 \pmod{p}$
+  (because~$a$ is an integer) and $b \cdot q = 0 \pmod{q}$
+  (because~$b$ is an integer), so $h(b \cdot q) = (1,0)$, as needed. A
+  similar calculation shows that $h(a \cdot p) = (0,1)$.
+\end{answer}
 
 \begin{definition}
   The multiplicative group $\ZN^{*} := \set{ x \in \Z_N : x \text{

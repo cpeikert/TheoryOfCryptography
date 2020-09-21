@@ -180,7 +180,7 @@ object.
   group.  For every $a \in G$, we have $a^{\abs{G}} = 1$.
 \end{theorem}
 
-\begin{proof}[Proof of Theorem~\ref{thm:euler-thm}]
+\begin{proof}
   Consider the set $A = a \cdot G = \set{ ax\; :\; x \in G}$.  Because
   $G$ is a group, $a$ is invertible, and we have $A = G$.  Taking
   products over all elements in $A = G$, we have \[ \prod_{x \in G}
@@ -204,25 +204,32 @@ elementary bur rather tedious, so we won't go through it today.)
 \begin{theorem}
   \label{thm:Zps-cyclic}
   Let $p$ be a prime.  The multiplicative group $\Zp^{*}$ is
-  \emph{cyclic}, i.e., there exists some \emph{generator} $g \in
-  \Zp^{*}$ such that $\Zp^{*} = \langle g \rangle := \set{g^{1}, g^{2},
-    \ldots, g^{p-1}=1}$.
+  \emph{cyclic}, i.e., there exists some \emph{generator}
+  $g \in \Zp^{*}$ such that
+  $\Zp^{*} = \langle g \rangle := \set{g^{1}, g^{2}, \ldots,
+    g^{p-1}=g^{0}=1}$. (Equivalently, we can write the group as
+  $\Zp^{*} = \set{g^{0}, g^{1}, \ldots, g^{p-2}}$.)
 \end{theorem}
 
 \begin{question}
-    Suppose you have a black-box \(\algo{B}\) which generates a uniformly-random element
-    of \(\Z_{p-1}\) for some prime \(p\). Using \(\algo{B}\) as your only source of
-    randomness, how could you construct an algorithm which samples a uniformly random
-    element of \(\Z_p^*\)?
+  Suppose there is a ``black box'' \(\algo{B}\) that outputs a
+  uniformly random element of \(\Z_{p-1}\) for some known prime
+  \(p\). Show that there exists an algorithm that, using~\(\algo{B}\)
+  as its only source of randomness, samples a uniformly random element
+  of \(\Z_p^*\).
 \end{question}
+
 \begin{answer}
-    By Theorem \ref{thm:Zps-cyclic}, there exists a generator \(g\) for \(\Z_p^*\). Our
-    algorithm \(\algo{A}\) simply returns \(g^{\algo{B}()}\). 
-    From Theorem \ref{thm:Zps-cyclic}, we know that \(\inner{g} = \set{g^1, \ldots,
-    g^{p-1}} = \Z_p^*\), and since \(\abs{\Z_p^*} = p - 1\), it must be the case that
-    for each \(x \in \Z_p^*\), there exists a \emph{unique} \(i \in \Z_{p-1}\) such that
-    \(x = g^i\). Hence, \(\Pr[\algo{A}() = x] = \Pr[g^{\algo{B}()} = g^i] = \Pr[\algo{B}()
-    = i] = 1/(p-1)\)
+  By Theorem~\ref{thm:Zps-cyclic}, there exists a generator~\(g\)
+  of~\(\Zp^{*}\). So, there exists an algorithm \(\algo{A}\) that
+  simply samples an $x \gets \algo{B}$ and returns \(g^{x}\). By
+  Theorem \ref{thm:Zps-cyclic}, we know that
+  \(\inner{g} = \set{g^0, \ldots, g^{p-2}} = \Z_p^*\), and since
+  \(\abs{\Z_p^*} = p - 1\), it must be the case that for each
+  \(x \in \Z_p^*\), there exists a \emph{unique} \(i \in \Z_{p-1}\)
+  such that \(x = g^i\). Hence,
+  \(\Pr[\algo{A} \text{ outputs } x] = \Pr[B \text{ outputs } i] =
+  1/(p-1)\), as needed.
 \end{answer}
 
 \subsection{Discrete Logarithm Problem and One-Way Function}
@@ -243,10 +250,11 @@ This problem is believed to be infeasible for large values of $p$.
 
 We would like to design a collection of OWFs based on the discrete
 logarithm assumption.  The collection is made up of the functions
-$f_{p,g} : \set{1, \ldots, p-1} \to \Zp^{*}$ (for prime $p$ and
-generator $g$ of $\Zp^{*}$), defined as \[ f_{p,g}(x) = g^{x} \bmod
-p. \] Moreover, these functions are even \emph{permutations} if we
-identify $\set{1, \ldots, p-1}$ with $\Zp^{*}$ in the natural way.
+$f_{p,g} \colon \set{1, \ldots, p-1} \to \Zp^{*}$ (for prime $p$ and
+generator $g$ of $\Zp^{*}$), defined as
+\[ f_{p,g}(x) = g^{x} \bmod p. \] Moreover, these functions are even
+\emph{permutations} if we identify $\set{1, \ldots, p-1}$ with
+$\Zp^{*}$ in the natural way.
 
 It is a tautology that the collection is one-way under the discrete
 logarithm assumption.  It is also clear that we can efficiently sample
@@ -304,28 +312,92 @@ We can think of many possible candidates for $h$: apply the xor
 function to all the bit of $x$; take the least significant bit of $x$
 (though you will show that this \emph{does not} meet our
 requirements!); take the ``most significant bit'' of $x$ (more
-precisely, test if $x>\frac{p-1}{2}$).  The last function will be the
-one we will use.
+precisely, test if $x>\frac{p-1}{2}$); etc.
 
-Let's formalize the security properties we want from $h(x)$: given
-$f(x)$, no algorithm should be able to guess $h(x)$ with much better
-than $\frac{1}{2}$ probability.
+Let's formalize the security property we want from~$h$. Informally, we
+want it to be the case that no efficient algorithm, given $f(x)$,
+should be able to guess $h(x)$ with probability much better than
+the~$\frac{1}{2}$ that is achievable by random guessing.
 
 \begin{definition}[Hardcore predicate]
   \label{def:hard-core-pred}
-  A predicate $h: \bit^* \to \bit$ is \emph{hard-core} for $f$ if for
-  all non-uniform PPT algorithms $\Adv$,
-  \[ \Pr_{x}[\Adv(f(x))=h(x)] \leq \frac{1}{2} + \negl(n). \]
+  A predicate $h \colon \bit^* \to \bit$ is \emph{hard-core} for~$f$
+  if for all non-uniform PPT algorithms $\Adv$,
+  \[ \advan_{f,h}(\Adv) := \Pr_{x}[\Adv(f(x))=h(x)] - \frac12 =
+    \negl(n). \]
 \end{definition}
-
-\emph{Exercise}: Prove that if $h$ is hard-core for a one-way
-permutation $f:D \to D$, then \[ (f(x),h(x)) \compind (U(D),U_1), \]
-where $x \gets D$.  This means that $G(x)=(f(x),h(x)) \in D \times
-\bit$ is a PRG that expands by one bit.
 
 Next time, we will show that under the discrete log assumption, the
 ``most significant bit'' predicate $h(x) = [x > \frac{p-1}{2}]$ is
 hard-core for $f_{p,g}$.
+
+\begin{question}
+  Prove that if $h$ is hard-core for a one-way permutation
+  $f \colon D \to D$, then
+  \[ (f(x),h(x)) \compind (U(D),U_1) \equiv (f(x),b), \] where
+  $x \gets D$ and $b \gets \bit$ are independent.  This means that
+  $G(x)=(f(x),h(x)) \in D \times \bit$ is a PRG that expands by one
+  bit. \emph{Hint:} give a reduction that converts any distinguisher
+  for the above two distributions into a predictor of~$h(x)$
+  given~$f(x)$.
+\end{question}
+
+\begin{answer}
+  We prove this by reduction. Let~$\calD$ be an nuPPT algorithm that
+  seeks to distinguish $(f(x),h(x))$ from $(f(x), b)$, where
+  $x \gets D, b \gets \bit$ are independent. We construct an nuPPT
+  predictor~$\AdvA$ against the hard-core predicate~$h$ for~$f$, which
+  uses~$\calD$ as a black box and has the same advantage. The key idea
+  is that~$\AdvA$, given some $y=f(x)$ for unknown~$x$, will simply
+  guess a candidate value~$b$ for the hard-core bit~$h(x)$, and
+  invoke~$\calD(y,b)$ to get some indication of whether this guess is
+  correct. Since~$\calD$ may not be a perfect distinguisher, its
+  answer may not always be ``correct,'' so it requires some care to
+  analyze this reduction.
+
+  Formally, we define the predictor~$\AdvA$ to work as follows: given
+  input $y \in D$, choose a uniformly random bit $b \gets \bit$ and
+  invoke $\calD(y,b)$. If~$\calD$ accepts (i.e., outputs 1), then
+  output~$b$ as the prediction for $h(f^{-1}(y))$; otherwise, output
+  $\overline{b}$ as the prediction.  Clearly, $\AdvA$ is nuPPT.
+
+  We now relate $\AdvA$'s advantage in the prediction game to
+  $\calD$'s advantage in the distinguishing game. First, observe that
+  $\AdvA$'s advantage is
+  \begin{align*}
+    \advan(\AdvA)
+    &= \Pr_{x \gets D}[\AdvA(f(x))=h(x)] - 1/2 \\
+    &= \frac12 \parens*{\Pr_{x \gets D}[\calD(f(x),h(x))=1] + \Pr_{x
+      \gets D}[\calD(f(x),\overline{h(x)})=0] - 1} \\
+    &= \frac12 \parens*{\Pr_{x \gets D}[\calD(f(x),h(x))=1] - \Pr_{x
+      \gets D}[\calD(f(x),\overline{h(x)})=1]},
+  \end{align*}
+  because~$\AdvA(f(x))$ outputs the correct bit~$h(x)$ if~$\AdvA$
+  chooses $b=h(x)$ and $\calD(f(x),b)$ accepts, or if~$\AdvA$ chooses
+  $b=\overline{h(x)}$ and $\calD(f(x),b)$ rejects. These events are
+  disjoint, so we can add their probabilities, and~$b$ is uniform and
+  independent of~$x$, leading to the $1/2$ factor.
+
+  Now let
+  \begin{align*}
+    p_{U}
+    &= \Pr_{x \gets D, b \gets \bit}[\calD(f(x),b) = 1] \\
+    &= \frac12 \parens*{\Pr_{x \gets D}[\calD(f(x),h(x)) = 1] + 
+      \Pr_{x \gets D}[\calD(f(x), \overline{h(x)}) = 1]},
+  \end{align*}
+  because each of $b=h(x)$ and $b=\overline{h(x)}$ occur with
+  probability $1/2$.  Similarly, define
+  \[ p_{G} = \Pr_{x \gets D}[\calD(f(x), h(x))=1]. \] By definition,
+  $\calD$'s advantage is
+  \begin{align*}
+    \advan(\calD) = p_{G}-p_{U}
+    &= \frac12 \parens*{\Pr_{x \gets D}[\calD(f(x),
+      h(x))=1] - \Pr_{x \gets D}[\calD(f(x),\overline{h(x)})=1]} \\
+    &= \advan(\AdvA).
+  \end{align*}
+  Since $\AdvA$'s advantage is negligible by the hypothesis that~$h$
+  is hard-core for~$f$, so is $\calD$'s advantage, as desired.
+\end{answer}
 
 \end{document}
 
