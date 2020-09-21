@@ -54,9 +54,9 @@ equivalent to this one.)
   \item \emph{Easy to sample from domain:} there is a PPT algorithm
     $\algo{D}$ such that $\algo{D}(s)$ outputs some $x \in D_{s}$
     (according to some arbitrary distribution).
-  \item \emph{Easy to evaluate function:} there is a PPT algorithm
-    $\algo{F}$ such that $\algo{F}(s,x)=f_{s}(x)$ for all $s \in S$,
-    $x \in D_{s}$.
+  \item \emph{Easy to evaluate function:} there is a deterministic
+    polynomial-time algorithm $\algo{F}$ for which
+    $\algo{F}(s,x)=f_{s}(x)$ for all $s \in S$, $x \in D_{s}$.
   \item \emph{Hard to invert:} for any non-uniform PPT algorithm
     $\Inv$, \[ \Pr_{s \gets \algo{S}(1^n), x \gets \algo{D}(s)}
     \bracks*{\Inv(s,f_{s}(x)) \in f_{s}^{-1}(f_{s}(x))} = \negl(n). \]
