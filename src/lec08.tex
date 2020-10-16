@@ -132,13 +132,19 @@ $O(\log n)$-length input may be seen as a PRG, and vice-versa.  But do
 there exist PRF families with longer input lengths --- say, $n$?
 
 \begin{question}
-  Let \(\set{f_s}\) be a pseudorandom function family. Is the family
-  \(\set{g_s}\) where \(g_s(x) = f_s(x) \concat 0\) also necessarily
-  pseudorandom?
+    Let \(\set{f_s}\) be a pseudorandom function family. Is the family
+    \(\set{g_s}\) where \(g_s(x) = f_s(x) \concat 0\) also pseudrandom?
 \end{question}
   
 \begin{answer}
-  No.
+    No. Intuitively, the output of \(g_s\) always ends in a 0, something which
+    occurs only half the time in truly uniformly random strings. Concretely, an
+    adversary simply choses an arbitrary string \(m\), queries its oracle on
+    \(m\) and returns 1 if the output ends in 0 and zero otherwise. When its
+    oracle is \(g_s\), the adversary always outputs \(1\) and when its oracle is
+    a uniformly random function, it returns \(1\) with probability
+    \(\frac{1}{2}\). Hence, the adversary has a non-negligible advantage of
+    \(\frac{1}{2}\).
 \end{answer}
 
 \subsection{Constructing PRFs}

@@ -82,17 +82,24 @@ $\set{f_{k} : \bit^{n} \to \bit^{n}}$.
 Completeness is evident by inspection.
 
 \begin{question}
-    Let \(F \colon \bit^n \to \bit^n\) be a uniformly random function. Is the
-    distribution \(r\concat F(r))\) where \(r \gets U(\bit^n)\) identical to
-    \(\bit^{2n}\)?
+    Let \(F \colon \bit^n \to \bit^n\) be a uniformly random function. Is an oracle which
+    on input \(x\) returns \(r_x \concat F(r_x))\), where \(r_x\) is an independent and
+    uniformly random $n$ bit string, identical to an oracle for a uniformly random
+    function \(\bit^n \to \bit^{2n}\)?
 \end{question}
 \begin{answer}
-    No. For the \(r \concat F(r)\) distribution, the second half of the bitstring is
-    entirely determined by the first half. Concretely, let \(R \in \bit^n\) s.t. \(R
-    \neq F(r)\). Then a uniformly random \(2n\)-bitstring has a nonzero probability
-    of being equal to \(r \concat R\), but there is no \(r\) such that \(r\concat F(r) =
-    r \concat R\) by construction. As we will see in the security proof for the above
-    construction, these distributions are computationally indistinguishable.
+    No. For the \(r_x \concat F(r_x)\) case, the second half of the bitstring is
+    entirely determined by the first half. To show that they differ, let's consider the
+    probability that there is a collision in each world. For there to be a collision in
+    the first world, all we need are two distinct inputs \(x\) and \(x'\) such that \(r_x
+    = r_{x'}\). In other words, for a collision to occur, of the \(2^n\) uniformly random
+    and independent \(n\)-bit
+    \(r_x\)s, at least two must be identical. On the other hand in order for there to be a
+    collision in the random function case, of the \(2^n\) uniformly random and independent
+    \(2n\)-bit outputs, we need at least two of them to be identical. This is less likely
+    than in the former case because the probability of two uniformly random \(2n\)-bit
+    strings being the same is less than the probability of two uniformly random \(n\)-bit
+    strings being the same. We will see this more concretely in the next section.
 \end{answer}
 
 \subsection{Security}
