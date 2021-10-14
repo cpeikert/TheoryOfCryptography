@@ -1,6 +1,6 @@
 language: generic
 services: docker
-script: docker run --mount src=$TRAVIS_BUILD_DIR,target=/usr/src/tex,type=bind cmlsharp/docker-tectonic
+script: docker run --mount src=$TRAVIS_BUILD_DIR,target=/usr/src/tex,type=bind cmlsharp/docker-tectonic:v1
   /bin/sh -c 'for i in src/lec*.tex; do if ! tectonic "$i" --outfmt pdf --outdir .; then exit 1; fi; done;'
 
 deploy:
