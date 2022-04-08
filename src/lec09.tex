@@ -69,7 +69,6 @@ PRFs considered in the previous lecture may not be permutations.
   $f$ (or $F$), and not their inverses.
 \end{definition}
 
-
 \subsection{Feistel Construction}
 \label{sec:feistel-construction}
 
@@ -99,14 +98,14 @@ this construction.
 \end{center}
 
 \begin{question}
-    \(D_f\) is a bijection. What is its inverse?
+  \(D_f\) is a bijection. What is its inverse?
 \end{question}
-\begin{answer}
-    Note that for $L'$ and $R'$ as defined above, we have $L = f(L')
-    \oplus R'$ and $R = L'$.  Formally, we can write $D_{f}^{-1} = \rho
-    \circ D_f \circ \rho$, where $\rho(L,R) = (R,L)$.
-\end{answer}
 
+\begin{answer}
+  Note that for $L'$ and $R'$ as defined above, we have
+  $L = f(L') \oplus R'$ and $R = L'$.  Formally, we can write
+  $D_{f}^{-1} = \rho \circ D_f \circ \rho$, where $\rho(L,R) = (R,L)$.
+\end{answer}
 
 However, $D_{f}$ by itself does \emph{not} define a PRF.  This is
 because $\textsc{LEFT}( D_f(L,R) ) = R$ for any $L,R$, which is rarely
@@ -300,29 +299,36 @@ security that captures this intended mode of usage.
 \end{definition}
 
 \begin{question}
-    This definition may seem problematic. Identify the problem in the following ``proof''
-    that multiple-message indistinguishability is impossible and determine what, if
-    anything, it actually proves. \\ \\
-    \emph{``Proof.''} Let \((\skcgen, \skcenc, \skcdec)\) be any encryption scheme with
-    multiple-message indistinguishability and let \(m_0, m_1\) be two messages such that
-    \(m_0 \neq m_1\). Consider a distinguisher which on input \((c_0, c_1)\) returns 1 if
-    \(c_0 = c_1\) and 0 otherwise. This distinguisher successfully distinguishes between
-    a world in which \((c_0, c_1) = (\skcenc_k(m_0), \skcenc_(m_0))\) and a world in
-    which \((c_0, c_1) = (\skcenc_k(m_0), \skcenc_(m_1))\) with probability 1 since
-    \(\skcenc_k(m_0) = \skcenc_k(m_0)\) and \(\skcenc_k(m_0) \neq \skcenc_k(m_1)\).
-    Hence, \((\skcgen, \skcenc, \skcdec)\) does not have multiple-message
-    indistinguishability. 
+  This definition may seem problematic. Identify the problem in the
+  following ``proof'' that multiple-message indistinguishability is
+  impossible and determine what, if
+  anything, it actually proves.
+
+  \medskip\noindent \emph{``Proof.''} Let
+  \((\skcgen, \skcenc, \skcdec)\) be any encryption scheme with
+  multiple-message indistinguishability and let \(m_0 \neq m_1\) be
+  two messages. Consider a distinguisher which on input \((c_0, c_1)\)
+  returns 1 if \(c_0 = c_1\) and 0 otherwise. This distinguisher
+  successfully distinguishes between a world in which
+  \((c_0, c_1) = (\skcenc_k(m_0), \skcenc_(m_0))\) and a world in
+  which \((c_0, c_1) = (\skcenc_k(m_0), \skcenc_(m_1))\) with
+  probability 1, since \(\skcenc_k(m_0) = \skcenc_k(m_0)\) and
+  \(\skcenc_k(m_0) \neq \skcenc_k(m_1)\).  Hence,
+  \((\skcgen, \skcenc, \skcdec)\) does not have multiple-message
+  indistinguishability.
 \end{question}
+
 \begin{answer}
-    The problem with this proof is that it assumes that \(\skcenc\) is
-    \emph{deterministic}. In other words, it assumes that two distinct encryptions of
-    \(m_0\) will yield the same ciphertext. However, nothing in our definition of
-    \(\skcenc\) requires this. Indeed, what this proof actually does show, is that in
-    order to have multiple-message indistinguishability, \(\skcenc\) must not be
-    deterministic, and instead must either be \emph{randomized} or \emph{stateful}.
+  The problem with this proof is that it assumes that \(\skcenc\) is
+  \emph{deterministic}. In other words, it assumes that two distinct
+  encryptions of \(m_0\) will yield the same ciphertext. However,
+  nothing in our definition of \(\skcenc\) requires this. Indeed, what
+  this proof actually does show, is that in order to have
+  multiple-message indistinguishability, \(\skcenc\) must not be
+  deterministic, and instead must either be \emph{randomized} or
+  \emph{stateful}.
 \end{answer}
 
-\vspace{\baselineskip}
 Unfortunately, we are still not done.  In order to make our definition
 completely water-tight, we need to capture some additional (realistic)
 power of the adversary: that it may be able to influence the choice of
@@ -367,14 +373,13 @@ either $C^{b}_{k}(\cdot,\cdot)$, we have implicit access to
 $\skcenc_{k}(\cdot)$ just by querying $C^{b}_{k}$ on two equal
 messages.
 
-\begin{exercise}
-  Show that IND-CPA security implies
-  multi-message security, but the converse is false.  \textit{Hint:}~Define a
-  ``pathological'' scheme that gives away its secret key via a certain sequence of
-  adaptive queries.
-\end{exercise}
+\begin{question}
+  Show that IND-CPA security implies multi-message security, but the
+  converse is false.  \textit{Hint:}~Define a ``pathological'' scheme
+  that gives away its secret key via a certain sequence of adaptive
+  queries.
+\end{question}
 
-\vspace{\baselineskip}
 We now describe a PRF-based encryption scheme enjoying IND-CPA
 security.  Define $\keyspace = \msgspace = \bit^{n}$ for the
 encryption scheme, and assume that $\set{f_{k} \colon \bit^{n} \to
@@ -393,17 +398,20 @@ m$. In the next lecture we will prove that this scheme is IND-CPA
 secure.
 
 \begin{question}
-    IND-CPA security ensures that the encryptions of any two messages are
-    indistinguishable (by a polynomial-time bounded adversary), however when thinking
-    about a security definition it is also important to consider what is \emph{not}
-    hidden by the scheme. What information about the message is not guaranteed to be
-    hidden by the definition of IND-CPA security?
+  IND-CPA security ensures that the encryptions of any two messages
+  are indistinguishable (by a polynomial-time bounded adversary),
+  however when thinking about a security definition it is also
+  important to consider what is \emph{not} hidden by the scheme. What
+  information about the message is not guaranteed to be hidden by the
+  definition of IND-CPA security?
 \end{question}
+
 \begin{answer}
-    Answers may vary, but what springs most readily to mind is the length of the message
-    itself. Consider the ciphertexts produced by the construction above which are of the
-    form \((r, f_k(r))\) where \(r \gets U_n\). An adversary need only count the number
-    of bits in \(r\) in order to determine the length of the message.
+  Answers may vary, but what springs most readily to mind is the
+  length of the message itself. Consider the ciphertexts produced by
+  the construction above which are of the form \((r, f_k(r))\) where
+  \(r \gets U_n\). An adversary need only count the number of bits in
+  \(r\) in order to determine the length of the message.
 \end{answer}
 
 \end{document}
