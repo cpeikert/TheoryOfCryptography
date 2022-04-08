@@ -1,10 +1,12 @@
 \documentclass[11pt]{article}
 
-\usepackage{fullpage}
+\usepackage{fullpage,microtype,pdfsync,hyperref}
 \usepackage{newtxtext}
 \usepackage[T1]{fontenc}
-\usepackage{hyperref,microtype,pdfsync}
-\usepackage{amssymb}
+
+\usepackage{mathtools,amsfonts,amssymb}
+\usepackage[amsmath,amsthm,thmmarks,hyperref]{ntheorem}
+\usepackage[capitalize,nameinlink,noabbrev]{cleveref}
 
 \input{header}
 
@@ -229,7 +231,7 @@ convinces the honest verifier on $x$, less some knowledge error.
 \label{sec:knowl-extr-discr}
 
 \begin{theorem}
-  Protocol~\ref{prot:dlog} is a proof of knowledge for the discrete
+  \cref{prot:dlog} is a proof of knowledge for the discrete
   logarithm relation, with knowledge error $\kappa = 1/2$.
 \end{theorem}
 
@@ -240,7 +242,7 @@ convinces the honest verifier on $x$, less some knowledge error.
   \item Run $P^{*}$ and receive a message $z \in G$ from $P^{*}$.
   \item Send challenge bit $b = 0$ to $P^{*}$ and receive an answer
     $a_{0}$.\label{item:chall-zero}
-  \item Rewind $P^{*}$ to its state before Step~\ref{item:chall-zero}.
+  \item Rewind $P^{*}$ to its state before \cref{item:chall-zero}.
     Send challenge bit $b = 1$ to $P^{*}$, and receive an answer
     $a_{1}$.
   \item Output $a_{1} - a_{0}$.
@@ -255,7 +257,7 @@ convinces the honest verifier on $x$, less some knowledge error.
   \alpha$ for some positive $\alpha$ (otherwise, we have nothing to
   prove).  We claim that \[ \Pr[a_{0} \text{ and } a_{1} \text{
     correct}] \geq \alpha^{3}/2 = \poly(\alpha), \] as required by
-  Definition~\ref{def:pok}.
+  \cref{def:pok}.
 
   To prove the claim, define \[ p_{z} = \Pr[P^{*} \text{ convinces }
   V(x) \mid P^{*} \text{ outputs $z$ in the first message}]. \] By an

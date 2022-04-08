@@ -1,11 +1,12 @@
 \documentclass[11pt]{article}
 
-\usepackage{fullpage}
-\usepackage{tabularx}
+\usepackage{fullpage,microtype,pdfsync,hyperref}
 \usepackage{newtxtext}
 \usepackage[T1]{fontenc}
-\usepackage{hyperref,microtype,pdfsync}
-\usepackage{amssymb}
+
+\usepackage{mathtools,amsfonts,amssymb}
+\usepackage[amsmath,amsthm,thmmarks,hyperref]{ntheorem}
+\usepackage[capitalize,nameinlink,noabbrev]{cleveref}
 
 \input{header}
 
@@ -207,12 +208,11 @@ subgroup of $\ZN^{*}$.  The following claim can be established easily.
   \end{eqnarray}
 
   For any even number $a$, we can reduce the problem to the case when
-  $a$ is odd by using equation (\ref{rec_3}).  Using equations
-  (\ref{rec_1}) and (\ref{rec_2}) we can iteratively reduce $a$ or $N$
-  until one of them becomes eauls to $1$, when $\left(\frac{a}{N}
-  \right)$ can be calculated trivially.  The overall algorithm and its
-  complexity is analogous to Euclid's algorithm for finding the gcd of
-  two numbers.
+  $a$ is odd by using \cref{rec_3}.  Using \cref{rec_1,rec_2}, we can
+  iteratively reduce $a$ or $N$ until one of them becomes eauls to
+  $1$, when $\left(\frac{a}{N} \right)$ can be calculated trivially.
+  The overall algorithm and its complexity is analogous to Euclid's
+  algorithm for finding the gcd of two numbers.
 \end{proof}
 
 We also present another claim that would be useful in the following
@@ -248,7 +248,7 @@ distinguish between a random quadratic residue and a random quadratic
 nonresidue \emph{with Jacobi symbol $1$}.  Note that it is crucial
 that the element have Jacobi symbol $1$, otherwise the tuples could be
 distinguished trivially by computing the Jacobi symbol $\left(
-  \frac{a}{N} \right)$ using Claim~\ref{compute_claim}.
+  \frac{a}{N} \right)$ using \cref{compute_claim}.
 
 \subsection{Interlude: Goldwasser-Micali Encryption Scheme}
 \label{sec:goldw-micali-pkc}
@@ -269,7 +269,7 @@ $\bit$ is defined as follows.
 \end{itemize}
 
 The proof of security follows directly from
-Conjecture~\ref{QR_conjecture}, which yields the following theorem.
+\cref{QR_conjecture}, which yields the following theorem.
 
 \begin{theorem}
   Under QRA, the Goldwasser-Micali scheme is IND-CPA-secure.
@@ -285,7 +285,7 @@ relative to a modulus $N$, but where decryption can be performed
 will only require knowledge of a square root of a user's public key.
 Looking ahead, the factorization of $N$ will be the \emph{master}
 secret key of the system, which will allow the authority to extract a
-secret key for any user.  Later in Section~\ref{sec:making-id-based},
+secret key for any user.  Later in \cref{sec:making-id-based},
 we will convert this PKE into an $\ibe$ scheme.
 
 \subsection{Warm-Up: Public-Key Encryption Scheme}
@@ -318,15 +318,15 @@ correct, but the following claim establishes that this is so.
   Let $t$ be the random value chosen by $\pkcenc$ where $\left(
     \frac{t}{N} \right) = m$.  The claim follows from the equations
   given below.
-  \begin{eqnarray*}
-    \left( \frac{c+2r}{N} \right) &=& \left( \frac{t + r^2/t + 2r}{N}
+  \begin{align*}
+    \left( \frac{c+2r}{N} \right) &= \left( \frac{t + r^2/t + 2r}{N}
     \right) \cdot \left( \frac{t}{N} \right)^2  \\
-    &=& \left( \frac{t^2 + r^2 + 2rt}{N} \right) \cdot \left(
+    &= \left( \frac{t^2 + r^2 + 2rt}{N} \right) \cdot \left(
       \frac{t}{N} \right)  \\
-    &=& \left( \frac{(t+r)^2}{N} \right) \cdot \left( \frac{t}{N}
+    &= \left( \frac{(t+r)^2}{N} \right) \cdot \left( \frac{t}{N}
     \right) \\
-    &=& \left( \frac{t}{N} \right). \qedhere
-  \end{eqnarray*}
+    &= \left( \frac{t}{N} \right).
+  \end{align*}
 \end{proof}
 
 In the remainder of this section we will argue that the above scheme
@@ -376,20 +376,21 @@ we easily prove that this lossiness property implies IND-CPA security.
 \end{corollary}
 
 \begin{proof}
-  By the QRA, composition lemma, and Claim~\ref{claim:lossy}, we have
+  By the QRA, composition lemma, and \cref{claim:lossy}, we have
   the following:
-  \begin{eqnarray*}
-    \langle N, a \gets \QRN^{*}, \pkcenc(a, +1) \rangle & \compind &
+  \begin{align*}
+    \langle N, a \gets \QRN^{*}, \pkcenc(a, +1) \rangle & \compind
     \langle N, a \gets \JN^{*} \setminus \QRN^{*}, \pkcenc(a, +1)
     \rangle \\
-    & \equiv & \langle N, a \gets \JN^{*} \setminus \QRN^{*},
+    &\equiv \langle N, a \gets \JN^{*} \setminus \QRN^{*},
     \pkcenc(a, -1) \rangle \\
-    & \compind & \langle N, a \gets \QRN^{*}, \pkcenc(a, -1) \rangle. \qedhere
-  \end{eqnarray*}
+    &\compind \langle N, a \gets \QRN^{*}, \pkcenc(a, -1) \rangle.
+  \end{align*}
 \end{proof}
 
 \subsection{Making It Identity-Based}
 \label{sec:making-id-based}
+
 % hashing $\id$ to two public keys: one in $\QRN^{*}$, on in $\JN^{*}
 % \backslash \QRN^{*}$.  extracting secret keys using $\msk$, the
 % factorization of $N$.
@@ -416,11 +417,11 @@ Jacobi symbol $1$, and exactly one of which is a quadratic residue
   H(\id)$ and $a_1 = -1 \cdot H(\id)$, and outputs $c_0 =
   \pkcenc(a_0,m)$ and $c_1 = \pkcenc(a_1,m)$ where $\pkcenc(\cdot,
   \cdot)$ is the encryption algorithm of the basic scheme as defined
-  in Section~\ref{sec:warm-up:-public}
+  in \cref{sec:warm-up:-public}
 \item $\ibedec(\sk_{id} = \sqrt{a_b}, c = (c_0,c_1))$ outputs
   $\pkcdec(\sk_{id}, c_b)$, where $\pkcdec(\cdot,\cdot)$ is the
   decryption algorithm of the basic scheme as defined in
-  Section~\ref{sec:warm-up:-public}.
+  \cref{sec:warm-up:-public}.
 \end{itemize}
 
 We now provide an outline of the proof of security for the above

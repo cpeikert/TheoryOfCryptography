@@ -1,10 +1,13 @@
 \documentclass[11pt]{article}
 
-\usepackage{fullpage}
+\usepackage{fullpage,microtype,pdfsync,hyperref}
 \usepackage{newtxtext}
 \usepackage[T1]{fontenc}
-\usepackage{hyperref,microtype,pdfsync}
-\usepackage{amssymb}
+
+\usepackage{mathtools,amsfonts,amssymb}
+\usepackage[amsmath,amsthm,thmmarks,hyperref]{ntheorem}
+\usepackage[capitalize,nameinlink,noabbrev]{cleveref}
+
 \usepackage{algorithmic}
 
 \input{header}
@@ -230,7 +233,7 @@ the challenge bit $b$, the honest prover $P$ chooses a \emph{random}
 permutation $\rho$ such that $H = \rho(G_{b})$, and not just (for
 example) the first one it encounters (since there may be more than
 one).  This will turn out to be crucial for the proof of
-zero-knowledge (Claim~\ref{claim:statind-conditional} below).
+zero-knowledge (\cref{claim:statind-conditional} below).
 
 \begin{theorem}
   \label{thm:gi-zkp}
@@ -283,13 +286,13 @@ zero-knowledge (Claim~\ref{claim:statind-conditional} below).
     \RETURN $(x = (G_{0}, G_{1}), r_{V^*}, H, \rho)$
   \end{algorithmic}
 
-  We now need to show that for any $x = (G_{0},G_{1}) \in \gi$, \[
-  \view_{V^{*}} [ P(x) \leftrightarrow V^{*}(x) ] \statind \Sim(x). \]
-  This follows by Claims~\ref{claim:statind-conditional} and
-  \ref{claim:output-iteration} below, because conditioned on $\Sim$
-  succeeding in some iteration, its output is identically distributed
-  with the view of $V^{*}$, and it fails in all $n$ iterations with
-  probability at most $2^{-n}$.
+  We now need to show that for any $x = (G_{0},G_{1}) \in \gi$,
+  \[ \view_{V^{*}} [ P(x) \leftrightarrow V^{*}(x) ] \statind
+    \Sim(x). \] This follows by
+  \cref{claim:statind-conditional,claim:output-iteration} below,
+  because conditioned on $\Sim$ succeeding in some iteration, its
+  output is identically distributed with the view of $V^{*}$, and it
+  fails in all $n$ iterations with probability at most $2^{-n}$.
 \end{proof}
 
 \begin{claim}
@@ -305,7 +308,7 @@ zero-knowledge (Claim~\ref{claim:statind-conditional} below).
   succeeds in any particular iteration is at least $1/2$.
 \end{claim}
 
-\begin{proof}[Proof of Claim~\ref{claim:statind-conditional}]
+\begin{proof}[Proof of \cref{claim:statind-conditional}]
   The output of $\Sim$ is $((G_{0}, G_{1}), r_{V^*},H,\rho)$. By
   construction, $r_{V^*}$ is uniform.  Since we choose $\rho$
   uniformly at random, we get that $H$ is uniform in
@@ -316,7 +319,7 @@ zero-knowledge (Claim~\ref{claim:statind-conditional} below).
   such that $H = \rho(G_{b})$.)
 \end{proof}
 
-\begin{proof}[Proof of Claim~\ref{claim:output-iteration}]
+\begin{proof}[Proof of \cref{claim:output-iteration}]
   Because $G_0 \equiv G_1$, the graph $H=\rho(G_{b})$ constructed by
   the simulator is uniform in $\iso(G_{0}) = \iso(G_{1})$, and
   simulator $\Sim$'s bit $b$ is statistically independent from $H$.

@@ -1,11 +1,12 @@
 \documentclass[11pt]{article}
 
-\usepackage{fullpage}
+\usepackage{fullpage,microtype,pdfsync,hyperref}
 \usepackage{newtxtext}
 \usepackage[T1]{fontenc}
-\usepackage{hyperref,microtype,pdfsync}
-\usepackage{amssymb}
-\usepackage{algorithm,algorithmic}
+
+\usepackage{mathtools,amsfonts,amssymb}
+\usepackage[amsmath,amsthm,thmmarks,hyperref]{ntheorem}
+\usepackage[capitalize,nameinlink,noabbrev]{cleveref}
 
 \input{header}
 
@@ -97,7 +98,7 @@ requirement of perfect secrecy.
   will show that the scheme is not Shannon secret.  It suffices to
   show the existence of a distribution $D$ over $\msgspace$, a fixed
   message $\bar{m} \in \msgspace$, and a ciphertext $\bar{c} \in
-  \ctspace$ such that the two sides of~\eqref{eq:shannon} are unequal.
+  \ctspace$ such that the two sides of \cref{eq:shannon} are unequal.
 
   Let $D$ be the uniform distribution over $\msgspace$, let $m \in
   \msgspace$ be arbitrary, let $\bar{k} \in \keyspace$ be an arbitrary
@@ -348,7 +349,7 @@ without one-way functions.
 \end{enumerate}
 
 \begin{question}
-  Notice that Definition~\ref{def:owf} allows for \(\Inv\) to have
+  Notice that \cref{def:owf} allows for \(\Inv\) to have
   some non-zero (positive) advantage, though it must be
   negligible. Consider a stronger definition that requires \(\Inv\) to
   have advantage 0 (i.e., it is impossible to find a preimage in

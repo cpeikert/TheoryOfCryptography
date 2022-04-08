@@ -1,10 +1,12 @@
 \documentclass[11pt]{article}
 
-\usepackage{fullpage}
+\usepackage{fullpage,microtype,pdfsync,hyperref}
 \usepackage{newtxtext}
 \usepackage[T1]{fontenc}
-\usepackage{hyperref,microtype,pdfsync}
-\usepackage{amssymb}
+
+\usepackage{mathtools,amsfonts,amssymb}
+\usepackage[amsmath,amsthm,thmmarks,hyperref]{ntheorem}
+\usepackage[capitalize,nameinlink,noabbrev]{cleveref}
 
 \usepackage[noend]{algorithmic}
 \usepackage{algorithm}
@@ -255,7 +257,7 @@ idealized model.
   otherwise, it fails.
 
   We shall analyze the simulation in the claims below.  By
-  Lemma~\ref{lem:adv-Sim} below, we conclude that the existence of a
+  \cref{lem:adv-Sim} below, we conclude that the existence of a
   forger of non-negligible advantage implies that we have a
   non-negligible advantage in inverting the trapdoor permutation, as
   desired.
@@ -294,10 +296,10 @@ idealized model.
 
 \begin{proof}
   We first note that $\vk=s$ is distributed precisely as in $\sig$,
-  because $\Sim$ is playing the TDP inversion game.  As you saw in Question
-  \ref{ques:oracle-sim}, $\Sim$ simulates \(H\) perfectly.  Lastly, because $\Sim$
-  did not fail, it answered every signing query with its unique valid
-  signature.
+  because $\Sim$ is playing the TDP inversion game.  As you saw in
+  \cref{ques:oracle-sim}, $\Sim$ simulates \(H\) perfectly.  Lastly,
+  because $\Sim$ did not fail, it answered every signing query with
+  its unique valid signature.
 
   Now $\Sim$ does not fail exactly when $m^{*}$ is $\For$'s $i^{*}$th
   query to $H$, where $(m^{*}, \sigma^{*})$ is $\For$'s output

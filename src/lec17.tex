@@ -1,10 +1,13 @@
 \documentclass[11pt]{article}
 
-\usepackage{fullpage}
+\usepackage{fullpage,microtype,pdfsync,hyperref}
 \usepackage{newtxtext}
 \usepackage[T1]{fontenc}
-\usepackage{hyperref,microtype,pdfsync}
-\usepackage{amssymb}
+
+\usepackage{mathtools,amsfonts,amssymb}
+\usepackage[amsmath,amsthm,thmmarks,hyperref]{ntheorem}
+\usepackage[capitalize,nameinlink,noabbrev]{cleveref}
+
 \usepackage[noend]{algorithm,algorithmic}
 
 \input{header}
@@ -191,7 +194,7 @@ from any one-way \emph{function}.
 
 \newcommand{\tcol}{\problem{3COL}}
 
-We can now prove Theorem~\ref{thm:zkp-np}.  For the reasons given
+We can now prove \cref{thm:zkp-np}.  For the reasons given
 below, it will suffice to give a zero-knowledge proof (with efficient
 prover) for the \emph{graph $3$-colorability} problem $\tcol$, defined
 as follows.
@@ -392,7 +395,7 @@ The following claim is immediate by inspection:
     random choice of $\rho$ by $P''$, the values $k_{u} =
     \rho(\pi(u))$ and $k_{v} = \rho(\pi(v))$ are \emph{distinct
       random} colors, independent of everything else (just as in the
-    definition of $\Sim$). \qedhere
+    definition of $\Sim$).
   \end{itemize}
 \end{proof}
 

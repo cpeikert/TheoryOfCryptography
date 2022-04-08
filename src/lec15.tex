@@ -1,10 +1,12 @@
 \documentclass[11pt]{article}
 
-\usepackage{fullpage}
+\usepackage{fullpage,microtype,pdfsync,hyperref}
 \usepackage{newtxtext}
 \usepackage[T1]{fontenc}
-\usepackage{hyperref,microtype,pdfsync}
-\usepackage{amssymb}
+
+\usepackage{mathtools,amsfonts,amssymb}
+\usepackage[amsmath,amsthm,thmmarks,hyperref]{ntheorem}
+\usepackage[capitalize,nameinlink,noabbrev]{cleveref}
 
 \input{header}
 
@@ -88,7 +90,7 @@ one-time indistinguishability, which says that for all $m_{0}, m_{1}
 
 \begin{proof}
   If $\skc$ is zero-knowledge, let $\Sim$ be the simulator guaranteed
-  by Definition~\ref{def:zk-skc}.  Then by hypothesis, for all $m_{0},
+  by \cref{def:zk-skc}.  Then by hypothesis, for all $m_{0},
   m_{1} \in \mathcal{M}$,
   \[ \set{k \gets \skcgen(1^{n}): \skcenc_{k}(m_0)} \compind
   \set{\Sim(1^{n})} \compind \set{k \gets \skcgen(1^{n}) :
@@ -101,7 +103,7 @@ one-time indistinguishability, which says that for all $m_{0}, m_{1}
   one-time indistinguishability, for any $m \in \msgspace$ we have
   \[ \set{k \gets \skcgen(1^{n}): \skcenc_{k}(m)} \compind \set{k
     \gets \skcgen(1^{n}) : \skcenc_{k}(m')} \equiv
-  \set{\Sim(1^{n})}. \qedhere \]
+  \set{\Sim(1^{n})}. \]
 \end{proof}
 
 \subsection{Why Zero Knowledge?}

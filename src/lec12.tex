@@ -1,10 +1,12 @@
 \documentclass[11pt]{article}
 
-\usepackage{fullpage}
+\usepackage{fullpage,microtype,pdfsync,hyperref}
 \usepackage{newtxtext}
 \usepackage[T1]{fontenc}
-\usepackage{hyperref,microtype,pdfsync}
-\usepackage{amssymb}
+
+\usepackage{mathtools,amsfonts,amssymb}
+\usepackage[amsmath,amsthm,thmmarks,hyperref]{ntheorem}
+\usepackage[capitalize,nameinlink,noabbrev]{cleveref}
 
 \input{header}
 
@@ -282,7 +284,7 @@ Formally, we define the following triplet of algorithms:
 
 The scheme is correct by inspection.  And $f_{s}$ is ``hard to
 invert'' by assumption, so why isn't the scheme secure according to
-Definition~\ref{def:uf-cma-sig}?  The key point is that $f_{s}$ is
+\cref{def:uf-cma-sig}?  The key point is that $f_{s}$ is
 hard to invert on a \emph{random} value $y \in D_{s}$, but a forger
 gets to \emph{choose} the message on which it inverts $f_{s}$!  In
 fact, observe that there is a trivial attack on the above scheme

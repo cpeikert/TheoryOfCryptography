@@ -1,10 +1,13 @@
 \documentclass[11pt]{article}
 
-\usepackage{fullpage}
+\usepackage{fullpage,microtype,pdfsync,hyperref}
 \usepackage{newtxtext}
 \usepackage[T1]{fontenc}
-\usepackage{hyperref,microtype,pdfsync}
-\usepackage{amssymb}
+
+\usepackage{mathtools,amsfonts,amssymb}
+\usepackage[amsmath,amsthm,thmmarks,hyperref]{ntheorem}
+\usepackage[capitalize,nameinlink,noabbrev]{cleveref}
+
 \usepackage{algorithm,algorithmic}
 
 \input{header}
@@ -87,7 +90,7 @@ number theory.
    \mid a$ and $d \mid b$.
 \end{definition}
 
-As a consequence of Algorithm~\ref{alg:exteuclid} below, there always
+As a consequence of \cref{alg:exteuclid} below, there always
 exist integers $x,y \in \Z$ such that $ax + by = \gcd(a,b)$.  We say
 that $a$ and $b$ are \emph{co-prime} (or \emph{relatively prime}) if
 $\gcd(a,b) = 1$, i.e., $ax = 1 \bmod b$.  From this, $x$ is the
@@ -162,7 +165,7 @@ and $y$) can be computed efficiently.
     uses $r < 2^n$ as its first parameter.  By the inductive
     hypothesis, the number of recursive calls following the second one
     is at most $2n$.  Hence the total number of recursive calls is at
-    most $2 + 2n \leq 2(n+1)$. \qedhere
+    most $2 + 2n \leq 2(n+1)$.
   \end{itemize}
 \end{proof}
 
@@ -339,7 +342,7 @@ uniformly random and independent $n$-bit primes.
 
 \emph{Rabin's function} $f_{N} \colon \ZN^{*} \to \QRN^{*}$ is defined
 as follows: \[ f_{N}(x) = x^{2} \bmod N. \] Precisely defining the
-collection according to Definition~\ref{def:collection-owfs} is a
+collection according to \cref{def:collection-owfs} is a
 simple exercise.  Note that $f_{N}$ is $4$-to-$1$, because each $y \in
 \QRN^{*}$ has two square roots modulo $p$, and two modulo $q$.
 
@@ -373,13 +376,13 @@ simple exercise.  Note that $f_{N}$ is $4$-to-$1$, because each $y \in
     $\gcd(x_{1}-x_{2},N) = p$, which we can compute efficiently.
   \end{proof}
 
-  Continuing with the proof of Theorem~\ref{thm:rabin-owf-factor}, we
+  Continuing with the proof of \cref{thm:rabin-owf-factor}, we
   prove one-wayness by contrapositive, via a reduction.  Assuming we
   have an inverter for the Rabin function, the idea is to choose our
   own $x_{1} \in \ZN^{*}$ and invoke the inverter on $y = f_{N}(x_{1})
   = x_{1}^{2} \bmod N$.  The square root $x_{2}$ it returns will be
   $\neq \pm x_{1}$, with probability $1/2$.  In such a case, we get
-  the prime factorization of $N$ by Claim~\ref{claim:roots-factor}.
+  the prime factorization of $N$ by \cref{claim:roots-factor}.
   We now proceed more formally.
 
   Assume a non-uniform PPT inverter $\Inv$ violating the one-wayness
@@ -391,7 +394,7 @@ simple exercise.  Note that $f_{N}$ is $4$-to-$1$, because each $y \in
   a uniform $x_{1} \gets \ZN^{*}$.  Let $y = x_{1}^{2} \bmod N$ and
   let $x_{2} \gets \Inv(N, y)$.  If $x_{2}^{2} = y \bmod N$ but $x_{1}
   \neq \pm x_{2} \bmod N$, then compute the factorization of $N$ by
-  Claim~\ref{claim:roots-factor}.
+  \cref{claim:roots-factor}.
 
   We now analyze the reduction.  First, $N$ and $y$ are distributed as
   expected, so $\Inv$ outputs $x_{2}$ such that $x_{2}^{2} = y \bmod

@@ -1,12 +1,16 @@
 \documentclass[11pt]{article}
 
-\usepackage{fullpage}
+\usepackage{fullpage,microtype,pdfsync,hyperref}
 \usepackage{newtxtext}
 \usepackage[T1]{fontenc}
-\usepackage{hyperref,microtype,pdfsync}
-\usepackage{amssymb}
+
+\usepackage{mathtools,amsfonts,amssymb}
+\usepackage[amsmath,amsthm,thmmarks,hyperref]{ntheorem}
+\usepackage[capitalize,nameinlink,noabbrev]{cleveref}
+
 \usepackage{algorithm,algorithmic}
 \usepackage{graphicx}
+
 \input{header}
 
 % VARIABLES
@@ -145,7 +149,7 @@ PRG with \emph{any} polynomial output length.
   This completes the proof.
 \end{proof}
 
-\noindent To recap, our proof of Theorem~\ref{thm:prg-expansion} took
+\noindent To recap, our proof of \cref{thm:prg-expansion} took
 the following path:
 \begin{itemize}
 \item We defined a construction: the actual PRG $G_t$ having a
@@ -166,7 +170,7 @@ the following path:
 \section{Obtaining a PRG}
 \label{sec:obtaining-prg}
 
-Thanks to Theorem~\ref{thm:prg-expansion}, we know that all we need is
+Thanks to \cref{thm:prg-expansion}, we know that all we need is
 to obtain a PRG with one extra bit of output.  We describe a
 number-theoretic construction, due to Blum and Micali, of such an
 object.
@@ -220,10 +224,10 @@ elementary bur rather tedious, so we won't go through it today.)
 \end{question}
 
 \begin{answer}
-  By Theorem~\ref{thm:Zps-cyclic}, there exists a generator~\(g\)
+  By \cref{thm:Zps-cyclic}, there exists a generator~\(g\)
   of~\(\Zp^{*}\). So, there exists an algorithm \(\algo{A}\) that
   simply samples an $x \gets \algo{B}$ and returns \(g^{x}\). By
-  Theorem \ref{thm:Zps-cyclic}, we know that
+  \cref{thm:Zps-cyclic}, we know that
   \(\inner{g} = \set{g^0, \ldots, g^{p-2}} = \Z_p^*\), and since
   \(\abs{\Z_p^*} = p - 1\), it must be the case that for each
   \(x \in \Z_p^*\), there exists a \emph{unique} \(i \in \Z_{p-1}\)
@@ -235,7 +239,7 @@ elementary bur rather tedious, so we won't go through it today.)
 \subsection{Discrete Logarithm Problem and One-Way Function}
 \label{sec:dlp-owf}
 
-Theorem~\ref{thm:Zps-cyclic} leads naturally to the so-called
+\Cref{thm:Zps-cyclic} leads naturally to the so-called
 \emph{discrete logarithm problem}, which is: given $y \in \Zp^{*}$
 (and prime $p$ and generator $g$ of $\Zp^{*}$), find $\log_{g} y$,
 i.e., the $x \in \set{1, \ldots, p-1}$ for which $y = g^{x} \bmod p$.
@@ -284,14 +288,14 @@ exist infinitely many such ``Sophie Germain'' primes of this form!
 \label{sec:blum-micali-prg}
 
 We now present a PRG that uses the ideas presented in the previous
-section.  From Section~\ref{sec:expanding-prg} we know that if we have
+section.  From \cref{sec:expanding-prg} we know that if we have
 a PRG that is able to generate one extra bit of randomness, we can
 generate a polynomial number of pseudorandom bits.  Our goal will be
 the following: we want to construct a PRG $G_{p,g} \colon \Zp^* \to
 \Zp^* \times \bit$.\footnote{To be pedantic, $G_{p,g}$ is a
   ``collection'' of PRGs, where the input seed comes from a set that
   depends on the function index $(p,g)$.  It it easy to check that our
-  construction from Section~\ref{sec:expanding-prg} is compatible with
+  construction from \cref{sec:expanding-prg} is compatible with
   this collection $G_{p,g}$.}
 
 Our solution is a function with the following form: \[ G_{p,g}(x)=

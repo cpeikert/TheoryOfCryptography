@@ -29,8 +29,6 @@
 
 %%% THEOREM COMMANDS
 
-\RequirePackage{amsthm}
-
 \theoremstyle{plain}            % following are "theorem" style
 \newtheorem{theorem}{Theorem}[section]
 \newtheorem{lemma}[theorem]{Lemma}
@@ -38,6 +36,8 @@
 \newtheorem{proposition}[theorem]{Proposition}
 \newtheorem{claim}[theorem]{Claim}
 \newtheorem{fact}[theorem]{Fact}
+
+\crefname{claim}{Claim}{Claims} % cleveref doesn't know this one
 
 \theoremstyle{definition}       % following are def style
 \newtheorem{definition}[theorem]{Definition}
@@ -311,3 +311,5 @@
 \loadxsimstyle{layouts}
 
 \AtEndDocument{\pagebreak\printsolutions}
+
+\crefname{question}{Question}{Questions}

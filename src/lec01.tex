@@ -1,10 +1,12 @@
 \documentclass[11pt]{article}
 
-\usepackage{fullpage}
+\usepackage{fullpage,microtype,pdfsync,hyperref}
 \usepackage{newtxtext}
 \usepackage[T1]{fontenc}
-\usepackage{hyperref,microtype,pdfsync}
-\usepackage{amssymb}
+
+\usepackage{mathtools,amsfonts,amssymb}
+\usepackage[amsmath,amsthm,thmmarks,hyperref]{ntheorem}
+\usepackage[capitalize,nameinlink,noabbrev]{cleveref}
 
 \input{header}
 
@@ -284,7 +286,7 @@ of probability theory, giving the following definition.
 Let's consider this definition.  First, the distribution $D$
 represents how Alice chooses her message, and can be arbitrary --- but
 we (conservatively) imagine that the distribution itself is publicly
-known.  The right-hand side of Equation~\eqref{eq:shannon} is simply
+known.  The right-hand side of \cref{eq:shannon} is simply
 the \textit{a priori} probability that Alice chooses the message
 $\bar{m}$; this represents what Eve already knows about the message
 \emph{without seeing the ciphertext}.  The left-hand side is the
@@ -300,7 +302,7 @@ eliminate the (somewhat cumbersome) conditional probability.  Using
 the definition of conditional probability, then substituting $m$ for
 $\bar{m}$ in $\skcenc_{k}(m)$ (because $m=\bar{m}$ is the other event
 in the conjunction), and then using the independence of $m$ and $k$,
-we can expand the left side of Equation~\eqref{eq:shannon} as follows:
+we can expand the left side of \cref{eq:shannon} as follows:
 \[ \Pr_{m,k}[m=\bar{m}\; |\; \skcenc_{k}(m)=\bar{c}] =
 \frac{\Pr_{m,k}[m = \bar{m} \wedge
   \skcenc_{k}(\bar{m})=\bar{c}]}{\Pr_{m,k}[\skcenc_{k}(m)=\bar{c}]} =
@@ -310,7 +312,7 @@ Shannon secrecy says that the above expression must equal
 $\Pr[m=\bar{m}]$, which is one of the terms in the numerator.  As long
 as this probability is positive (i.e., $\bar{m}$ is in the support of
 $D$), we can cancel it from both sides.  (Note that if $\bar{m}$ is
-not in the support of $D$, then Equation~\eqref{eq:shannon} always
+not in the support of $D$, then \cref{eq:shannon} always
 holds, regardless of how $\skcenc$ works!)  We therefore get an
 equivalent form of Shannon secrecy, which is: for every distribution
 $D$ over $\msgspace$, every $\bar{m}$ in the support of $D$, and every
@@ -397,7 +399,7 @@ to completely ``randomize'' the message, but in a reversible way
   $x$.)
 
   Finally, we prove perfect secrecy according to
-  Definition~\ref{def:perfect-secrecy}.  ``Plugging in'' the scheme to
+  \cref{def:perfect-secrecy}.  ``Plugging in'' the scheme to
   the definition, observe that for any $\bar{m} \in \msgspace$ and
   $\bar{c} \in \ctspace$, we have \[ \Pr_{k \gets
     \skcgen}[\skcenc_{k}(\bar{m}) = \bar{c}] = \Pr_{k \gets
@@ -451,7 +453,7 @@ to completely ``randomize'' the message, but in a reversible way
   Given a ciphertext \(c\) and key \(k\), the decryption function
   would output a plaintext \(m\) where \(m_i = c_i - k_i
   \pmod{b}\). It is straightforward to adapt the proof of
-  Theorem~\ref{thm:otp-perfect} to show the completeness and perfect
+  \cref{thm:otp-perfect} to show the completeness and perfect
   secrecy of this scheme.
 \end{answer}
 

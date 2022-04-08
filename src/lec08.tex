@@ -1,10 +1,13 @@
 \documentclass[11pt]{article}
 
-\usepackage{fullpage}
+\usepackage{fullpage,microtype,pdfsync,hyperref}
 \usepackage{newtxtext}
 \usepackage[T1]{fontenc}
-\usepackage{hyperref,microtype,pdfsync}
-\usepackage{amssymb}
+
+\usepackage{mathtools,amsfonts,amssymb}
+\usepackage[amsmath,amsthm,thmmarks,hyperref]{ntheorem}
+\usepackage[capitalize,nameinlink,noabbrev]{cleveref}
+
 \usepackage{graphicx}
 \usepackage{algorithm,algorithmic}
 
@@ -165,7 +168,7 @@ our function family is $\approx 2^{-2^{n}}$-sparse, i.e., the family
 $\set{f_s}$ makes up only a \emph{doubly exponentially} small subset
 of the entire space of functions.
 
-\begin{proof}[Proof of Theorem~\ref{thm:prg-implies-prf}]
+\begin{proof}[Proof of \cref{thm:prg-implies-prf}]
   For simplicity, we prove the theorem for $\ell_{1}(n) = \ell_{2}(n)
   = n$; extending to other values is straightforward.
 
@@ -257,15 +260,15 @@ of the entire space of functions.
   $q(n) = \poly(n)$ number of subtrees in order to answer all the
   queries of the distinguisher correctly.
 
-  For the hybrids $H_{i-1}$ and $H_{i}$, Algorithm~\ref{alg:simulator}
+  For the hybrids $H_{i-1}$ and $H_{i}$, \cref{alg:simulator}
   defines a simulator that takes $q(n) = \poly(n)$ pairs of $n$-bit
   strings.
   
   \renewcommand{\algorithmicrequire}{\textbf{Input:}}
 
   \begin{algorithm}
-    \label{alg:simulator}
     \caption{Simulator $\Sim_{i}$ for emulating either $H_{i-1}$ or $H_{i}$.}
+    \label{alg:simulator}
     \begin{algorithmic}[1]
       \REQUIRE $(z^1_0, z^1_1), \ldots , (z^q_0, z^q_1) \in \bit^{2n}$
       for some large enough $q(n) = \poly(n)$

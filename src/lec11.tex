@@ -1,10 +1,12 @@
 \documentclass[11pt]{article}
 
-\usepackage{fullpage}
+\usepackage{fullpage,microtype,pdfsync,hyperref}
 \usepackage{newtxtext}
 \usepackage[T1]{fontenc}
-\usepackage{hyperref,microtype,pdfsync}
-\usepackage{amssymb}
+
+\usepackage{mathtools,amsfonts,amssymb}
+\usepackage[amsmath,amsthm,thmmarks,hyperref]{ntheorem}
+\usepackage[capitalize,nameinlink,noabbrev]{cleveref}
 
 \input{header}
 
@@ -170,7 +172,7 @@ special kind of hash function family.
   independent, as claimed.
 \end{example}
 
-From Definition~\ref{def:pairwise-ind-hash}, it is immediate to see
+From \cref{def:pairwise-ind-hash}, it is immediate to see
 that for any distinct $m,m' \in \msgspace$ and any $t,t' \in
 \tagspace$, \[ \Pr_{h \gets \calH}\left[h(m')=t' \mid h(m)=t\right] =
 \frac{1}{\abs{\tagspace}}. \]
@@ -221,7 +223,7 @@ Our $\mac$ construction is as follows: let $\calH = \set{h_k \colon
 \begin{question}[ID=one-time]
   Although perfectly unforgeable, the above scheme is only
   one-time. Suppose \(\mathcal{H}\) is the concrete hash family
-  described in Example \ref{ex:pairwise-ind} and show how an attacker
+  described in \cref{ex:pairwise-ind} and show how an attacker
   with access to two message-tag pairs generated from the same key can
   forge a new message-tag pair.
 \end{question}
@@ -248,7 +250,7 @@ Our $\mac$ construction is as follows: let $\calH = \set{h_k \colon
   a one-time perfectly unforgeable MAC, a \(d\)-wise independent hash
   family can be used to form a \((d-1)\)-time perfectly unforgeable
   MAC in precisely the same way (the security proof is essentially the
-  same). Using Example \ref{ex:pairwise-ind} as a template, describe
+  same). Using \cref{ex:pairwise-ind} as a template, describe
   how one could construct such a family.
 \end{question}
 
@@ -269,7 +271,7 @@ Our $\mac$ construction is as follows: let $\calH = \set{h_k \colon
 \subsubsection{Critiques}
 \label{sec:critiques-info-mac}
 
-As noted in Question \ref{ques:one-time}, the scheme is only one-time!
+As noted in \cref{ques:one-time}, the scheme is only one-time!
 This problem is a deficiency in our \emph{definition} of
 unforgeability, because it does not comport with the fact that we
 would like to use a $\mac$ scheme to tag multiple messages.  However,

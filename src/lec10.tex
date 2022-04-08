@@ -1,10 +1,12 @@
 \documentclass[11pt]{article}
 
-\usepackage{fullpage}
+\usepackage{fullpage,microtype,pdfsync,hyperref}
 \usepackage{newtxtext}
 \usepackage[T1]{fontenc}
-\usepackage{hyperref,microtype,pdfsync}
-\usepackage{amssymb}
+
+\usepackage{mathtools,amsfonts,amssymb}
+\usepackage[amsmath,amsthm,thmmarks,hyperref]{ntheorem}
+\usepackage[capitalize,nameinlink,noabbrev]{cleveref}
 
 \input{header}
 
@@ -403,7 +405,7 @@ might reveal certain bits of $r$ while still being one-way.
   hypothesis that $h$ is hard-core, we have \[ \langle s, f_{s}(r),
   h(r) \oplus 0 \rangle \compind \langle s, f_{s}(r), \algo{U}_{1}
   \rangle \equiv \langle s, f_{s}(r), \algo{U}_{1} \oplus 1 \rangle
-  \compind \langle s, f_{s}(r), h(r) \oplus 1 \rangle. \qedhere \]
+  \compind \langle s, f_{s}(r), h(r) \oplus 1 \rangle. \]
 \end{proof}
 
 Do trapdoor OWP families exist?  Here are some plausible candidates:

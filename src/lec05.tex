@@ -1,10 +1,13 @@
 \documentclass[11pt]{article}
 
-\usepackage{fullpage}
+\usepackage{fullpage,microtype,pdfsync,hyperref}
 \usepackage{newtxtext}
 \usepackage[T1]{fontenc}
-\usepackage{hyperref,microtype,pdfsync}
-\usepackage{amssymb}
+
+\usepackage{mathtools,amsfonts,amssymb}
+\usepackage[amsmath,amsthm,thmmarks,hyperref]{ntheorem}
+\usepackage[capitalize,nameinlink,noabbrev]{cleveref}
+
 \usepackage{algorithm,algorithmic}
 
 \input{header}
@@ -106,7 +109,7 @@ Note that $A$ and $\bar{A}$ are effectively the same test, since
 \end{proof}
 
 Statistical distance is very robust, which enhances its usefulness.
-Using Lemma~\ref{lem:stat-dist}, the following facts are
+Using \cref{lem:stat-dist}, the following facts are
 straightforward to prove.
 
 \begin{lemma}
@@ -133,7 +136,7 @@ application of any (randomized) procedure.
 
 \begin{answer}
   In the forward direction, because $\Delta(X,Y) = 0$ and all the
-  terms in the sum from Lemma~\ref{lem:stat-dist} are non-negligible,
+  terms in the sum from \cref{lem:stat-dist} are non-negligible,
   we have that $\abs{X(w) - Y(w)} = 0$ for all $w \in \Omega$, i.e.,
   $X(w) = Y(w)$. Hence, $X = Y$. In the other direction, if $X = Y$,
   then by definition $X(A) - Y(A) = 0$ for all $A$, so
@@ -159,18 +162,18 @@ are ``essentially the same,'' in an asymptotic sense.
   singleton set $A = \set{0^{n}}$, yielding
   $\Delta(X_{n}, Y_{n}) = 2^{-n} = \negl(n)$, so
   $\calX \statind \calY$.  (This can also be seen by calculating the
-  summation in Lemma~\ref{lem:stat-dist}.)  The analysis extends
+  summation in \cref{lem:stat-dist}.)  The analysis extends
   similarly to any $Y_{n}$ that leaves out a $\negl(n)$ fraction of
   $\bit^{n}$.  From this we can say that such ensembles $\calY$ are
   ``essentially uniform,'' or \emph{statistically pseudorandom}.
 \end{example}
 
-Question: can a statistically peudorandom generator exist?  This
+Can a statistically peudorandom generator exist?  This
 depends on the definition of ``generator'' (which we give below), but
 for any meaningful definition of the term, it isn't possible!  This
 can be shown by explicitly demonstrating an appropriate subset (or
 test) that distinguishes strings output by the generator from
-uniformly random ones; see Question~\ref{ques:3} below.
+uniformly random ones; see \cref{ques:3} below.
 
 \subsection{Computational Indistinguishability}
 \label{sec:comp-indist}

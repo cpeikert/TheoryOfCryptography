@@ -1,10 +1,13 @@
 \documentclass[11pt]{article}
 
-\usepackage{fullpage}
+\usepackage{fullpage,microtype,pdfsync,hyperref}
 \usepackage{newtxtext}
 \usepackage[T1]{fontenc}
-\usepackage{hyperref,microtype,pdfsync}
-\usepackage{amssymb}
+
+\usepackage{mathtools,amsfonts,amssymb}
+\usepackage[amsmath,amsthm,thmmarks,hyperref]{ntheorem}
+\usepackage[capitalize,nameinlink,noabbrev]{cleveref}
+
 \usepackage{algorithm,algorithmic}
 
 \input{header}
@@ -155,11 +158,11 @@ plausible conjecture:
 Let's now change the input distribution of $f_{\text{mult}}$ so that
 $x,y$ are chosen uniformly and independently from $\Pi_{n}$.  Now, the
 one-wayness property for $f_{\text{mult}}$ is syntactically identical
-to Conjecture~\ref{conj:fact-primes-hard}, so for that property we
+to \cref{conj:fact-primes-hard}, so for that property we
 have a ``proof by assumption.''  The only remaining question is the
 distribution over inputs: can we efficiently sample a random $n$-bit
 prime, i.e., sample uniformly from $\Pi_{n}$?
-Algorithm~\ref{alg:genprime} gives a potential algorithm,
+\cref{alg:genprime} gives a potential algorithm,
 $\algo{GenPrime}$, to do so.
 
 \begin{algorithm}
@@ -217,9 +220,9 @@ denote the number of primes not exceeding $N$.  We have the following:
 \end{lemma}
 (In fact, this is a weaker form of the ``prime number theorem,'' which
 says that $\pi(N)$ asymptotically approaches $\frac{N}{\ln N}$.  We
-will not give a proof of Lemma~\ref{lem:chebyshev-primes} now, but
+will not give a proof of \cref{lem:chebyshev-primes} now, but
 there is an elementary one in the Pass-shelat notes.)  Using
-Lemma~\ref{lem:chebyshev-primes}, we have
+\cref{lem:chebyshev-primes}, we have
 \[ \frac{\abs{\Pi_{n}}}{2^{n}} = \frac{\pi(2^{n})}{2^{n}} >
   \frac{2^{n}}{2^{n} \cdot 2 \log_{2}(2^{n})} = \frac{1}{2n}. \]
 Finally, since all the iterations of $\algo{GenPrime}$ are
@@ -240,7 +243,7 @@ hard'' functions is more general, but also most costly and technically
 more complex.  Suppose we are not confident where the ``hard'' inputs
 to a OWF were likely to be, but we do believe that they aren't too
 rare.  We would then have a $\delta$-\emph{weak} one-way function,
-where the ``hard to invert'' property from Definition~\ref{def:owf} is
+where the ``hard to invert'' property from \cref{def:owf} is
 relaxed to the following:
 \begin{itemize}
 \item For any non-uniform PPT algorithm $\Inv$, \[ \advan_{f}(\Inv) :=
@@ -294,7 +297,7 @@ have the following theorem:
     of the inversion subtasks independently}; it might correlate its
   successes and failures. See the text following the original question
   for further elaboration, and the proof of
-  Theorem~\ref{thm:weak-strong-owf} for a rigorous argument.
+  \cref{thm:weak-strong-owf} for a rigorous argument.
 \end{answer}
 
 \paragraph{Proof idea:} The intuition here is that inverting~$f'$
@@ -376,7 +379,7 @@ $\approx 1-\delta/2 > 1-\delta$, as desired.
 
 We now give the formal proof.
 
-\begin{proof}[Proof of Theorem~\ref{thm:weak-strong-owf}]
+\begin{proof}[Proof of \cref{thm:weak-strong-owf}]
   Because $m = \poly(n)$ by assumption (and because $2n/\delta = 2n
   \cdot \poly(n) = \poly(n)$), if $f$ is efficiently computable, then
   so is $f'$.  Now suppose that some efficient adversary $\Inv'$
@@ -423,7 +426,7 @@ We now give the formal proof.
 
   The remainder of the proof is a simple exercise, following the
   ``plug-and-repeat'' strategy described above, and using
-  Claim~\ref{claim:good-dense}.
+  \cref{claim:good-dense}.
 \end{proof}
 
 \end{document}

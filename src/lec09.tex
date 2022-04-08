@@ -1,10 +1,14 @@
 \documentclass[11pt]{article}
 
-\usepackage{fullpage}
+\usepackage{fullpage,microtype,pdfsync,hyperref}
 \usepackage{newtxtext}
 \usepackage[T1]{fontenc}
-\usepackage{hyperref,microtype}
-\usepackage{amssymb,graphicx}
+
+\usepackage{mathtools,amsfonts,amssymb}
+\usepackage[amsmath,amsthm,thmmarks,hyperref]{ntheorem}
+\usepackage[capitalize,nameinlink,noabbrev]{cleveref}
+
+\usepackage{graphicx}
 
 \input{header}
 
@@ -88,14 +92,15 @@ construction makes no complexity assumption on $f$.)
   \[ D_f(L, R) = (R,L \oplus f(R) ). \]
 \end{definition}
 
-Figure~\ref{fig:feistel_1_pic} gives a pictorial representation of
+\Cref{fig:feistel_1_pic} gives a pictorial representation of
 this construction.
 
-\begin{center}
+\begin{figure}[h]
   \centering
   \includegraphics[width=0.20\textwidth]{feistel1.png}
+  \caption{The Feistel transformation.}
   \label{fig:feistel_1_pic}
-\end{center}
+\end{figure}
 
 \begin{question}
   \(D_f\) is a bijection. What is its inverse?
@@ -111,13 +116,14 @@ However, $D_{f}$ by itself does \emph{not} define a PRF.  This is
 because $\textsc{LEFT}( D_f(L,R) ) = R$ for any $L,R$, which is rarely
 be the case for a truly random permutation.  But what happens if we
 use \emph{two} Fesitel rounds, each with a (possibly different) round
-function (see Figure~\ref{fig:feistel_2_pic})?
+function (see \cref{fig:feistel_2_pic})?
 
-\begin{center}
+\begin{figure}[h]
   \centering
   \includegraphics[width=0.20\textwidth]{feistel2.png}
+  \caption{Two rounds of the Feistel transformation.}
   \label{fig:feistel_2_pic}
-\end{center}
+\end{figure}
 
 Unfortunately, two Feistel rounds also does not yield a PRP family.
 Consider arbitrary $L_1, L_2, R \in \bit^n$ with $L_{1} \neq L_{2}$,
@@ -226,7 +232,7 @@ The following lemma follows immediately.
 \end{proof}
 
 Now we describe a symmetric encryption scheme, and use
-Lemma~\ref{lem:pseudorand-one_msg_secure} to prove its one-message
+\cref{lem:pseudorand-one_msg_secure} to prove its one-message
 security.  Let $\keyspace = \bit^n$ be the keyspace, and let
 $\msgspace = \bit^{\ell(n)}$ be the message space, where $\ell(n)$ is
 a polynomial in $n$.  Let $G$ be a PRG with output length $\ell(n)$.
@@ -244,17 +250,16 @@ The following algorithms specify the encryption scheme.
 \end{claim}
 
 \begin{proof}
-  \begin{eqnarray}
-    \left\{ k \gets \skcgen : \skcenc_k(m) \right\} & \equiv &
+  \begin{align}
+    \left\{ k \gets \skcgen : \skcenc_k(m) \right\} &\equiv
     \left\{ k \gets \bit^{n} : m \oplus G(k) \right\} \label{eq:scheme} \\
-    & \compind & \left\{ x \gets U_{\ell(n)} : m \oplus x
+    &\compind \left\{ x \gets U_{\ell(n)} : m \oplus x
     \right\} \label{eq:prg} \\
-    & \equiv & \left\{ U_{\ell(n)} \right\}. \label{eq:prob}
-  \end{eqnarray}
-  Equation~\eqref{eq:scheme} is by definition of the scheme.
-  Equation~\eqref{eq:prg} is true because $G$ is a PRG, and by a
-  trivial simulation.  Equation~\eqref{eq:prob} is by basic
-  probability.
+    &\equiv \left\{ U_{\ell(n)} \right\}. \label{eq:prob}
+  \end{align}
+  \Cref{eq:scheme} is by definition of the scheme.  \Cref{eq:prg} is
+  true because $G$ is a PRG, and by a trivial
+  simulation. \Cref{eq:prob} is by basic probability.
 \end{proof}
 
 Note that the scheme constructed above is good for encrypting only
