@@ -163,30 +163,36 @@ scheme is, in fact, IND-CCA-secure.  (You will prove these facts in
 your homework.)
 
 \begin{question}
-    Can textbook RSA ciphertexts be manipulated with predictable consequences to the
-    underlying plaintexts (similar to the PRF-based scheme)? Recall that RSA encryption
-    takes a plaintext \(m \in \Z_n\) (where \(n = pq\) for primes \(p\), \(q\)) and
-    returns \(m^e \pmod {n}\).
+  Can textbook RSA ciphertexts be manipulated with predictable
+  consequences to the underlying plaintexts (similar to the PRF-based
+  scheme)? Recall that RSA encryption takes a plaintext \(m \in \Z_n\)
+  (where \(n = pq\) for primes \(p\), \(q\)) and returns
+  \(m^e \pmod {n}\).
 \end{question}
+
 \begin{answer}
-    Yes. Multiplying a ciphertext that encrypts a message \(m\) by \(x^e\) yields a
-    ciphertext that encrypts \(m \cdot x\). \[
-        \pkcenc(m) \cdot x^e \equiv m^e \cdot x^e \equiv (mx)^e \equiv \pkcenc(mx)
-    \]
+  Yes. Multiplying a ciphertext that encrypts a message \(m\) by
+  \(x^e\) yields a ciphertext that encrypts \(m \cdot x\):
+  \[ \pkcenc(m) \cdot x^e \equiv m^e \cdot x^e \equiv (mx)^e \equiv
+    \pkcenc(mx) .
+  \]
 \end{answer}
 
 \begin{question}
-    How does the ``bit-flipping'' trick for our PRF-based encryption scheme violate our
-    precise definition of CCA security?
+  How does the ``bit-flipping'' trick for our PRF-based encryption
+  scheme violate our precise definition of CCA security?
 \end{question}
+
 \begin{answer}
-    Let \(m\) be any \(n-1\) bitstring. On input \(k\) an attacker simply queries
-    \(c^* \gets C_k^b(1\concat m, 0 \concat m)\), then queries the decryption oracle on
-    \(\overline{c^*}\) and outputs the first bit of the resulting plaintext. Note that
-    \(\overline{c^*} \neq c^*\) so the decryption oracle does not output \(\bot\).
-    Since \(D_k(\overline{c^*} = \overline{D_k(c^*)})\) by the ``bit-flipping`` trick,
-    the first bit of the resulting plaintext will be 0 if \(c^*\) is an encryption of
-    \(1 \concat m\) and 1 otherwise.
+  Let \(m\) be any \(n-1\) bitstring. On input \(k\) an attacker
+  simply queries \(c^* \gets C_k^b(1\concat m, 0 \concat m)\), then
+  queries the decryption oracle on \(\overline{c^*}\) and outputs the
+  first bit of the resulting plaintext. Note that
+  \(\overline{c^*} \neq c^*\) so the decryption oracle does not output
+  \(\bot\).  Since \(D_k(\overline{c^*} = \overline{D_k(c^*)})\) by
+  the ``bit-flipping'' trick, the first bit of the resulting plaintext
+  will be 0 if \(c^*\) is an encryption of \(1 \concat m\) and 1
+  otherwise.
 \end{answer}
 
 \section{Digital Signatures}
