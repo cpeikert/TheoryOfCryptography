@@ -82,24 +82,29 @@ $\set{f_{k} : \bit^{n} \to \bit^{n}}$.
 Completeness is evident by inspection.
 
 \begin{question}
-    Let \(F \colon \bit^n \to \bit^n\) be a uniformly random function. Is an oracle which
-    on input \(x\) returns \(r_x \concat F(r_x))\), where \(r_x\) is an independent and
-    uniformly random $n$ bit string, identical to an oracle for a uniformly random
-    function \(\bit^n \to \bit^{2n}\)?
+  Let \(F \colon \bit^n \to \bit^n\) be a uniformly random
+  function. Is an oracle which on input \(x\) returns
+  \(r_x \concat F(r_x))\), where \(r_x\) is an independent and
+  uniformly random $n$ bit string, identical to an oracle for a
+  uniformly random function \(\bit^n \to \bit^{2n}\)?
 \end{question}
+
 \begin{answer}
-    No. For the \(r_x \concat F(r_x)\) case, the second half of the bitstring is
-    entirely determined by the first half. To show that they differ, let's consider the
-    probability that there is a collision in each world. For there to be a collision in
-    the first world, all we need are two distinct inputs \(x\) and \(x'\) such that \(r_x
-    = r_{x'}\). In other words, for a collision to occur, of the \(2^n\) uniformly random
-    and independent \(n\)-bit
-    \(r_x\)s, at least two must be identical. On the other hand in order for there to be a
-    collision in the random function case, of the \(2^n\) uniformly random and independent
-    \(2n\)-bit outputs, we need at least two of them to be identical. This is less likely
-    than in the former case because the probability of two uniformly random \(2n\)-bit
-    strings being the same is less than the probability of two uniformly random \(n\)-bit
-    strings being the same. We will see this more concretely in the next section.
+  No. For the \(r_x \concat F(r_x)\) case, the second half of the
+  bitstring is entirely determined by the first half. To show that
+  they differ, let's consider the probability that there is a
+  collision in each world. For there to be a collision in the first
+  world, all we need are two distinct inputs \(x\) and \(x'\) such
+  that \(r_x = r_{x'}\). In other words, for a collision to occur, of
+  the \(2^n\) uniformly random and independent \(n\)-bit \(r_x\)s, at
+  least two must be identical. On the other hand in order for there to
+  be a collision in the random function case, of the \(2^n\) uniformly
+  random and independent \(2n\)-bit outputs, we need at least two of
+  them to be identical. This is less likely than in the former case
+  because the probability of two uniformly random \(2n\)-bit strings
+  being the same is less than the probability of two uniformly random
+  \(n\)-bit strings being the same. We will see this more concretely
+  in the next section.
 \end{answer}
 
 \subsection{Security}
@@ -290,43 +295,54 @@ setting, because many different parties can encrypt with the same
 public key, and may not be able to keep joint state.
 
 \begin{question}
-    Given an IND-CPA-secure asymmetric scheme for one-bit messages, construct an
-    IND-CPA-secure asymmetric scheme for two-bit messages. Sketch out a proof of this
-    scheme's security. How could you extend this proof to show that an IND-CPA-secure
-    asymmetric scheme for one-bit messages implies an IND-CPA-secure asymmetric scheme
-    for \(\poly(n)\)-bit messages?
+  Given an IND-CPA-secure asymmetric scheme for one-bit messages,
+  construct an IND-CPA-secure asymmetric scheme for two-bit
+  messages. Sketch out a proof of this scheme's security. How could
+  you extend this proof to show that an IND-CPA-secure asymmetric
+  scheme for one-bit messages implies an IND-CPA-secure asymmetric
+  scheme for \(\poly(n)\)-bit messages?
 \end{question}
+
 \begin{answer}
-    Let \(\Pi = (\skcgen, \skcenc, \skcdec)\) be our IND-CPA-secure scheme for one-bit
-    messages. Now, let \(\Pi' := (\skcgen', \skcenc', \skcdec')\) where \(\skcgen' :=
-    \skcgen\) and \(\skcenc'(b_1 \concat b_2) := \skcenc(b_1) \concat \skcenc(b_2)\). \\
+  Let \(\Pi = (\skcgen, \skcenc, \skcdec)\) be our IND-CPA-secure
+  scheme for one-bit messages. Now, let
+  \(\Pi' := (\skcgen', \skcenc', \skcdec')\) where
+  \(\skcgen' := \skcgen\) and
+  \(\skcenc'(b_1 \concat b_2) := \skcenc(b_1) \concat \skcenc(b_2)\).
+  
+  For our security proof we need to show that
+  \((pk, \skcenc'(b_1 \concat b_2)) \compind (pk, \skcenc'(b_1'
+  \concat b_2')\) for any bits \(b_1, b_2, b_1', b_2'\). We can do
+  this through a straightforward application of the hybrid lemma. Let
+  \(H_0 = (pk, \skcenc_{pk}(b_1) \concat \skcenc_{pk}(b_2))\), let
+  \(H_1 = (pk, \pkcenc_{pk}(b_1') \concat \pkcenc_{pk}(b_2))\), and
+  finally \(H_2 = \pkcenc_{pk}(b_1') \pkcenc_{pk}(b_2'))\). In other
+  words, each of our hybrid worlds successively replaces a bit from
+  the encryption of our left-world message with a bit from the
+  encryption of our right-world message. The rough idea is that since
+  \((pk, \pkcenc_{pk}(0)) \compind (pk, \pkcenc_{pk}(1))\), each
+  hybrid world will be indistinguishable from the next, which we can
+  show formally using the composition
+  lemma.
 
-    For our security proof we need to show that \((pk, \skcenc'(b_1 \concat b_2))
-    \compind (pk, \skcenc'(b_1' \concat b_2')\) for any bits \(b_1, b_2, b_1', b_2'\). We
-    can do this through a straightforward application of the hybrid lemma. Let \(H_0 =
-    (pk, \skcenc_{pk}(b_1) \concat \skcenc_{pk}(b_2))\), let \(H_1 = (pk,
-    \pkcenc_{pk}(b_1') \concat \pkcenc_{pk}(b_2))\), and finally \(H_2 =
-    \pkcenc_{pk}(b_1') \pkcenc_{pk}(b_2'))\). In other words, each of our hybrid worlds
-    successively replaces a bit from the encryption of our left-world message with a bit
-    from the encryption of our right-world message. The rough idea is that since
-    \((pk, \pkcenc_{pk}(0)) \compind (pk, \pkcenc_{pk}(1))\), each hybrid world will be
-    indistinguishable from the next, which we can show formally using the composition
-    lemma.  \\
+  For brevity, consider just \(H_0\) and \(H_1\). Consider an
+  algorithm \(S\) which on input \((pk, c)\) returns
+  \((pk, c \concat \pkcenc_{pk}(b_2))\). Clearly \(S\) runs in
+  polynomial time. Moreover, if the input to \(S\) comes from
+  \((pk, \pkcenc_{pk}(b_1))\), then \(S\)'s output is \(H_0\) and if
+  it is \((pk, \pkcenc_{pk}(b_1'))\) then it is \(H_1\). By the
+  security of \(\Pi\),
+  \(\pkcenc_{pk}(b_1) \compind \pkcenc_{pk}(b_1')\), so
+  \(H_0 \compind H_1\) by the composition lemma.
 
-    \noindent For brevity, consider just \(H_0\) and \(H_1\). Consider an algorithm \(S\)
-    which on input \((pk, c)\) returns \((pk, c \concat \pkcenc_{pk}(b_2))\). Clearly \(S\)
-    runs in polynomial time. Moreover, if the input to \(S\) comes from
-    \((pk, \pkcenc_{pk}(b_1))\), then \(S\)'s output is \(H_0\) and if it is
-    \((pk, \pkcenc_{pk}(b_1'))\) then it is \(H_1\). By the security of \(\Pi\),
-    \(\pkcenc_{pk}(b_1) \compind \pkcenc_{pk}(b_1')\), so \(H_0 \compind H_1\) by the
-    composition lemma. \\
-
-    \noindent To adapt this proof, the exact same scheme is used -- the \(\poly(n)\) bit
-    message is encrypted bitwise using our one-bit encryption scheme. The security proof
-    is identical but with more hybrid worlds. Just as in this proof, each hybrid world
-    would replace the first \(i\) bits of an encryption of \(m\) with the first \(i\)
-    bits of an encryption of \(m'\). Since the message is of length \(\poly(n)\), we have
-    polynomially many hybrid worlds, so we can apply the hybrid lemma.
+  To adapt this proof, the exact same scheme is used -- the
+  \(\poly(n)\) bit message is encrypted bitwise using our one-bit
+  encryption scheme. The security proof is identical but with more
+  hybrid worlds. Just as in this proof, each hybrid world would
+  replace the first \(i\) bits of an encryption of \(m\) with the
+  first \(i\) bits of an encryption of \(m'\). Since the message is of
+  length \(\poly(n)\), we have polynomially many hybrid worlds, so we
+  can apply the hybrid lemma.
 \end{answer}
 
 \subsection{Constructions}
