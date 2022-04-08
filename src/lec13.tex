@@ -27,25 +27,6 @@
 
 % LECTURE MATERIAL STARTS HERE
 
-%\section{Recap}
-%In the previous lecture we saw :
-
-%\begin{itemize}
-%	\item MAC for shared key model
-%	\begin{itemize}
-%		\item unforgability under CMA 
-%	\end{itemize}
-%	\item Application to authenticated encryption
-%	\begin{itemize}
-%		\item CCA security
-%	\end{itemize}
-%	\item Digital signatures in public key model
-%	\begin{itemize}
-%	\item $\forall$ nuppt $\calF$, $\Pr_{(vk,sk) \gets \siggen} [\calF^{\sigsign_{sk}(.)}(vk)\ forges] \leq \negl(n)$.
-%	\end{itemize}
-%\end{itemize}
-%\end{comment}
-
 \section{One-Time Signatures}
 \label{sec:one-time-signatures}
 
@@ -170,28 +151,34 @@ function $f$:
   not \emph{strong} unforgeability.  Is the scheme strongly
   unforgeable?
 \end{remark}
+
 \begin{question}
-    Verify that this scheme is indeed only one-time. That is, show that if \(\For\) is
-    allowed to make two calls to the signing oracle, a forgery can be produced.
+  Verify that this scheme is indeed only one-time. That is, show that
+  if \(\For\) is allowed to make two calls to the signing oracle, a
+  forgery can be produced.
 \end{question}
+
 \begin{answer}
-    The key thing to notice is that when a message is signed, half the secret key is
-    revealed. For example, if the oracle is queried on \(0^\ell\), then the entire first
-    row of the secret key is revealed. Querying \(1^\ell\) reveals the second row. As
-    such, an attacker that is allowed two oracle queries can simply query \(0^\ell\) and
-    \(1^\ell\) to reveal the entire secret key. From there, a valid signature can be
-    produced for any message.
+  The key thing to notice is that when a message is signed, half the
+  secret key is revealed. For example, if the oracle is queried on
+  \(0^\ell\), then the entire first row of the secret key is
+  revealed. Querying \(1^\ell\) reveals the second row. As such, an
+  attacker that is allowed two oracle queries can simply query
+  \(0^\ell\) and \(1^\ell\) to reveal the entire secret key. From
+  there, a valid signature can be produced for any message.
 \end{answer}
 
 \section{From One-Time to Many-Time}
 \label{sec:many-time-signatures}
 
-As you showed above, Lamport's scheme is only one-time. Still, we might imagine a way to
-obtain a many-time signature by choosing a ``fresh'' one-time signature key with each
-signed message, and authenticating it along with the message.  However, this cannot work
-on its own, because the verification key $\vk$ in the one-time signature is much
-\emph{longer} than the messages it can sign (about $2 \ell n$ bits, for a
-length-preserving function $f$, versus $\ell$ bits).
+As you showed above, Lamport's scheme is only one-time. Still, we
+might imagine a way to obtain a many-time signature by choosing a
+``fresh'' one-time signature key with each signed message, and
+authenticating it along with the message.  However, this cannot work
+on its own, because the verification key $\vk$ in the one-time
+signature is much \emph{longer} than the messages it can sign (about
+$2 \ell n$ bits, for a length-preserving function $f$, versus $\ell$
+bits).
 
 We will now see a way to overcome this problem by ``compressing'' the
 fresh verification key using a special kind of hash function.
