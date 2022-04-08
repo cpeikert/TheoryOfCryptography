@@ -69,7 +69,6 @@ PRFs considered in the previous lecture may not be permutations.
   $f$ (or $F$), and not their inverses.
 \end{definition}
 
-
 \subsection{Feistel Construction}
 \label{sec:feistel-construction}
 
@@ -99,14 +98,14 @@ this construction.
 \end{center}
 
 \begin{question}
-    \(D_f\) is a bijection. What is its inverse?
+  \(D_f\) is a bijection. What is its inverse?
 \end{question}
-\begin{answer}
-    Note that for $L'$ and $R'$ as defined above, we have $L = f(L')
-    \oplus R'$ and $R = L'$.  Formally, we can write $D_{f}^{-1} = \rho
-    \circ D_f \circ \rho$, where $\rho(L,R) = (R,L)$.
-\end{answer}
 
+\begin{answer}
+  Note that for $L'$ and $R'$ as defined above, we have
+  $L = f(L') \oplus R'$ and $R = L'$.  Formally, we can write
+  $D_{f}^{-1} = \rho \circ D_f \circ \rho$, where $\rho(L,R) = (R,L)$.
+\end{answer}
 
 However, $D_{f}$ by itself does \emph{not} define a PRF.  This is
 because $\textsc{LEFT}( D_f(L,R) ) = R$ for any $L,R$, which is rarely
@@ -123,13 +122,21 @@ function (see Figure~\ref{fig:feistel_2_pic})?
 Unfortunately, two Feistel rounds also does not yield a PRP family.
 Consider arbitrary $L_1, L_2, R \in \bit^n$ with $L_{1} \neq L_{2}$,
 and any function $f : \bit^n \rightarrow \bit^n$.  We have
-$\textsc{Right}( D_f(L_1,R) ) = L_1\oplus f(R) $ and
-$\textsc{Right}(D_f(L_2,R) ) = L_2\oplus f(R)$.  Taking the
-exclusive-or of both equations, we get \[ \textsc{Right}( D_f(L_1,R))
-\oplus \textsc{Right}( D_f(L_2,R)) = L_1 \oplus L_2. \] On the other
+$\textsc{Left}(D_g( D_f(L_1,R) )) = \textsc{Right}( D_f(L_1,R) )$
+$= L_1\oplus f(R)$ and $\textsc{Left}(D_g( D_f(L_2,R) )) = $
+$\textsc{Right}( D_f(L_2,R) )= L_2\oplus f(R)$. Taking the 
+exclusive-or of both equations, we get 
+\begin{align*}
+\textsc{Left}(D_g( D_f(L_1,R) ) \oplus D_g( D_f(L_2,R) )) &=
+\textsc{Left}(D_g( D_f(L_1,R) ))\oplus\textsc{Left}(D_g( D_f(L_2,R) ))\\
+&= (L_1\oplus f(R)) \oplus (L_2\oplus f(R))\\
+&= L_1 \oplus L_2.
+\end{align*}
+On the other 
 hand, for a truly random permutation $\mathcal P$, $\mathcal P(L_1,R)
 \oplus \mathcal P(L_2, R)$ is the exclusive-or of two distinct random
-strings and its right half would equal $L_1\oplus L_2$ with only
+strings and $\textsc{Left}(\mathcal P(L_1,R)
+\oplus \mathcal P(L_2, R))$ would equal $L_1\oplus L_2$ with only
 negligible probability.
 
 Fortunately, all is not lost: we have the following theorem of Luby

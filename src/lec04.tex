@@ -54,9 +54,9 @@ equivalent to this one.)
   \item \emph{Easy to sample from domain:} there is a PPT algorithm
     $\algo{D}$ such that $\algo{D}(s)$ outputs some $x \in D_{s}$
     (according to some arbitrary distribution).
-  \item \emph{Easy to evaluate function:} there is a PPT algorithm
-    $\algo{F}$ such that $\algo{F}(s,x)=f_{s}(x)$ for all $s \in S$,
-    $x \in D_{s}$.
+  \item \emph{Easy to evaluate function:} there is a deterministic
+    polynomial-time algorithm $\algo{F}$ for which
+    $\algo{F}(s,x)=f_{s}(x)$ for all $s \in S$, $x \in D_{s}$.
   \item \emph{Hard to invert:} for any non-uniform PPT algorithm
     $\Inv$, \[ \Pr_{s \gets \algo{S}(1^n), x \gets \algo{D}(s)}
     \bracks*{\Inv(s,f_{s}(x)) \in f_{s}^{-1}(f_{s}(x))} = \negl(n). \]
@@ -267,9 +267,9 @@ $\ZN^{*}$:
 \end{itemize}
 
 \begin{definition}
-  For $N \in \Z^+$, Euler's \emph{totient function} $\varphi(n)$ is
+  For $N \in \Z^+$, Euler's \emph{totient function} $\varphi(N)$ is
   defined to be $\abs{\ZN^{*}}$, i.e., the number of positive integers
-  $a \leq n$ relatively prime to $n$.
+  $a \leq N$ that are relatively prime to $N$.
 \end{definition}
 
 \noindent Here are some useful facts about the totient function:
@@ -277,7 +277,7 @@ $\ZN^{*}$:
 \item For a prime $p$, we have $\varphi(p) = p - 1$.
 \item For a prime $p$ and positive integer $a$, we have $\varphi(p^a)
   = (p-1) p^{a-1} = p^a - p^{a-1}$.
-\item If $gcd(a,b) = 1$, then $\varphi(a \cdot b) = \varphi(a) \cdot
+\item If $\gcd(a,b) = 1$, then $\varphi(a \cdot b) = \varphi(a) \cdot
   \varphi(b)$.
 \end{itemize}
 
@@ -300,6 +300,34 @@ $\ZN^{*}$:
 \item For an odd prime $p$, we have $-1 \in \QRp^{*}$ if and only if
   $p = 1 \bmod 4$.
 \end{itemize}
+
+\begin{question}
+    Verify that the CRT isomorphism works in $\Z_{15}$ by checking that $h(7 \cdot 9) = h(7) \cdot h(9)$.
+\end{question}
+\begin{answer}
+    Note that $15$ is the product of two primes: $3$ and $5$, so \(\Z_{15} \cong \Z_3
+    \times \Z_5\).  First, we consider \(h(7 \cdot 9)\). \(7 \cdot 9 \equiv 3 \pmod{15}\)
+    and \(h(3) = (3 \bmod 3, 3 \bmod 5) = (0, 3)\). Next, \(h(7) = (7 \bmod{3}, 7
+    \bmod{5}) = (1,2)\) and \(h(9) = (9 \bmod{3}, 9 \bmod 5) = (0, 4)\). Finally we
+    multiply the pairs elementwise, recalling that the first elements of each pair are
+    from \(\Z_3\) and the second elements are from \(\Z_5\).  \((1,2) \cdot (0,4) =
+    (0,3)\) as expected.
+\end{answer}
+\begin{question}
+    Show that \(h^{-1}(x,y) = x \cdot c_p + y \cdot c_q\).
+\end{question}
+\begin{answer}
+    Consider,
+    \begin{align*}
+        (x,y) &= (x, 0) + (0, y) \\
+              &= h(x) \cdot (1,0) + h(y) \cdot (0,1) \\
+              &= h(x) \cdot h(c_p) + h(y) \cdot h(c_q) \\
+              &= h(x \cdot c_p + y \cdot c_q) \\
+        h^{-1}(x,y) &= x \cdot c_p + y \cdot c_q
+    \end{align*}
+\end{answer}
+
+
 
 \section{Factoring-Related Functions}
 \label{sec:fact-related}

@@ -151,6 +151,18 @@ function $f$:
   not \emph{strong} unforgeability.  Is the scheme strongly
   unforgeable?
 \end{remark}
+\begin{question}
+    Verify that this scheme is indeed only one-time. That is, show that if \(\For\) is
+    allowed to make two calls to the signing oracle, a forgery can be produced.
+\end{question}
+\begin{answer}
+    The key thing to notice is that when a message is signed, half the secret key is
+    revealed. For example, if the oracle is queried on \(0^\ell\), then the entire first
+    row of the secret key is revealed. Querying \(1^\ell\) reveals the second row. As
+    such, an attacker that is allowed two oracle queries can simply query \(0^\ell\) and
+    \(1^\ell\) to reveal the entire secret key. From there, a valid signature can be
+    produced for any message.
+\end{answer}
 
 \begin{question}
   Verify that this scheme is indeed only one-time. That is, show that
@@ -326,7 +338,6 @@ intuition is that a forgery must somewhere ``break off'' of the chain
 produced by the legitimate signer, and hence is a forgery against one
 of the $\vk_{i}$, which is hard to produce due to the uf-1cma security
 of $\ots$.  A formal proof is relatively routine.
-
 
 \subsection{Improvements}
 \label{sec:improvements}
