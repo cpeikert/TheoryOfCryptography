@@ -13,7 +13,7 @@ jobs:
         uses: xu-cheng/latex-action@v2
         with:
           working_directory: "src/"
-          root_file: "*.tex"
+          root_file: "lec*.tex"
           glob_root_file: true
 
       - name: Move PDF files and commit them
