@@ -7,3 +7,5 @@
 **/*.rel
 **/*.thm
 **/*.xsim
+**/*.fls
+**/*.fdb_latexmk
