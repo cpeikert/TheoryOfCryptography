@@ -113,6 +113,7 @@ Using \cref{lem:stat-dist}, the following facts are
 straightforward to prove.
 
 \begin{lemma}
+  \label{lem:ipl}
   Let $f$ be a function (or more generally, randomized procedure) on
   the domain of $X,Y$. Then $\Delta(f(X), f(Y)) \leq \Delta(X,Y)$.
 \end{lemma}
@@ -203,74 +204,83 @@ $\advan_{\calX,\calY}(\Adv)$ a function of $n \in \N$.
   distributions over $\bit^{l(n)}$.
 \end{definition}
 
-The basic facts about statistical distance also carry over to
-computational indistinguishability, where all functions/tests are
-restricted to be efficient.
+The basic facts about statistical distance also carry over to computational indistinguishability, where we restrict all functions/tests to be \emph{efficient}.
+We call the analogue of \cref{lem:ipl} the \emph{composition lemma}, because it involves the composition of an applied procedure and a distinguisher.
+We call the analogue of the triangle inequality the \emph{hybrid lemma}, because (as we will see soon) we usually invoke it on a sequence of ``hybrid'' distributions that interpolate step-by-step between two distributions we ultimately care about.
 
 \begin{lemma}[Composition lemma]
-  \label{lem:closure}
-  Let $\AdvB$ be a non-uniform PPT algorithm.  If
-  $\set{X_{n}} \compind \set{Y_{n}}$, then
-  $\set{\AdvB(X_{n})} \compind \set{\AdvB(Y_{n})}$.
+  \label{lem:composition}
+  Let $\calX = \set{X_{n}}$ and $\calY = \set{Y_{n}}$ be ensembles, $\Sim$ be any non-uniform PPT algorithm, and $\calX' = \set{X'_{n} = \Sim(X_{n})}$ and $\calY' = \set{Y'_{n} = \Sim(Y_{n})}$.
+  Then for any non-uniform PPT algorithm~$\Dist'$, we have that $\advan_{\calX',\calY'}(\Dist') = \advan_{\calX,\calY}(\Dist' \circ \Sim)$.
+  In particular, if $\calX \compind \calY$, then $\calX' \compind \calY'$.
 \end{lemma}
 
 \begin{proof}
-  Let $\Dist$ be any non-uniform PPT algorithm attempting to
-  distinguish $\set{\AdvB(X_{n})}$ from $\set{\AdvB(Y_{n})}$; we wish
-  to show that its advantage must be negligible.  Consider an
-  algorithm $\Adv$ that, given input $x$, runs $\Dist(\AdvB(x))$ and
-  outputs whatever $\Dist$ outputs.  Clearly $\Adv$ is non-uniform
-  PPT.  By construction, we have
-  \[ \advan_{X_{n},Y_{n}}(\Adv) =
-    \advan_{\AdvB(X_{n}),\AdvB(Y_{n})}(\Dist).
-  \] The left-hand side is $\negl(n)$ by hypothesis, hence so is the
-  right-hand side, as desired.
+  Consider the composed algorithm $\Dist = \Dist' \circ \Sim$, i.e., on input~$x$, it runs $\Dist(\Sim(x))$ and outputs the same answer.
+  By construction, we have that
+  \[
+    \begin{aligned}
+      \advan_{\calX',\calY'}(\Dist')
+      &= \abs{\Pr[\Dist'(X'_{n})=1] - \Pr[\Dist'(Y'_{n})=1]} \\
+      &= \abs{\Pr[\Dist'(\Sim(X_{n}))=1] - \Pr[\Dist'(\Sim(Y_{n}))=1]} \\
+      &= \advan_{\calX,\calY}(\Dist) ,
+    \end{aligned}
+  \]
+  as claimed.
+  In particular, if $\calX \compind \calY$, then because~$\calD$ is non-uniform PPT by construction, the right-hand side is $\negl(n)$, hence so is the left-hand side.
 \end{proof}
 
 \begin{lemma}[Hybrid lemma]
   \label{lem:hybrid}
-  Let $\calX^{i} = \set{X^{i}_{n}}$ for $i \in [m]$, where
-  $m=\poly(n)$.  If $\calX^{i} \compind \calX^{i+1}$ for every
-  $i \in [m-1]$, then $\calX^{1} \compind \calX^{m}$.
+  Let $X^{i}$ for $i \in \set{0, 1, \ldots, m}$ be distributions for some positive integer~$m$.
+  Then for \emph{any} algorithm~$\Dist$ (regardless of efficiency),
+  \[ \advan_{X^{0},X^{m}}(\Dist) \leq \sum_{i \in [m]} \advan_{X^{i-1}, X^{i}}(\Dist) .
+  \]
+  In particular, let $\calX^{i} = \set{X^{i}_{n}}$ be~$m$ ensembles, where~$m$ is a constant independent of~$n$.
+  If $\calX^{i-1} \compind \calX^{i}$ for every $i \in [m]$, then $\calX^{0} \compind \calX^{m}$.
 \end{lemma}
 
 \begin{proof}
-  Let $\Dist$ be any non-uniform PPT algorithm attempting to
-  distinguish $\calX^{1}$ from $\calX^{m}$.  Let
-  $p_{i} = p_{i}(n) = \Pr[\Dist(X^{i}_{n}) = 1]$.  By the triangle
-  inequality, we can write $\Dist$'s advantage as
-  \[ \advan_{\calX^{1},\calX^{m}}(\Dist) = \abs{p_{1} - p_{m}} \leq
-    \sum_{i \in [m-1]} \abs{p_{i} - p_{i+1}} = \sum_{i \in [m-1]}
-    \advan_{\calX^{i}, \calX^{i+1}}(\Dist). \] Now by assumption, each
-  $\advan_{\calX^{i}, \calX^{i+1}}(\Dist) = \nu_{i}(n)$, where
-  $\nu_{i}(n)$ is a negligible function---which may be different for
-  each $i$.  The sum of $\poly(n)$-many negligible functions is indeed
-  negligible: letting $\nu(n) = \sum_{i} \nu_{i}(n)$, we need to show
-  that for all $c > 0$, there exists some $n_{0}$ such that
-  $\nu(n) \leq n^{-c}$ for all $n \geq n_{0}$.  By assumption, we know
-  that for each $i$, there is some $n_{i}$ such that
-  $\nu_{i}(n) \leq n^{-c}/m$ for \emph{all} $n \leq n_{i}$.  Letting
-  $n_{0}$ be the largest of these, it follows that
-  $\nu(n) \leq n^{-c}$ for all $n \geq n_{0}$, as desired.
+  For each~$i$, let $p_{i} = \Pr[\Dist(X^{i}) = 1]$.
+  By the triangle inequality, we can write $\Dist$'s advantage as
+  \[ \advan_{X^{0}, X^{m}}(\Dist) = \abs{p_{0} - p_{m}} \leq \sum_{i \in [m]} \abs{p_{i-1} - p_{i}} = \sum_{i \in [m]} \advan_{X^{i-1},X^{i}}(\Dist) .
+  \]
+  
+  Now consider the ensembles $\calX^{i}$, and restrict to non-uniform PPT~$\Dist$.
+  By assumption, each $\advan_{\calX^{i-1}, \calX^{i}}(\Dist) = \nu_{i}(n)$, where $\nu_{i}(n)$ is a negligible function that may be \emph{different for each $i \in [m]$}.
+  Fortunately, the sum of any \emph{constant} number of negligible functions is indeed negligible: letting $\nu(n) = \sum_{i} \nu_{i}(n)$, we need to show that for all $c > 0$, there exists some constant~$n_{0}$ such that $\nu(n) \leq n^{-c}$ for all $n \geq n_{0}$.
+  We know that for each $i \in [m]$, there is a constant~$n_{i}$ such that $\nu_{i}(n) \leq n^{-(c+1)} \leq n^{-c}/m$ for all $n \geq n_{i}$.
+  Letting $n_{0} = \max_{i \in [m]} n_{i}$ be the largest of these---which is a constant (independent of~$n$) because~$m$ is constant---it follows that $\nu(n) \leq n^{-c}$ for all $n \geq n_{0}$, as desired.
 \end{proof}
 
 \begin{remark}
-  In the proof of the lemma, we used the triangle inequality on the
-  quantities $\advan_{\calX^{i},\calX^{i+1}}(\Dist)$ to conclude
-  something about $\advan_{\calX^{1}, \calX^{m}}(\Dist)$.
-  Syntactically this is unremarkable, but observe closely what we have
-  done: even though $\Dist$'s ``goal in life'' is to distinguish
-  between $\calX^{1}$ and $\calX^{m}$, by referring to the quantities
-  $\advan_{\calX^{i},\calX^{i+1}}(\Dist)$, we are implicitly
-  considering how $\Dist$ behaves on \emph{all} the hybrid ensembles
-  $\calX^{i}$ --- these are distributions on which $\Dist$ was never
-  ``designed'' to run!  Yet because $\Dist$ is ``just an algorithm,''
-  we can run it and use it for whatever purposes we like.  The hybrid
-  lemma says that in order for $\Dist$ to distinguish between
-  $\calX^{1}$ and $\calX^{m}$, it must also distinguish between
-  $\calX^{i}$ and $\calX^{i+1}$ for some $i$, which is impossible by
-  hypothesis.
+  In the proof of the lemma, we used the triangle inequality on the quantities $\advan_{X^{i-1},X^{i}}(\Dist)$ to conclude something about $\advan_{X^{0},X^{m}}(\Dist)$.
+  Syntactically this is unremarkable, but observe closely what we have done: even though $\Dist$'s ``goal in life'' is to distinguish between~$X^{0}$ and~$X^{m}$, by referring to the quantities $\advan_{X^{i-1},X^{i}}(\Dist)$, we are implicitly considering how $\Dist$ behaves on \emph{all} the hybrid distributions~$X^{i}$---even ones on which $\Dist$ was never ``designed'' to run!
+  Yet because~$\Dist$ is ``just an algorithm,'' we can run it and use it for whatever purposes we like.
+  The hybrid lemma says that in order for~$\Dist$ to distinguish (with non-negligible advantage) between the ensembles~$\calX^{0}$ and~$\calX^{m}$, it must also distinguish between~$\calX^{i}$ and~$\calX^{i+1}$ for some $i$, which is impossible by hypothesis.
 \end{remark}
+
+Importantly, the asymptotic part of \cref{lem:hybrid} considers only a \emph{constant} number of hybrid ensembles, because it critically relies on the fact that the sum of a constant number of negligible functions is negligible.
+However, in many applications we will need to consider a number of hybrid distributions that \emph{grows with the security parameter}~$n$.
+This is considerably more subtle: first, since the distributions in an ensemble are themselves indexed by~$n$, it is not so clear how to meaningfully define a number of ensembles that varies with~$n$.
+Second, it turns out that the sum of $\poly(n)$-many \emph{different} negligible functions may be non-negligible!\footnote{Consider the sequence of functions $\nu_{i}$ for $i \in \N$, where $\nu_{i}(n) = 1$ if $n=i$, and $\nu_{i}(n)=0$ otherwise.
+  Then each individual~$\nu_{i}$ is negligible, because $\nu_{i}(n) = 0$ for all $n > n_{0} := i$.
+  However, defining $\nu(n) = \sum_{i=1}^{n} \nu_{i}(n)$ as the sum of the first~$n$ functions in the sequence, we have that $\nu(n) = 1$ for all~$n$, which is clearly not negligible.
+  The proof of \cref{lem:hybrid-constant} fails here because the~$n_{0}$ defined therein is not a constant, but instead depends on~$n$.}
+
+The following corollary side-steps the first issue by considering ensembles for only the ``endpoint'' distributions, not the intermediate hybrids, and deals with the second issue by requiring that each advantage term be bounded by the \emph{same} negligible function.
+This will indeed be the case in all the applications we consider, because all such terms will arise from applying the composition lemma (\cref{lem:composition}) for the \emph{same pair} of indistinguishable ``source'' ensembles $\calX,\calY$, with the \emph{same (composed) distinguisher} $\Dist = \Dist' \circ \Sim$.
+(Or, slightly more generally, a constant number of indistinguishable pairs, with one composed distinguisher for each.)
+
+\begin{corollary}
+  \label{cor:hybrid-poly}
+  Let $\calX = \set{X_{n}}$ and $\calY = \set{Y_{n}}$ be ensembles, and $H^{i}_{n}$ be ``hybrid'' distributions for $i \in \set{0, \ldots, m}$ where $m=\poly(n)$ may vary with~$n$, and where $H^{0}_{n} = X_{n}$ and $H^{m}_{n} = Y_{n}$.
+  If $\advan_{H_{n}^{i-1},H_{n}^{i}}(\Dist) \leq \nu(n)$ for all $i \in [m]$ and a \emph{single} negligible function $\nu(n) = \negl(n)$, then $\advan_{\calX,\calY}(\Dist) = \negl(n)$ as well.
+\end{corollary}
+
+\begin{proof}
+  This follows immediately from (the first part of) \cref{lem:hybrid} and the fact that $m \cdot \nu(n) = \negl(n)$, because $m = \poly(n)$.
+\end{proof}
 
 \section{Pseudorandom Generators}
 \label{sec:prgs}
@@ -309,10 +319,10 @@ restricted to be efficient.
   lemma. Since \(G\) is a PRG, we have
   \(G(U_n) \compind U_{\ell(n)}\), where $\ell(n)$ is $G$'s
   expansion. Consider the efficient algorithm
-  \(\AdvB(x) := \overline{x}\). Observe that
-  \(H(x) = \overline{G(x)} = \AdvB(G(x))\) for any~$x$. By the
+  \(\Sim(x) := \overline{x}\). Observe that
+  \(H(x) = \overline{G(x)} = \Sim(G(x))\) for any~$x$. By the
   composition lemma, we have
-  \[ H(U_{n}) = \AdvB(G(U_n)) \compind \AdvB(U_{\ell(n)}) \equiv
+  \[ H(U_{n}) = \Sim(G(U_n)) \compind \Sim(U_{\ell(n)}) \equiv
     U_{\ell(n)}, \] where the last equivalence holds because any
   bijective function applied to the uniform distribution yields the
   uniform distribution. Thus, \(H(U_n) \compind U_{\ell(n)}\), as
@@ -341,12 +351,15 @@ restricted to be efficient.
   let $A = G(\bit^n) \subseteq \bit^{\ell(n)}$, i.e., the image of
   $G$, as suggested above. Because~$G$ is deterministic, we have
   $\abs{A} \leq 2^{n}$. Then
-  \begin{align*}
-    \abs{G(U_n)(A) - U_{\ell(n)}(A)} &= \abs{1 - U_{\ell(n)}(A)} \\
-                                     &= 1 - \abs{A} \cdot 2^{-\ell(n)}  \\
-                                     &\geq 1 - 2^{n-\ell(n)} \\
-                                     &\geq 1 - 2^{-1} = 1/2,
-  \end{align*}
+  \[
+    \begin{aligned}
+      \abs{G(U_n)(A) - U_{\ell(n)}(A)}
+      &= \abs{1 - U_{\ell(n)}(A)} \\
+      &= 1 - \abs{A} \cdot 2^{-\ell(n)}  \\
+      &\geq 1 - 2^{n-\ell(n)} \\
+      &\geq 1 - 2^{-1} = 1/2,
+    \end{aligned}
+  \]
   which is (very much) non-negligible. Since we have demonstrated a
   particular~$A$ for which
   $\abs{G(U_n)(A) - U_{\ell(n)}(A)} \geq 1/2$, the suprenum over all
