@@ -266,7 +266,7 @@ This is considerably more subtle: first, since the distributions in an ensemble 
 Second, it turns out that the sum of $\poly(n)$-many \emph{different} negligible functions may be non-negligible!\footnote{Consider the sequence of functions $\nu_{i}$ for $i \in \N$, where $\nu_{i}(n) = 1$ if $n=i$, and $\nu_{i}(n)=0$ otherwise.
   Then each individual~$\nu_{i}$ is negligible, because $\nu_{i}(n) = 0$ for all $n > n_{0} := i$.
   However, defining $\nu(n) = \sum_{i=1}^{n} \nu_{i}(n)$ as the sum of the first~$n$ functions in the sequence, we have that $\nu(n) = 1$ for all~$n$, which is clearly not negligible.
-  The proof of \cref{lem:hybrid-constant} fails here because the~$n_{0}$ defined therein is not a constant, but instead depends on~$n$.}
+  The proof of \cref{lem:hybrid} fails here because the~$n_{0}$ defined therein is not a constant, but instead depends on~$n$.}
 
 The following corollary side-steps the first issue by considering ensembles for only the ``endpoint'' distributions, not the intermediate hybrids, and deals with the second issue by requiring that each advantage term be bounded by the \emph{same} negligible function.
 This will indeed be the case in all the applications we consider, because all such terms will arise from applying the composition lemma (\cref{lem:composition}) for the \emph{same pair} of indistinguishable ``source'' ensembles $\calX,\calY$, with the \emph{same (composed) distinguisher} $\Dist = \Dist' \circ \Sim$.
