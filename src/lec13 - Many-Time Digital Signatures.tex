@@ -79,10 +79,22 @@ function $f$:
 
 \noindent Correctness is by inspection.
 
-\begin{theorem}
+\begin{question}
+  Verify that this scheme is indeed only one-time (at most).
+  That is, show that if $\For$ is allowed to make two calls to the signing oracle, a forgery can be produced.
+\end{question}
+
+\begin{answer}
+  The key thing to notice is that when a message is signed, half the secret key is revealed.
+  For example, if the oracle is queried on~$0^{\ell}$, then the entire first row of the secret key is revealed.
+  Similarly, querying~$1^{\ell}$ reveals the second row.
+  As such, an attacker that is allowed two oracle queries can simply query~$0^{\ell}$ and~$1^{\ell}$ to reveal the entire secret key.
+  From there, a valid signature can be produced for any message.
+\end{answer}
+
+\begin{theorem}%
   \label{thm:ots-1cma}
-  Lamport's OTS is unforgable under a one-time chosen-message attack
-  (uf-1cma-secure) assuming that $f$ is a OWF.
+  Lamport's OTS is unforgable under a one-time chosen-message attack (uf-1cma-secure), assuming that~$f$ is a OWF\@.
 \end{theorem}
 
 \begin{proof}
@@ -147,23 +159,16 @@ function $f$:
   proof.
 \end{proof}
 
-\begin{remark}
-  Notice that the proof above showed \emph{standard} unforgeability,
-  not \emph{strong} unforgeability.  Is the scheme strongly
-  unforgeable?
-\end{remark}
-
 \begin{question}
-  Verify that this scheme is indeed only one-time.
-  That is, show that if \(\For\) is allowed to make two calls to the signing oracle, a forgery can be produced.
+  Notice that the proof above showed \emph{standard} unforgeability, not \emph{strong} unforgeability.
+  Is the scheme strongly unforgeable?
 \end{question}
 
 \begin{answer}
-  The key thing to notice is that when a message is signed, half the secret key is revealed.
-  For example, if the oracle is queried on \(0^\ell\), then the entire first row of the secret key is revealed.
-  Querying \(1^\ell\) reveals the second row.
-  As such, an attacker that is allowed two oracle queries can simply query \(0^\ell\) and \(1^\ell\) to reveal the entire secret key.
-  From there, a valid signature can be produced for any message.
+  Not necessarily.
+  In particular, it is not strongly unforgeable if, given one preimage (under~$f$) of a value~$y$, it is easy to find another preimage.
+  For example, suppose that~$f$ ignores the first bit of its input, i.e., $f(0x)=f(1x)$ for all~$x$.
+  Then a forger can simply flip the first bit of any component $x^{i,b}$ of any valid signature~$\sigma$ for any message~$m$, to produce a different valid signature for the same message.
 \end{answer}
 
 \section{From One-Time to Many-Time}
