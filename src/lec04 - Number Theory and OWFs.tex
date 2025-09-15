@@ -1,16 +1,8 @@
 \documentclass[11pt]{article}
 
-\usepackage{fullpage,microtype,pdfsync,hyperref}
-\usepackage{newtxtext}
-\usepackage[T1]{fontenc}
-
-\usepackage{mathtools,amsfonts,amssymb}
-\usepackage[amsmath,amsthm,thmmarks,hyperref]{ntheorem}
-\usepackage[capitalize,nameinlink,noabbrev]{cleveref}
+\input{header}
 
 \usepackage{algorithm,algorithmic}
-
-\input{header}
 
 % VARIABLES
 
@@ -320,7 +312,7 @@ $\ZN^{*}$:
     Show that \(h^{-1}(x,y) = x \cdot c_p + y \cdot c_q\).
 \end{question}
 \begin{answer}
-    Consider,
+    Consider that
     \begin{align*}
         (x,y) &= (x, 0) + (0, y) \\
               &= h(x) \cdot (1,0) + h(y) \cdot (0,1) \\
@@ -329,8 +321,6 @@ $\ZN^{*}$:
         h^{-1}(x,y) &= x \cdot c_p + y \cdot c_q
     \end{align*}
 \end{answer}
-
-
 
 \section{Factoring-Related Functions}
 \label{sec:fact-related}
@@ -352,37 +342,33 @@ simple exercise.  Note that $f_{N}$ is $4$-to-$1$, because each $y \in
   collection (with function generator $\algo{S}$) is one-way.
 \end{theorem}
 
+To prove the theorem, we will rely on the following essential number-theoretic fact.
+
+\begin{claim}
+  \label{claim:roots-factor}
+  Let $N = pq$ be the product of distinct odd primes.
+  Given any $x_{1}, x_{2} \in \ZN^{*}$ such that $x_{1}^{2} = x_{2}^{2} \bmod N$ but $x_{1} \neq \pm x_{2} \bmod N$, the factors of $N$ can be computed efficiently.
+\end{claim}
+
 \begin{proof}
+  We have $x_{1}^{2} = x_{2}^{2} \bmod p$ and $x_{1}^{2} = x_{2}^{2}
+  \bmod q$, which implies $x_{1} = \pm x_{2} \bmod p$ and $x_{1} =
+  \pm x_{2} \bmod q$.  But we cannot have both $+$ or both $-$, by
+  assumption.  Wlog, we have $x_{1} = + x_{2} \bmod p$ and $x_{1} =
+  - x_{2} \bmod q$.  Then $p \mid (x_{1}-x_{2})$ but $q \nmid
+  (x_{1}-x_{2})$, otherwise we'd have $q \mid (2x_{2}) \Rightarrow q
+  \mid x_{2} \Rightarrow x_{2} \not\in \ZN^{*}$.  Then
+  $\gcd(x_{1}-x_{2},N) = p$, which we can compute efficiently.
+\end{proof}
+
+\begin{proof}[Proof of \cref{thm:rabin-owf-factor}]
   First, as already discussed it is easy to generate a function,
-  sample its domain, and evaluate the function.  The main fact we use
-  to prove one-wayness is the following.
+  sample its domain, and evaluate the function.
 
-  \begin{claim}
-    \label{claim:roots-factor}
-    Let $N = pq$ be the product of distinct odd primes.  Given any
-    $x_{1}, x_{2} \in \ZN^{*}$ such that $x_{1}^{2} = x_{2}^{2} \bmod
-    N$ but $x_{1} \neq \pm x_{2} \bmod N$, the factors of $N$ can be
-    computed efficiently.
-  \end{claim}
-
-  \begin{proof}[Proof of Claim]
-    We have $x_{1}^{2} = x_{2}^{2} \bmod p$ and $x_{1}^{2} = x_{2}^{2}
-    \bmod q$, which implies $x_{1} = \pm x_{2} \bmod p$ and $x_{1} =
-    \pm x_{2} \bmod q$.  But we cannot have both $+$ or both $-$, by
-    assumption.  Wlog, we have $x_{1} = + x_{2} \bmod p$ and $x_{1} =
-    - x_{2} \bmod q$.  Then $p \mid (x_{1}-x_{2})$ but $q \nmid
-    (x_{1}-x_{2})$, otherwise we'd have $q \mid (2x_{2}) \Rightarrow q
-    \mid x_{2} \Rightarrow x_{2} \not\in \ZN^{*}$.  Then
-    $\gcd(x_{1}-x_{2},N) = p$, which we can compute efficiently.
-  \end{proof}
-
-  Continuing with the proof of \cref{thm:rabin-owf-factor}, we
-  prove one-wayness by contrapositive, via a reduction.  Assuming we
-  have an inverter for the Rabin function, the idea is to choose our
-  own $x_{1} \in \ZN^{*}$ and invoke the inverter on $y = f_{N}(x_{1})
-  = x_{1}^{2} \bmod N$.  The square root $x_{2}$ it returns will be
-  $\neq \pm x_{1}$, with probability $1/2$.  In such a case, we get
-  the prime factorization of $N$ by \cref{claim:roots-factor}.
+  We prove one-wayness by contrapositive, via a reduction.
+  Assuming we have an inverter for the Rabin function, the idea is to choose our own $x_{1} \in \ZN^{*}$ and invoke the inverter on $y = f_{N}(x_{1}) = x_{1}^{2} \bmod N$.
+  The square root $x_{2}$ it returns will be $\neq \pm x_{1}$, with probability $1/2$.
+  In such a case, we get the prime factorization of $N$ by \cref{claim:roots-factor}.
   We now proceed more formally.
 
   Assume a non-uniform PPT inverter $\Inv$ violating the one-wayness

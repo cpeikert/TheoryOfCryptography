@@ -1,18 +1,9 @@
 \documentclass[11pt]{article}
 
-\usepackage{fullpage,microtype,pdfsync,hyperref}
-\usepackage{newtxtext}
-\usepackage[T1]{fontenc}
-
-\usepackage{mathtools,amsfonts,amssymb}
-\usepackage[amsmath,amsthm,thmmarks,hyperref]{ntheorem}
-\usepackage[capitalize,nameinlink,noabbrev]{cleveref}
+\input{header}
 
 \usepackage[noend]{algorithmic}
 \usepackage{algorithm}
-\usepackage{verbatim}
-
-\input{header}
 
 % VARIABLES
 
@@ -113,7 +104,7 @@ functions.
 \section{A Signature Scheme in the RO Model}
 \label{sec:signature-scheme-ro}
 
-\href{https://github.com/cpeikert/TheoryOfCryptography/blob/master/lec10.pdf}{Recall
+\href{https://github.com/cpeikert/TheoryOfCryptography/blob/master/lec10 - Asymmetric Encryption.pdf}{Recall
   the definition of a trapdoor permutation family:} it is a set
 $\set{f_{s} \colon D_{s} \to D_{s}}$ of permutations where $f_{s}$ is
 easy to invert with knowledge of the trapdoor (which is generated
@@ -121,7 +112,7 @@ along with the index $s$), and otherwise hard to invert on uniformly
 random values $y \in D_{s}$.  The RSA and Rabin function families are
 plausible trapdoor permutation candidates.
 
-\href{https://github.com/cpeikert/TheoryOfCryptography/blob/master/lec12.pdf}{Previously},
+\href{https://github.com/cpeikert/TheoryOfCryptography/blob/master/lec12 - Chosen-Ciphertext Attacks and Digital Signatures.pdf}{Previously},
 we attempted to design a secure signature scheme based on trapdoor
 permutations.  Our old scheme was simple: the public verification key
 was a function $f_{s}$, the secret signing key was its trapdoor (also

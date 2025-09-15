@@ -1,13 +1,5 @@
 \documentclass[11pt]{article}
 
-\usepackage{fullpage,microtype,pdfsync,hyperref}
-\usepackage{newtxtext}
-\usepackage[T1]{fontenc}
-
-\usepackage{mathtools,amsfonts,amssymb}
-\usepackage[amsmath,amsthm,thmmarks,hyperref]{ntheorem}
-\usepackage[capitalize,nameinlink,noabbrev]{cleveref}
-
 \input{header}
 
 % VARIABLES
@@ -262,12 +254,11 @@ concept of a negligible function is a \emph{useful} and
 more precise in our manipulations of probabilities.
 
 \begin{question}
-  Is the product of a negligible function and a non-negligible
-  function always negligible, always non-negligible, or neither?
+  Is the product of a negligible function and a non-negligible function necessarily negligible, necessarily non-negligible, or not necessarily either?
 \end{question}
   
 \begin{answer}
-  Neither; it depends on the functions. Consider \(f(n) = 2^{-n}\)
+  Not necessarily either; it depends on the functions. Consider \(f(n) = 2^{-n}\)
   (which is negligible) and \(g(n) = 2^n\) (which is non-negligible).
   Then, \(f(n) \cdot g(n) = 1\), which is clearly non-negligible. On
   the other hand, consider \(h(n) = 1\) (which is
