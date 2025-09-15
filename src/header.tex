@@ -1,4 +1,27 @@
-\RequirePackage{mathtools}
+\usepackage{fullpage}
+\usepackage{newtxtext}
+\usepackage{microtype}
+\usepackage[T1]{fontenc}
+
+\usepackage{hyperref}
+\hypersetup{hypertexnames=false,breaklinks=true,colorlinks=true,linkcolor=blue,filecolor=blue,citecolor=blue,urlcolor=blue}
+
+\usepackage{mathtools}
+% show equation numbers only for referenced equations
+\mathtoolsset{showonlyrefs}
+
+\usepackage{amsfonts,amssymb}
+\usepackage[amsmath,amsthm,thmmarks,hyperref]{ntheorem}
+\usepackage{thmtools}
+
+\usepackage{zref-clever}
+\zcsetup{
+        cap=true, % capitalize types
+        nameinlink,
+}
+% for migration from cleveref
+\newcommand{\cref}[1]{\zcref{#1}}
+\newcommand{\Cref}[1]{\zcref[S]{#1}}
 
 %%% BLACKBOARD SYMBOLS
 
@@ -26,25 +49,28 @@
 
 %%% THEOREM COMMANDS
 
-\theoremstyle{plain}            % following are "theorem" style
-\newtheorem{theorem}{Theorem}[section]
-\newtheorem{lemma}[theorem]{Lemma}
-\newtheorem{corollary}[theorem]{Corollary}
-\newtheorem{proposition}[theorem]{Proposition}
-\newtheorem{claim}[theorem]{Claim}
-\newtheorem{fact}[theorem]{Fact}
+\declaretheorem[numberwithin=section]{theorem}
 
-\crefname{claim}{Claim}{Claims} % cleveref doesn't know this one
+\declaretheorem[sibling=theorem,style=plain]
+        {lemma,corollary,proposition,claim,fact}
 
-\theoremstyle{definition}       % following are def style
-\newtheorem{definition}[theorem]{Definition}
-\newtheorem{conjecture}[theorem]{Conjecture}
-\newtheorem{example}[theorem]{Example}
-\newtheorem{protocol}[theorem]{Protocol}
+\declaretheorem[sibling=theorem,style=definition]
+        {definition,conjecture,construction,assumption,protocol}
 
-\theoremstyle{remark}           % following are remark style
-\newtheorem{remark}[theorem]{Remark}
-\newtheorem{note}[theorem]{Note}
+\declaretheorem[sibling=theorem,style=remark]
+        {remark,example,note}
+
+% teach zref-clever these names
+
+\zcRefTypeSetup{claim}{Name-sg=Claim,Name-pl=Claims,name-sg=claim,name-pl=claims}
+\zcRefTypeSetup{fact}{Name-sg=Fact,Name-pl=Facts,name-sg=fact,name-pl=facts}
+\zcRefTypeSetup{maintheorem}{Name-sg=Main Theorem,Name-pl=Main
+Theorems,name-sg=main theorem,name-pl=main theorems}
+\zcRefTypeSetup{conjecture}{Name-sg=Conjecture,Name-pl=Conjectures,name-sg=conjecture,name-pl=conjectures}
+\zcRefTypeSetup{construction}{Name-sg=Construction,Name-pl=Constructions,name-sg=construction,name-pl=constructions}
+\zcRefTypeSetup{assumption}{Name-sg=Assumption,Name-pl=Assumptions,name-sg=assumption,name-pl=assumptions}
+\zcRefTypeSetup{protocol}{Name-sg=Protocol,Name-pl=Protocols,name-sg=protocol,name-pl=protocols}
+\zcRefTypeSetup{question}{Name-sg=Question,Name-pl=Questions,name-sg=question,name-pl=questions}
 
 % equation numbering style
 \numberwithin{equation}{section}
@@ -308,5 +334,3 @@
 \loadxsimstyle{layouts}
 
 \AtEndDocument{\pagebreak\printsolutions}
-
-\crefname{question}{Question}{Questions}
