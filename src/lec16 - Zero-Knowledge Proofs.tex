@@ -85,7 +85,7 @@ knowledge.''
 \begin{definition}
   \label{def:hvzk}
   An interactive proof system $(P,V)$ for a language $L$ is said to be
-  \emph{honest-verifier zero-knowledge} if there exists an nuppt
+  \emph{honest-verifier zero-knowledge} if there exists a PPT
   simulator $\Sim$ such that for all $x \in L$, \[ \view_{V}[ P(x)
   \leftrightarrow V(x) ] \statind \Sim(x), \] where $\view_{V}$ is the
   ``view'' of the verifier in the interaction, consisting of its input
@@ -141,8 +141,8 @@ $V^{*}$, and show that its view can be efficiently simulated as well.
 \begin{definition}
   \label{def:zk}
   An interactive proof system $(P,V)$ for a language $L$ is
-  \emph{zero-knowledge} if for every nuppt $V^{*}$ there exists an
-  nuppt simulator $\Sim$ such that for all $x \in L$, \[ \view_{V^{*}}[
+  \emph{zero-knowledge} if for every PPT $V^{*}$ there exists a
+  PPT simulator $\Sim$ such that for all $x \in L$, \[ \view_{V^{*}}[
   P(x) \leftrightarrow V^{*}(x) ] \statind \Sim(x). \]
 \end{definition}
 
@@ -247,7 +247,7 @@ zero-knowledge (\cref{claim:statind-conditional} below).
   error is at most $\frac{1}{2}$.
 
   Now we prove that the protocol is zero-knowledge.  To do this, let
-  $V^{*}$ be an arbitrary nuppt algorithm.  Unlike in our above proof
+  $V^{*}$ be an arbitrary PPT algorithm.  Unlike in our above proof
   of \emph{honest-verifier} zero-knowledge for the $\gni$ problem, we
   do not know how $V^{*}$ will choose its challenge bit $b$ --- it
   might introduce some bias, or choose $b$ to depend on the prover's

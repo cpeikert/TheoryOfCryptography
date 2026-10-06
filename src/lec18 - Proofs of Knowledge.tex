@@ -97,7 +97,7 @@ knowledge of a discrete logarithm in a cyclic group.
 Is the protocol \emph{complete}?  Yes: if $P$ and $V$ act as
 described, then $g^{a} = g^{r + bw} = g^{r} \cdot (g^{w})^{b} = z
 \cdot x^{b}$.  Is the protocol \emph{zero-knowledge}?  Let $V^{*}$ be
-a (possibly malicious) nuppt verifier.  We define a simulator
+a (possibly malicious) PPT verifier.  We define a simulator
 $\Sim^{V^{*}}(x)$:
 \begin{enumerate}
 
@@ -168,7 +168,7 @@ too small) probability.
   \label{def:pok}
   An interactive proof system $(P,V)$ is a \emph{proof of knowledge}
   with \emph{knowledge error} $\kappa \in [0,1]$ for an $\NP$-relation
-  $R$ if there exists an nuppt oracle machine $K^{\cdot}$ (the
+  $R$ if there exists a PPT oracle machine $K^{\cdot}$ (the
   \emph{knowledge extractor}) such that for any $x \in L_{R}$, and for
   any (possibly unbounded) $P^{*}$ for which $p^{*}_{x} =
   \Pr[\out_{V}[P^{*} \leftrightarrow V(x)] = 1] > \kappa$, we have \[

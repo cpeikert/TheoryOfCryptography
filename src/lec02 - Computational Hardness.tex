@@ -167,91 +167,71 @@ it in cryptography.
 \subsection{Algorithms}
 \label{sec:algorithms}
 
-Informally, we all know what an algorithm is: something that you can
-implement in your favorite programming language, and run on any kind
-of computer (or network of computers) that you might like.  As a
-formal mathematical object, an algorithm is a \emph{Turing machine}.
-In this course we will not need the formal definition too often, and
-the informal notion will usually suffice.
+Informally, we all know what an algorithm is: something that you can implement in your favorite programming language, and run on any kind of computer (or network of computers) you might like.
+As a formal mathematical object, an algorithm is a \emph{Turing machine}.
+In this course we will not need the formal definition too often, and the informal notion will usually suffice.
 
-The \emph{running time} of an algorithm on an input is the number of
-``basic'' steps it performs before terminating.  Basic steps include
-reading or writing to a location in memory, performing an arithmetic
-operation (on fixed-size pieces of data), etc.  For our purposes, the
-exact set of basic operations will not be too important, because it is
-possible to translate between different sets of basic operations with
-only polynomial slowdown: an algorithm (using one set of basic ops)
-with running time $T$ can be converted into an algorithm (using
-another set) with running time $d T^{c}$, for some fixed constants
-$c,d$.  The running time $T(n)$ of an algorithm as a function of input
-length $n$ is its \emph{maximum} running time over all inputs of
-length $n$.  We say that an algorithm is \emph{polynomial-time} if its
-running time $T(n)=O(n^{c})$ for some fixed constant $c \geq 0$.
+\paragraph{Running time.}
 
-Two aspects of our model of an algorithm require a bit more precision.
-The first is \emph{randomization}, that is, we grant algorithms the
-ability to ``flip coins.''  In the Turing machine view, the machine is
-augmented with a read-only ``random tape,'' which is initialized with
-an infinite string of uniformly random and independent bits.
-Alternatively, we can view the algorithm's randomness as an extra
-argument $r \in \bit^{*}$, and we denote the output of $\Adv$ on input
-$x$ with ``coins'' $r$ as $\Adv(x; r)$.  (When omitted, $r$ is taken
-to be a uniformly random string.)  Note that $\Adv(x)$ defines a
-probability distribution over its outputs, where the probability is
-taken over the random coins.  The running time $T$ of a probabilistic
-algorithm $\Adv$ on an input $x$ is the \emph{maximum} number of steps
-performed by $\Adv(x;r)$, over all random strings $r$.  The notions of
-running time as a function of the input length $n = \len{x}$, and
-\emph{probabilistic polynomial-time} (PPT), are defined similarly.
-Note that a PPT algorithm can only ``look at'' polynomially many bits
-of its random string.
+The \emph{running time} of an algorithm on an input is the number of ``basic'' steps it performs before terminating.
+Basic steps include reading or writing to a location in memory, performing an arithmetic operation (on fixed-size pieces of data), etc.
+For our purposes, the exact set of basic operations will not be too important, because the standard computational models we consider can simulate one another with only polynomial slowdown.
+That is, an algorithm with running time~$T$ in one model can be simulated in another with running time at most $dT^{c}$, for some fixed constants $c,d>0$.
+The running time $T(\ell)$ of an algorithm is the \emph{maximum} number of steps it performs on any input of length~$\ell$.
+We say that an algorithm is \emph{polynomial-time} if $T(\ell)=O(\ell^{c})$ for some fixed constant $c\geq0$.
 
-In this course, PPT algorithms will be our main model of ``efficient
-computation'' for cryptographic schemes.  This is primarily to give us
-a \emph{useful, well-behaved abstraction}, which allows us not to get
-too caught up in the details of implementations.  Of course, an
-algorithm with running time $n^{100}$ is not very useful in practice,
-and at times we will take a more precise view of running times.
+\paragraph{Randomized algorithms.}
 
-The second aspect of our model, which we use only for modelling
-\emph{adversaries}, is \emph{non-uniformity}.  The idea is that we
-allow an adversary to have some extra ``advice'' that depends only on
-the \emph{length} of its input.  This advice can only increase what
-the algorithm is capable of computing, so security against non-uniform
-adversaries is potentially stronger than against only uniform ones.
-The ability to have advice will also simplify some of our security
-proofs.\footnote{It also makes Turing machines equivalent to ``circuit
-  families,'' which leads to more robust security definitions.}  More
-formally, we say that $\Adv$ is a non-uniform algorithm if there
-exists an infinite sequence $w_{1}, w_{2}, \ldots \in \bit^{*}$ so
-that on input $x$, $\Adv$ is also given the extra argument
-$w_{\len{x}}$.  The notion of PPT for non-uniform algorithms is as
-above; in particular, note that a non-uniform PPT machine can only
-``look at'' polynomially many bits of its advice string, so without
-loss of generality we can assume that $\len{w_{n}} = O(n^{c})$ for
-some constant $c \geq 0$.
+Our model also allows \emph{randomization}: algorithms may ``flip coins.''
+In the Turing machine view, the machine is augmented with a read-only ``random tape,'' which is initialized with an infinite string of uniformly random and independent bits.
+Alternatively, we can view the algorithm's randomness as an extra argument $r \in \bit^{*}$, and we denote the output of $\Adv$ on input $x$ with ``coins'' $r$ as $\Adv(x; r)$.
+(When omitted,~$r$ is taken to be a uniformly random string.)
+For fixed~$x$, $\Adv(x)$ defines a distribution over outputs induced by its random coins.
+If the input is itself random, the output distribution also accounts for that randomness.
+For a probabilistic algorithm, the running time $T(\ell)$ is the \emph{maximum} number of steps over all inputs of length~$\ell$ and all choices of random coins.
+An algorithm is \emph{probabilistic polynomial-time} (PPT) if $T(\ell)=O(\ell^{c})$ for some fixed constant $c\geq0$.
+Note that a PPT algorithm can read only polynomially many bits of its random string.
+
+In this course, PPT algorithms will be our main model of ``efficient computation'' for cryptographic schemes.
+This is primarily to give us a \emph{useful, well-behaved abstraction}, which allows us not to get too caught up in the details of implementations.
+Of course, an algorithm with running time $T(\ell)=\ell^{100}$ is not very useful in practice, and at times we will take a more precise view of running times.
+
+\paragraph{The security parameter.}
+
+To study how security scales, we index cryptographic schemes and experiments by a positive integer~$n$, called the \emph{security parameter}.
+Informally, it lets us specify ``how much'' security we want; it may determine quantities such as the key length, but need not equal the length of an algorithm's input.
+We give algorithms an additional input $1^n$, the all-$1$s string of length~$n$, so that they can use this parameter.
+We often suppress this input in notation, but it is implicitly available to all algorithms, including adversaries and reductions.
+The unary encoding of~$1^n$ allows a PPT algorithm to run for polynomially many steps in~$n$, regardless of the lengths of its other inputs.
+When the other inputs have length polynomially bounded in~$n$, polynomial time in the total input length is equivalent to polynomial time in~$n$.
+
+\paragraph{Uniformity and advice.}
+
+All algorithms in these notes, including adversaries, simulators, and reductions, are \emph{uniform} unless explicitly stated otherwise: a single finite program handles every security parameter and input.
+In particular, the unqualified term ``PPT'' means uniform probabilistic polynomial time.
+
+To model adversaries that have additional information depending on the security parameter, we can optionally allow \emph{non-uniformity}.
+A non-uniform algorithm~$\Adv$ has a sequence of advice strings $w_1,w_2,\ldots\in\bit^*$, and at security parameter~$n$ it is also given~$w_n$.
+The advice may depend on~$n$, but not on the particular input or random coins, and need not be computable from~$n$.
+For a non-uniform PPT algorithm, the advice length is polynomially bounded in~$n$, and the running time is polynomial in the total input length.
+Security against non-uniform PPT adversaries is potentially stronger than security against PPT adversaries; we will explicitly identify any use of this stronger requirement.
 
 \subsection{Asymptotics}
 \label{sec:asymptotics}
 
-We have defined running time as a function of input length $n$, and we
-will also frequently do so for probabilities.  The length $n$ is
-frequently called the \emph{security parameter} of a cryptographic
-scheme, because it (informally) lets us specify ``how much'' security
-we want.
+We use asymptotic bounds to describe both computational resources and probabilities as the security parameter grows.
 
-We say that a function $T(n)$ is \emph{polynomial}, written $T(n) =
-\poly(n)$, if $T(n) = O(n^{c})$ for some fixed constant $c$.  A
-nonnegative function $\nu(n)$ is \emph{negligible}, written $\nu(n) =
-\negl(n)$, if it vanishes faster than the inverse of any polynomial:
-$\nu(n) = o(n^{-c})$ for every constant $c > 0$, or equivalently,
-$\lim_{n \to \infty} \nu(n) \cdot n^{c} = 0$.  We usually apply
-the concept of a negligible function to quantify the probability of an
-``extremely rare'' event, i.e., one that will effectively ``never
-occur'' in a polynomial-time universe.  As with polynomial time, the
-concept of a negligible function is a \emph{useful} and
-\emph{well-behaved} abstraction, though at times we will need to be
-more precise in our manipulations of probabilities.
+\paragraph{Polynomial and negligible bounds.}
+
+We say that a function $T(n)$ is \emph{polynomially bounded}---or just \emph{polynomial} for short---written $T(n) = \poly(n)$, if $T(n) = O(n^{c})$ for some fixed constant $c$.
+A nonnegative function $\nu(n)$ is \emph{negligible}, written $\nu(n) = \negl(n)$, if it vanishes faster than the inverse of any polynomial: $\nu(n) = O(n^{-c})$ for every constant $c > 0$, or equivalently, $\lim_{n \to \infty} \nu(n) \cdot n^{c} = 0$ for every constant $c>0$.
+We usually apply the concept of a negligible function to quantify the probability of an ``extremely rare'' event, i.e., one that will effectively ``never occur'' in a polynomial-time universe.
+As with polynomial time, the concept of a negligible function is a \emph{useful} and \emph{well-behaved} abstraction, though at times we will need to be more precise in our manipulations of probabilities.
+
+Two closure properties will let us combine negligible bounds in security proofs.
+A sum of a constant number of negligible functions is negligible: for every constant $c>0$, each summand is $O(n^{-c})$, so their sum is too.
+The product of a negligible function~$\nu(n)$ and a nonnegative polynomially bounded function~$p(n)$ is also negligible.
+Indeed, if $p(n)=O(n^a)$ for some constant $a\geq0$, then for every constant $c>0$, we have $\nu(n)=O(n^{-(a+c)})$ and hence $p(n)\nu(n)=O(n^{-c})$.
 
 \begin{question}
   Is the product of a negligible function and a non-negligible function necessarily negligible, necessarily non-negligible, or not necessarily either?
@@ -265,6 +245,13 @@ more precise in our manipulations of probabilities.
   non-negligible). Then \(f(n) \cdot h(n) = 2^{-n}\), which is
   negligible.
 \end{answer}
+
+\paragraph{Changing the security parameter.}
+
+In many settings the effective security parameter can change, and we need to determine whether a negligible function remains negligible in the new parameter.
+This holds whenever the new parameter is polynomially bounded in the original parameter and tends to infinity.
+Formally, if $\nu(n)=\negl(n)$ and $n'=n'(n)=\poly(n)$ is a positive integer-valued function tending to infinity as $n\to\infty$, then $\nu(n)=\negl(n')$, meaning that $\nu(n)=O(\parens{n'}^{-d})$ for every constant $d>0$ as $n'\to\infty$.
+Indeed, writing $n'=O(n^{c})$ for some constant $c>0$, for every constant $d>0$ we have $\nu(n)\in O(n^{-cd})\subseteq O(\parens{n'}^{-d})$.\footnote{The bound $n'=\poly(n)$ matters: e.g., if $n'=2^{n}$, then $2^{-n}$ is negligible in~$n$ but equals $1/n'$, which is not $O(\parens{n'}^{-2})$.}
 
 \section{One-Way Functions}
 \label{sec:one-way-functions}
@@ -294,7 +281,7 @@ without one-way functions.
     all $x \in \bit^{*}$.
   \item \emph{Hard to invert.}  An efficient algorithm inverts $f$ on
     a random input with only negligible probability.  Formally, for
-    any non-uniform PPT algorithm $\Inv$, the \emph{advantage} of
+    any PPT algorithm $\Inv$, the \emph{advantage} of
     $\Inv$ \[ \advan_{f}(\Inv) := \Pr_{x \gets \bit^{n}} \bracks*{
       \Inv(1^{n}, f(x)) \in f^{-1}(f(x)) } = \negl(n) \] is a
     negligible function (in the security parameter $n$).

@@ -24,7 +24,7 @@
 \label{sec:one-time-signatures}
 
 We recall the definition of unforgeability under chosen-message attack
-for a signature scheme, which requires that for all nuppt $\For$,
+for a signature scheme, which requires that for all PPT $\For$,
 \[ \Pr_{(vk,sk) \gets \siggen} \left[ \calF^{\sigsign_{sk}(\cdot)}(vk)
   \text{ forges} \right] \leq \negl(n). \]
 
@@ -127,7 +127,7 @@ function $f$:
   $\sigma'_{i^*}$ is a valid forgery for $m'$, then $\sigma'_{i^{*}}
   \in f^{-1}(y^{i^*,b^*} = y)$, as desired.
 
-  We now analyze $\Sim^{\For}$.  Clearly it is nuppt, hence
+  We now analyze $\Sim^{\For}$.  Clearly it is PPT, hence
   $\advan_{f}(\Sim^{\For})$ must be negligible.  By the following
   claim, $\advan_{\ots}(\For)$ must therefore be negligible as well,
   as desired.
@@ -181,42 +181,29 @@ fresh verification key using a special kind of hash function.
 \subsection{Collision-Resistant Hash Functions}
 \label{sec:coll-resist-hash}
 
-We want a function that ``compresses'' its input, but for which it is
-hard to find two inputs that hash to the same output.  This does not
-make much sense for a single \emph{fixed} function, because a
-non-uniform adversary can simply have two colliding inputs
-``hard-wired'' into it.  But it does make sense for a function chosen
-at random from a family.  We also want the function (i.e., its
-description) to be \emph{public}, so that it can be run and checked by
-anyone.  This means that the adversary should be given the description
-of the function, rather than just an oracle to it.
+We want a function that ``compresses'' its input, but for which it is hard to find two distinct inputs that hash to the same output, called a \emph{collision}.
+A single fixed compressing function cannot satisfy this requirement, because there \emph{exists} an efficient adversary that simply has a collision ``hard-coded'' in its program.\footnote{Similarly, if we fix one function for each security parameter, a non-uniform adversary can receive a collision for that parameter as advice.}
+We therefore choose the function at random from a family and give its description to the adversary, which must then find a collision for that chosen function.
+We want the function's description to be \emph{public}, so that anyone can evaluate it; the adversary therefore receives the description, rather than just oracle access.
 
 \begin{definition}
-  A family of hash functions $\set{h_s \colon D \to R}$ (where
-  $\abs{R} < \abs{D}$) is \emph{collision-resistant} if for all nuppt
-  $\Adv$,
-  \[ \Pr_{h \gets \{ h_s \}} [\Adv(s) \text{ outputs distinct } x, x'
-  \text{ such that } h(x) = h(x')] \leq \negl(n). \]
+  A family of hash functions $\set{h_s \colon D \to R}$ (where $\abs{R} < \abs{D}$) is \emph{collision resistant} if for all PPT $\Adv$,
+  \[ \Pr_{h \gets \{ h_s \}} [\Adv(s) \text{ outputs distinct } x, x' \text{ such that } h(x) = h(x')] \leq \negl(n).
+  \]
 \end{definition}
 
-\begin{example}[Based on discrete logarithm]
-  Consider the family $\set{h_{p,g,y} \colon \Zp^{*} \times \bit \to
-    \Zp^{*}}$ for prime $p$, generator $g$ of $\Z_p^*$, and $y \in
-  \Z_p^*$:
-  \[h_{p,g,y}(x,b) = y^b g^x \bmod p. \]
+\begin{example}[Collision resistance from discrete logarithm]
+  Consider the family $\set{h_{p,g,y} \colon \Zp^{*} \times \bit \to \Zp^{*}}$ for prime $p$, generator $g$ of $\Z_p^*$, and $y \in \Z_p^*$: \[h_{p,g,y}(x,b) = y^b g^x \bmod p.
+  \]
 \end{example}
 
-A function from this family shrinks its input by $1$ bit.  To get
-additional compression, we can simply iterate the function by feeding
-its output (plus an additional bit) back to itself repeatedly.  It is
-easy to check that a collision in the basic function can always be
-extracted from any collision in the iterated function (even if the
-colliding strings have different lengths).
+A function from this family shrinks its input by one bit.
+To get additional compression, we can simply iterate the function by feeding its output (plus an additional input bit) back to itself repeatedly.
+It is easy to check that a collision in the basic function can be efficiently extracted from any collision in the iterated function, as long as the colliding input strings have the same length.
+(Variable lengths can be handled by a suitable input encoding.)
 
 \begin{claim}
-  Under the discrete log assumption (i.e., that computing
-  $\log_{g}(y)$ is hard), the family $\set{h_{p,g,y}}$ is a
-  collision-resistant hash family.
+  Under the discrete log assumption (i.e., that computing $\log_{g}(y)$ is hard), the family $\set{h_{p,g,y}}$ is a collision-resistant hash family.
 \end{claim}
 
 \begin{proof}

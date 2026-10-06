@@ -52,7 +52,7 @@ equivalent to this one.)
   \item \emph{Easy to evaluate function:} there is a deterministic
     polynomial-time algorithm $\algo{F}$ for which
     $\algo{F}(s,x)=f_{s}(x)$ for all $s \in S$, $x \in D_{s}$.
-  \item \emph{Hard to invert:} for any non-uniform PPT algorithm
+  \item \emph{Hard to invert:} for any PPT algorithm
     $\Inv$, \[ \Pr_{s \gets \algo{S}(1^n), x \gets \algo{D}(s)}
     \bracks*{\Inv(s,f_{s}(x)) \in f_{s}^{-1}(f_{s}(x))} = \negl(n). \]
   \end{enumerate}
@@ -371,7 +371,7 @@ To prove the theorem, we will rely on the following essential number-theoretic f
   In such a case, we get the prime factorization of $N$ by \cref{claim:roots-factor}.
   We now proceed more formally.
 
-  Assume a non-uniform PPT inverter $\Inv$ violating the one-wayness
+  Assume a PPT inverter $\Inv$ violating the one-wayness
   of the Rabin collection, i.e., \[ \Pr_{N \gets \algo{S}(1^{n}), x
     \gets \ZN^{*}}[\Inv(N, y = x^{2} \bmod N) \in \sqrt{y} \bmod N] =
   \delta(n) \] is non-negligible.

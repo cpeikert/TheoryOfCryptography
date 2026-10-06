@@ -276,7 +276,7 @@ we do so by giving the adversary oracle access to the scheme.
 
 \begin{definition}[Unforgeability under Chosen-Message Attack]
   \label{def:uf-mca}
-  We say that $\mac$ is UF-CMA if for all nuppt $\For$,
+  We say that $\mac$ is UF-CMA if for all PPT $\For$,
   \[
   \advan_{\mac}(\For) := \Pr_{k \gets \macgen}\left[\For^{\mactag_k}
   \text{ succeeds} \right] \leq \negl(n),
@@ -312,7 +312,7 @@ $\msgspace = \tagspace = \bit^n$, and $\set{f_k \colon \msgspace \to
   We shall show that attacking $\mac$ is at least as hard as breaking
   the PRF family (i.e., distinguishing a function chosen at random
   from the family from a truly uniform, random function).  Let $\For$
-  be a candidate nuppt forger against $\mac$.  We use $\For$ to
+  be a candidate PPT forger against $\mac$.  We use $\For$ to
   construct an (oracle) distinguisher $\Dist^{\cdot}$ for the PRF game
   as follows.  Notice that $\Dist$ needs to ``simulate'' the
   chosen-message attack for $\For$, by providing a $\mactag_{k}$
@@ -327,7 +327,7 @@ $\msgspace = \tagspace = \bit^n$, and $\set{f_k \colon \msgspace \to
   If $m'$ is different from all of the queries so far and $t' =
   g(m')$, then $\Dist$ returns $1$, otherwise it returns $0$.
 
-  We observe that $D$ is clearly nuppt.  We also remark that $\Dist$
+  We observe that $D$ is clearly PPT.  We also remark that $\Dist$
   only outputs $1$ when $\For$ outputs a tag for a message $m$ that
   was not previously queried.  Now we want to know the advantage of
   $\Dist$ against $\set{f_k}$:
@@ -411,7 +411,7 @@ ciphertext was judged to be authentic.
   $\scheme{AE}$ is a secure authenticated encryption scheme if it is:
   \begin{enumerate}
   \item IND-CPA-secure as an encryption scheme, and
-  \item Strongly unforgeable as a $\mac$.  That is, for all nuppt
+  \item Strongly unforgeable as a $\mac$.  That is, for all PPT
     $\For$,
     \[
     \Pr_{k \gets \skcgen}[\For^{\skcenc_k(\cdot)} \text{ forges}] \leq \negl(n),

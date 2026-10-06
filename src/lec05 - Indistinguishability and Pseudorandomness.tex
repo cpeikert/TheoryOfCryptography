@@ -161,12 +161,12 @@ are ``essentially the same,'' in an asymptotic sense.
   ``essentially uniform,'' or \emph{statistically pseudorandom}.
 \end{example}
 
-Can a statistically peudorandom generator exist?  This
-depends on the definition of ``generator'' (which we give below), but
+Can a statistically pseudorandom generator exist?  This
+depends on the definition of ``generator'' (which we give in the next lecture), but
 for any meaningful definition of the term, it isn't possible!  This
 can be shown by explicitly demonstrating an appropriate subset (or
 test) that distinguishes strings output by the generator from
-uniformly random ones; see \cref{ques:3} below.
+uniformly random ones; we will do this in the next lecture.
 
 \subsection{Computational Indistinguishability}
 \label{sec:comp-indist}
@@ -179,214 +179,208 @@ an algorithm $\Adv$ (possibly randomized), define $\Adv$'s
 \[ \advan_{X,Y}(\Adv) = \abs*{\Pr[\Adv(X)=1] - \Pr[\Adv(Y)=1]}. \]
 (The output of $\Adv$ can be arbitrary, but we interpret $1$ as a
 special output indicating that the test implemented by $\Adv$ is
-``satisfied,'' and any other output as ``not satisfied.'')  We extend
-this to ensembles $\calX$ and $\calY$, making
-$\advan_{\calX,\calY}(\Adv)$ a function of $n \in \N$.
+``satisfied,'' and any other output as ``not satisfied.'')
+For ensembles $\calX = \set{X_{n}}$ and $\calY = \set{Y_{n}}$, we give the distinguisher the security parameter explicitly and define its advantage as the function
+\[
+  \advan_{\calX,\calY}(\Adv)(n)
+  = \abs*{\Pr[\Adv(1^{n},X_{n})=1] - \Pr[\Adv(1^{n},Y_{n})=1]}\text.
+\]
+We may suppress the input $1^{n}$ and the argument~$n$ when they are clear from context.
 
 \begin{definition}
   \label{def:comp-ind}
-  Let $\calX = \set{X_{n}}$ and $\calY = \set{Y_{n}}$ be ensembles,
-  where $X_{n}$ and $Y_{n}$ are distributions over $\bit^{l(n)}$ for
-  $l(n) = \poly(n)$.  We say that $\calX$ and $\calY$ are
-  \emph{computationally indistinguishable}, written
-  $\calX \compind \calY$, if $\advan_{\calX,\calY}(\Adv) = \negl(n)$
-  for all non-uniform PPT algorithms $\Adv$.  We say that $\calX$ is
-  (computationally) \emph{pseudorandom} if
-  $\calX \compind \set{U_{l(n)}}$, the ensemble of uniform
-  distributions over $\bit^{l(n)}$.
+  Let $\calX = \set{X_{n}}$ and $\calY = \set{Y_{n}}$ be ensembles.
+  We say that $\calX$ and $\calY$ are \emph{computationally indistinguishable}, written $\calX \compind \calY$, if $\advan_{\calX,\calY}(\Adv) = \negl(n)$ for every PPT algorithm~$\Adv$.
+
+  \noindent If each~$X_{n}$ is a distribution over $\bit^{\ell(n)}$, we say that~$\calX$ is (computationally) \emph{pseudorandom} if $\calX \compind \set{U_{\ell(n)}}$, the ensemble of uniform distributions over $\bit^{\ell(n)}$.
 \end{definition}
 
 The basic facts about statistical distance also carry over to computational indistinguishability, where we restrict all functions/tests to be \emph{efficient}.
-We call the analogue of \cref{lem:ipl} the \emph{composition lemma}, because it involves the composition of an applied procedure and a distinguisher.
+We call the analogue of \cref{lem:ipl} the \emph{composition lemma}, because it involves the composition of an arbitrary PPT procedure and distinguisher.
 We call the analogue of the triangle inequality the \emph{hybrid lemma}, because (as we will see soon) we usually invoke it on a sequence of ``hybrid'' distributions that interpolate step-by-step between two distributions we ultimately care about.
 
 \begin{lemma}[Composition lemma]
   \label{lem:composition}
-  Let $\calX = \set{X_{n}}$ and $\calY = \set{Y_{n}}$ be ensembles, $\Sim$ be any non-uniform PPT algorithm, and $\calX' = \set{X'_{n} = \Sim(X_{n})}$ and $\calY' = \set{Y'_{n} = \Sim(Y_{n})}$.
-  Then for any non-uniform PPT algorithm~$\Dist'$, we have that $\advan_{\calX',\calY'}(\Dist') = \advan_{\calX,\calY}(\Dist' \circ \Sim)$.
+  Let $\calX = \set{X_{n}}$ and $\calY = \set{Y_{n}}$ be ensembles, and let~$\Sim$ be a PPT algorithm.
+  Define $X'_{n}=\Sim(1^{n},X_{n})$ and $Y'_{n}=\Sim(1^{n},Y_{n})$, and let $\calX'=\set{X'_{n}}$ and $\calY'=\set{Y'_{n}}$.
+  For any distinguisher~$\Dist'$ (regardless of efficiency), the composed distinguisher
+  \[
+    \Dist(1^{n},\cdot) := \Dist'(1^{n},\Sim(1^{n},\cdot))
+  \]
+  has advantage
+  \[
+    \advan_{\calX,\calY}(\Dist)(n) = \advan_{\calX',\calY'}(\Dist')(n)\text.
+  \]
+  If~$\Dist'$ is PPT, then so is~$\Dist$.
   In particular, if $\calX \compind \calY$, then $\calX' \compind \calY'$.
 \end{lemma}
 
 \begin{proof}
-  Consider the composed algorithm $\Dist = \Dist' \circ \Sim$, i.e., on input~$x$, it runs $\Dist(\Sim(x))$ and outputs the same answer.
-  By construction, we have that
+  The algorithm~$\Dist$ runs~$\Sim$ and then~$\Dist'$, using independent randomness for the two runs, and outputs the answer of~$\Dist'$.
+  If~$\Dist'$ is PPT, then so is~$\Dist$, because~$\Sim$ is PPT and its output length is bounded by its running time.
+  By construction,
   \[
     \begin{aligned}
-      \advan_{\calX',\calY'}(\Dist')
-      &= \abs{\Pr[\Dist'(X'_{n})=1] - \Pr[\Dist'(Y'_{n})=1]} \\
-      &= \abs{\Pr[\Dist'(\Sim(X_{n}))=1] - \Pr[\Dist'(\Sim(Y_{n}))=1]} \\
-      &= \advan_{\calX,\calY}(\Dist) ,
+      \advan_{\calX,\calY}(\Dist)(n)
+      &= \abs*{\Pr[\Dist(1^{n},X_{n})=1] - \Pr[\Dist(1^{n},Y_{n})=1]} \\
+      &= \abs*{\Pr[\Dist'(1^{n},\Sim(1^{n},X_{n}))=1]
+        - \Pr[\Dist'(1^{n},\Sim(1^{n},Y_{n}))=1]} \\
+      &= \abs*{\Pr[\Dist'(1^{n},X'_{n})=1] - \Pr[\Dist'(1^{n},Y'_{n})=1]} \\
+      &= \advan_{\calX',\calY'}(\Dist')(n)\text.
     \end{aligned}
   \]
-  as claimed.
-  In particular, if $\calX \compind \calY$, then because~$\calD$ is non-uniform PPT by construction, the right-hand side is $\negl(n)$, hence so is the left-hand side.
+  For the final claim, restrict to PPT distinguishers~$\Dist'$.
+  If $\calX \compind \calY$, the left-hand side is negligible because~$\Dist$ is PPT, so the right-hand side is negligible as well; since~$\Dist'$ is an arbitrary PPT algorithm, $\calX' \compind \calY'$.
 \end{proof}
 
-\begin{lemma}[Hybrid lemma]
-  \label{lem:hybrid}
-  Let $X^{i}$ for $i \in \set{0, 1, \ldots, m}$ be distributions for some positive integer~$m$.
-  Then for \emph{any} algorithm~$\Dist$ (regardless of efficiency),
-  \[ \advan_{X^{0},X^{m}}(\Dist) \leq \sum_{i \in [m]} \advan_{X^{i-1}, X^{i}}(\Dist) .
+The algorithm~$\Sim$ is often called a \emph{simulator} because it ``simulates'' a sample from~$X'_n$ or~$Y'_n$ given a sample from~$X_n$ or~$Y_n$, respectively.
+It is thus a \emph{reduction} from distinguishing $\calX$ and~$\calY$ to distinguishing $\calX'$ and~$\calY'$.
+
+\begin{question}
+  Let $\calX=\set{X_n}$ be a pseudorandom ensemble.
+  Is $\set{\overline{X_n}}$ necessarily pseudorandom as well, where $\overline{\cdot}$ denotes bitwise complement?
+  \emph{Hint:} use \cref{lem:composition}.
+\end{question}
+
+\begin{answer}
+  Yes: complementing a uniformly random string preserves its distribution.
+  Let $\ell(n)$ denote the length of the strings distributed according to~$X_n$.
+  Define the efficient algorithm $\Sim(1^n,z):=\overline{z}$.
+  Since $\calX\compind\set{U_{\ell(n)}}$, \cref{lem:composition} gives
+  \[
+    \set{\overline{X_n}}
+    =\set{\Sim(1^n,X_n)}
+    \compind\set{\Sim(1^n,U_{\ell(n)})}
+    \equiv\set{U_{\ell(n)}}\text,
   \]
-  In particular, let $\calX^{i} = \set{X^{i}_{n}}$ be~$m$ ensembles, where~$m$ is a constant independent of~$n$.
-  If $\calX^{i-1} \compind \calX^{i}$ for every $i \in [m]$, then $\calX^{0} \compind \calX^{m}$.
+  where the last equality of distributions holds because bitwise complementation is a permutation of $\bit^{\ell(n)}$.
+  Thus $\set{\overline{X_n}}$ is pseudorandom.
+\end{answer}
+
+\Cref{lem:composition} uses the same index~$n$ for both the source and target ensembles.
+In some applications, the output distribution at parameter~$n'$ instead depends on a source distribution at a different, related index~$n$.
+For example, we may define $X'_{2n}=\Sim(1^{n},X_{n})$ and $Y'_{2n}=\Sim(1^{n},Y_{n})$, and want to establish indistinguishability with respect to the parameter $n'=2n$.
+The following extension allows~$n'$ to be a function of~$n$, with its values ranging over an infinite subset~$I$ of~$\N$.
+For ensembles indexed by~$I$, we interpret negligibility and indistinguishability by letting~$n'$ tend to infinity within~$I$.
+
+\begin{lemma}[Composition with security-parameter change]%
+  \label{lem:composition-parameters}
+  Let $\calX = \set{X_{n}}$ and $\calY = \set{Y_{n}}$ be ensembles, and let~$\Sim$ be a PPT algorithm.
+  Let $n'=n'(n)$ be an injective map such that $1^{n'}$ is computable in polynomial time from $1^{n}$, and let $I=n'(\N)$.
+  Define $X'_{n'}=\Sim(1^{n},X_{n})$ and $Y'_{n'}=\Sim(1^{n},Y_{n})$, and let $\calX'=\set{X'_{n'}}_{n' \in I}$ and $\calY'=\set{Y'_{n'}}_{n' \in I}$.
+  For any distinguisher~$\Dist'$ (regardless of efficiency), the composed distinguisher $\Dist(1^{n},\cdot) := \Dist'(1^{n'},\Sim(1^{n},\cdot))$ has advantage
+  \[
+    \advan_{\calX,\calY}(\Dist)(n) = \advan_{\calX',\calY'}(\Dist')(n')\text.
+  \]
+  If~$\Dist'$ is PPT, then so is~$\Dist$.
+  In particular, if $\calX \compind \calY$, then $\calX' \compind \calY'$ on the target parameter set~$I$.
 \end{lemma}
 
 \begin{proof}
-  For each~$i$, let $p_{i} = \Pr[\Dist(X^{i}) = 1]$.
-  By the triangle inequality, we can write $\Dist$'s advantage as
-  \[ \advan_{X^{0}, X^{m}}(\Dist) = \abs{p_{0} - p_{m}} \leq \sum_{i \in [m]} \abs{p_{i-1} - p_{i}} = \sum_{i \in [m]} \advan_{X^{i-1},X^{i}}(\Dist) .
-  \]
-  
-  Now consider the ensembles $\calX^{i}$, and restrict to non-uniform PPT~$\Dist$.
-  By assumption, each $\advan_{\calX^{i-1}, \calX^{i}}(\Dist) = \nu_{i}(n)$, where $\nu_{i}(n)$ is a negligible function that may be \emph{different for each $i \in [m]$}.
-  Fortunately, the sum of any \emph{constant} number of negligible functions is indeed negligible: letting $\nu(n) = \sum_{i} \nu_{i}(n)$, we need to show that for all $c > 0$, there exists some constant~$n_{0}$ such that $\nu(n) \leq n^{-c}$ for all $n \geq n_{0}$.
-  We know that for each $i \in [m]$, there is a constant~$n_{i}$ such that $\nu_{i}(n) \leq n^{-(c+1)} \leq n^{-c}/m$ for all $n \geq n_{i}$.
-  Letting $n_{0} = \max_{i \in [m]} n_{i}$ be the largest of these---which is a constant (independent of~$n$) because~$m$ is constant---it follows that $\nu(n) \leq n^{-c}$ for all $n \geq n_{0}$, as desired.
+  Injectivity ensures that $\calX',\calY'$ are well-defined and that $n'(n)\to\infty$ as $n\to\infty$; efficient computation of $1^{n'}$ from $1^{n}$ implies $n'=\poly(n)$.
+  The advantage equality follows by the same calculation as in \cref{lem:composition}, using independent randomness for~$\Sim$ and~$\Dist'$.
+
+  Fix any PPT distinguisher~$\Dist'$.
+  Then~$\Dist$ is PPT, because $1^{n'}$ is efficiently computable from $1^{n}$ and~$\Sim$ is PPT.
+  If $\calX \compind \calY$, then the advantage of~$\Dist$ is negligible in~$n$.
+  The change-of-parameter property from Lecture~2 then implies that the advantage of~$\Dist'$ is negligible in~$n'$ on~$I$, proving $\calX' \compind \calY'$.
 \end{proof}
 
 \begin{remark}
-  In the proof of the lemma, we used the triangle inequality on the quantities $\advan_{X^{i-1},X^{i}}(\Dist)$ to conclude something about $\advan_{X^{0},X^{m}}(\Dist)$.
-  Syntactically this is unremarkable, but observe closely what we have done: even though $\Dist$'s ``goal in life'' is to distinguish between~$X^{0}$ and~$X^{m}$, by referring to the quantities $\advan_{X^{i-1},X^{i}}(\Dist)$, we are implicitly considering how $\Dist$ behaves on \emph{all} the hybrid distributions~$X^{i}$---even ones on which $\Dist$ was never ``designed'' to run!
-  Yet because~$\Dist$ is ``just an algorithm,'' we can run it and use it for whatever purposes we like.
-  The hybrid lemma says that in order for~$\Dist$ to distinguish (with non-negligible advantage) between the ensembles~$\calX^{0}$ and~$\calX^{m}$, it must also distinguish between~$\calX^{i}$ and~$\calX^{i+1}$ for some $i$, which is impossible by hypothesis.
+  Both composition statements also hold for non-uniform PPT algorithms $\Dist'$ and~$\Sim$ if the source ensembles are indistinguishable against non-uniform PPT distinguishers.
+  The reduction's advice consists of the advice needed by the two algorithms at the corresponding parameters; its length remains polynomially bounded.
 \end{remark}
 
-Importantly, the asymptotic part of \cref{lem:hybrid} considers only a \emph{constant} number of hybrid ensembles, because it critically relies on the fact that the sum of a constant number of negligible functions is negligible.
-However, in many applications we will need to consider a number of hybrid distributions that \emph{grows with the security parameter}~$n$.
-This is considerably more subtle: first, since the distributions in an ensemble are themselves indexed by~$n$, it is not so clear how to meaningfully define a number of ensembles that varies with~$n$.
-Second, it turns out that the sum of $\poly(n)$-many \emph{different} negligible functions may be non-negligible!\footnote{Consider the sequence of functions $\nu_{i}$ for $i \in \N$, where $\nu_{i}(n) = 1$ if $n=i$, and $\nu_{i}(n)=0$ otherwise.
-  Then each individual~$\nu_{i}$ is negligible, because $\nu_{i}(n) = 0$ for all $n > n_{0} := i$.
-  However, defining $\nu(n) = \sum_{i=1}^{n} \nu_{i}(n)$ as the sum of the first~$n$ functions in the sequence, we have that $\nu(n) = 1$ for all~$n$, which is clearly not negligible.
-  The proof of \cref{lem:hybrid} fails here because the~$n_{0}$ defined therein is not a constant, but instead depends on~$n$.}
+\begin{lemma}[Hybrid lemma]
+  \label{lem:hybrid}
+  Let $X^0,\ldots,X^m$ be distributions for some positive integer~$m$, and let~$\Dist$ be any algorithm (regardless of efficiency).
+  Writing $p_i=\Pr[\Dist(X^i)=1]$, we have
+  \[
+    \advan_{X^0,X^m}(\Dist)
+    =\abs[\bigg]{\sum_{i\in[m]}\parens{p_{i-1}-p_i}}
+    \leq\sum_{i\in[m]}\advan_{X^{i-1},X^i}(\Dist)\text.
+  \]
+\end{lemma}
 
-The following corollary side-steps the first issue by considering ensembles for only the ``endpoint'' distributions, not the intermediate hybrids, and deals with the second issue by requiring that each advantage term be bounded by the \emph{same} negligible function.
-This will indeed be the case in all the applications we consider, because all such terms will arise from applying the composition lemma (\cref{lem:composition}) for the \emph{same pair} of indistinguishable ``source'' ensembles $\calX,\calY$, with the \emph{same (composed) distinguisher} $\Dist = \Dist' \circ \Sim$.
-(Or, slightly more generally, a constant number of indistinguishable pairs, with one composed distinguisher for each.)
+\begin{proof}
+  By telescoping and the triangle inequality,
+  \[
+    \advan_{X^0,X^m}(\Dist)=\abs{p_0-p_m}=\abs[\bigg]{\sum_{i\in[m]}\parens{p_{i-1}-p_i}}\leq\sum_{i\in[m]}\abs{p_{i-1}-p_i}=\sum_{i\in[m]}\advan_{X^{i-1},X^i}(\Dist)\text.
+  \]
+\end{proof}
+
+\begin{remark}
+  Even though the intended goal of~$\Dist$ is to distinguish~$X^0$ from~$X^m$, the proof of \cref{lem:hybrid} analyzes the same distinguisher on every hybrid distribution~$X^i$.
+  This is legitimate because~$\Dist$ is just an algorithm, so we can analyze its behavior on any input distribution we like.
+  If~$\Dist$ has advantage~$\varepsilon$ between~$X^0$ and~$X^m$, the hybrid lemma guarantees that it has advantage at least $\varepsilon/m$ between some adjacent pair $X^{i-1}$ and~$X^i$.
+\end{remark}
 
 \begin{corollary}
-  \label{cor:hybrid-poly}
-  Let $\calX = \set{X_{n}}$ and $\calY = \set{Y_{n}}$ be ensembles, and $H^{i}_{n}$ be ``hybrid'' distributions for $i \in \set{0, \ldots, m}$ where $m=\poly(n)$ may vary with~$n$, and where $H^{0}_{n} = X_{n}$ and $H^{m}_{n} = Y_{n}$.
-  If $\advan_{H_{n}^{i-1},H_{n}^{i}}(\Dist) \leq \nu(n)$ for all $i \in [m]$ and a \emph{single} negligible function $\nu(n) = \negl(n)$, then $\advan_{\calX,\calY}(\Dist) = \negl(n)$ as well.
+  \label{cor:hybrid-constant}
+  Let $\calX^0,\calX^{1},\ldots,\calX^m$ be ensembles, where~$m$ is a positive constant independent of~$n$.
+  If $\calX^{i-1}\compind\calX^i$ for every $i\in[m]$, then $\calX^0\compind\calX^m$.
 \end{corollary}
 
 \begin{proof}
-  This follows immediately from (the first part of) \cref{lem:hybrid} and the fact that $m \cdot \nu(n) = \negl(n)$, because $m = \poly(n)$.
+  Write $\calX^i=\set{X^i_n}$ and fix any PPT distinguisher~$\Dist$.
+  For each security parameter~$n$, apply \cref{lem:hybrid} to $X^0_n,\ldots,X^m_n$ and the algorithm $\Dist(1^n,\cdot)$, obtaining
+  \[
+    \advan_{\calX^0,\calX^m}(\Dist)(n)
+    \leq\sum_{i\in[m]}\advan_{\calX^{i-1},\calX^i}(\Dist)(n)\text.
+  \]
+  Each summand is a negligible function by hypothesis, and a sum of a constant number of negligible functions is itself negligible: for every constant $c>0$, each summand is $O(n^{-c})$, so their sum is also $O(n^{-c})$.
+  Since~$\Dist$ was arbitrary, $\calX^0\compind\calX^m$.
 \end{proof}
 
-\section{Pseudorandom Generators}
-\label{sec:prgs}
+\paragraph{Polynomially many hybrid steps.}
 
-\begin{definition}
-  \label{def:prg}
-  A \emph{deterministic} function $G : \bit^{*} \to \bit^{*}$ is a
-  \emph{pseudorandom generator} (PRG) with output length $\ell(n) > n$
-  if:
-  \begin{itemize}
-  \item $G$ can be computed by a polynomial-time algorithm,
-  \item $\len{G(x)} = \ell(\len{x}) > \len{x}$ for all
-    $x \in \bit^{*}$, and
-  \item the ensemble $\set{G(U_{n})}$ is (computationally)
-    pseudorandom.
-  \end{itemize}
-  
-  This last property essentially says that $\set{G(U_{n})}$ and
-  $\set{U_{\ell(n)}}$ are computationally indistinguishable. By the
-  composition lemma, it follows that $G(U_{n})$ can be used in place
-  of $U_{\ell(n)}$ in \emph{any} (efficient) application!
-\end{definition}
+In many applications, the number of hybrid steps grows (polynomially) with the security parameter~$n$.
+We cannot directly express this by replacing the constant~$m$ in \cref{cor:hybrid-constant} with a function $m(n)$, because~$n$ is in scope only within each ensemble.
+Instead, for each~$n$, we define a sequence of \emph{distributions} $H^0_n,\ldots,H^{m(n)}_n$; the initial and final distributions form the two ensembles $\calH^0:=\set{H^0_n}$ and $\calH^m:=\set{H^{m(n)}_n}$ that we want to prove are indistinguishable.
+The hybrid bound (\cref{lem:hybrid}) applies to each such sequence, but showing that it is negligible requires additional care: the sum of polynomially many \emph{different} negligible functions is not necessarily negligible.\footnote{For example, let $\nu_i(n)=1$ when $n=i$ and $\nu_i(n)=0$ otherwise.
+  Each~$\nu_i$ is negligible, but $\sum_{i=1}^n\nu_i(n)=1$ for every~$n$.}
 
-\begin{question}
-  Let \(G\) be a PRG. Is \(H(x) := \overline{G(x)}\)
-  \emph{necessarily} a PRG as well?  \emph{Hint:} think about the
-  composition lemma.
-\end{question}
-  
-\begin{answer}
-  Yes. The intuition here is that if \(G(x)\) looks random, then its
-  complement \(\overline{G(x)}\) should look like the complement of a
-  uniformly random string, which itself is uniformly random.
+\begin{corollary}[Polynomially many hybrid steps]
+  \label{cor:hybrid-polynomial}
+  Let $m(n)\geq1$ be integer-valued, with $1^{m(n)}$ polynomial-time computable from $1^n$, so $m(n)=\poly(n)$.
+  For each~$n$, let $H^0_n,\ldots,H^{m(n)}_n$ be distributions, and define $\calH^0:=\set{H^0_n}$ and $\calH^m:=\set{H^{m(n)}_n}$.
+  Let $\calX=\set{X_n}$ and $\calY=\set{Y_n}$ be computationally indistinguishable ensembles, and let~$\Sim$ be a PPT algorithm.
+  Writing $\Sim_i(1^n,z):=\Sim(1^n,i,z)$, suppose that for every~$n$ and every $i\in[m(n)]$,
+  \begin{equation}
+    \label{eq:hybrid-simulator-identities}
+    \Sim_i(1^n,X_n)\equiv H^{i-1}_n
+    \qquad\text{and}\qquad
+    \Sim_i(1^n,Y_n)\equiv H^i_n\text.
+  \end{equation}
+  Then $\calH^0\compind\calH^m$.
+\end{corollary}
 
-  The formal proof is a straightforward application of the composition
-  lemma. Since \(G\) is a PRG, we have
-  \(G(U_n) \compind U_{\ell(n)}\), where $\ell(n)$ is $G$'s
-  expansion. Consider the efficient algorithm
-  \(\Sim(x) := \overline{x}\). Observe that
-  \(H(x) = \overline{G(x)} = \Sim(G(x))\) for any~$x$. By the
-  composition lemma, we have
-  \[ H(U_{n}) = \Sim(G(U_n)) \compind \Sim(U_{\ell(n)}) \equiv
-    U_{\ell(n)}, \] where the last equivalence holds because any
-  bijective function applied to the uniform distribution yields the
-  uniform distribution. Thus, \(H(U_n) \compind U_{\ell(n)}\), as
-  needed.
-\end{answer}
+\begin{proof}
+  Define the \emph{averaging simulator}~$\bar{\Sim}$ that, on input $(1^n,z)$, chooses $i\gets[m(n)]$ uniformly and runs $\Sim_i(1^n,z)$ with fresh randomness; clearly, this~$\bar{\Sim}$ is PPT\@.
 
-\begin{question}
-  Prove (or at least sketch a proof) that a \emph{statistically}
-  pseudorandom generator cannot exist. \emph{Hint:} think about the
-  sizes of $G(\bit^n)$ and $\bit^{\ell(n)}$, and define an appropriate
-  statistical test (i.e., subset of $\bit^{\ell(n)}$).
-\end{question}
+  Fix any PPT algorithm~$\Dist'$; we will show that it has negligible advantage in distinguishing~$\calH^0$ and~$\calH^m$.
+  Let \[ p_i(n)=\Pr[\Dist'(1^n,H^i_n)=1] \text, \] so the advantage is $\abs{p_0(n)-p_{m(n)}(n)}$.
+  To use the hypothesis $\calX\compind\calY$, consider the composed PPT distinguisher $\Dist(1^n,\cdot):=\Dist'(1^n,\bar{\Sim}(1^n,\cdot))$ from \cref{lem:composition}.
+  Unfolding the definition of~$\Dist$, averaging over the choice of~$i$ using \cref{eq:hybrid-simulator-identities}, and telescoping the sum as in \cref{lem:hybrid} gives
+  \begin{align*}
+    \advan_{\calX,\calY}(\Dist)(n)
+    &=\abs*{\Pr[\Dist'(1^n,\bar{\Sim}(1^n,X_n))=1]-\Pr[\Dist'(1^n,\bar{\Sim}(1^n,Y_n))=1]} \\
+    &=\frac{1}{m(n)}\abs[\bigg]{\sum_{i=1}^{m(n)}\parens*{\Pr[\Dist'(1^n,H^{i-1}_n)=1]-\Pr[\Dist'(1^n,H^i_n)=1]}} \\
+    &=\frac{1}{m(n)}\abs[\bigg]{\sum_{i=1}^{m(n)}\parens{p_{i-1}(n)-p_i(n)}} \\
+    &=\frac{\abs{p_0(n)-p_{m(n)}(n)}}{m(n)}
+    =\frac{\advan_{\calH^0,\calH^m}(\Dist')(n)}{m(n)}\text.
+  \end{align*}
+  Since $\calX\compind\calY$ and~$\Dist$ is PPT, its advantage on the left-hand side is negligible.
+  Multiplying by $m(n)=\poly(n)$ preserves negligibility, so the advantage of~$\Dist'$ on the right-hand-side is negligible as well.
+  Since~$\Dist'$ was arbitrary, we finally conclude that $\calH^0\compind\calH^m$, as claimed.
+\end{proof}
 
-\begin{answer}
-  Since $G$ has $n$-bit seeds (of which there are $2^n$), there are at
-  most $2^n$ possible outputs of $G$ (which reside in
-  $\bit^{\ell(n)}$). However, $\bit^{\ell(n)}$ is significantly larger
-  than this; it has $2^{\ell(n)} \geq 2^{n+1}$ elements, making it at
-  least twice as big as the image of \(G\). Informally, we can think
-  of our statistical test as checking whether or not its given string
-  is in the image of $G$. When the string is an output of~$G$, the
-  check always succeeds; when the string is uniformly random, there is
-  a significant (at least $1/2$) probability that the check fails.
+We emphasize that in \cref{eq:hybrid-simulator-identities}, it is important that each~$\Sim_i$ maps~$X_n$ to the hybrid with the lower index $i-1$, and~$Y_n$ to the hybrid with the higher index~$i$.
+This consistent ordering makes the acceptance-probability differences telescope \emph{before} we take the absolute value.
+Taking the absolute value of each difference $p_{i-1}(n)-p_i(n)$ before summing would only \emph{upper}-bound the advantage of~$\Dist$ by the average advantage of~$\Dist'$ between adjacent hybrids.
+This would be the wrong direction: we need to upper-bound the advantage of~$\Dist'$ between~$\calH^0$ and~$\calH^m$ in terms of the advantage of~$\Dist$ between~$\calX$ and~$\calY$, which we know is negligible.
 
-  More formally and in the language of statistical indistinguishably:
-  let $A = G(\bit^n) \subseteq \bit^{\ell(n)}$, i.e., the image of
-  $G$, as suggested above. Because~$G$ is deterministic, we have
-  $\abs{A} \leq 2^{n}$. Then
-  \[
-    \begin{aligned}
-      \abs{G(U_n)(A) - U_{\ell(n)}(A)}
-      &= \abs{1 - U_{\ell(n)}(A)} \\
-      &= 1 - \abs{A} \cdot 2^{-\ell(n)}  \\
-      &\geq 1 - 2^{n-\ell(n)} \\
-      &\geq 1 - 2^{-1} = 1/2,
-    \end{aligned}
-  \]
-  which is (very much) non-negligible. Since we have demonstrated a
-  particular~$A$ for which
-  $\abs{G(U_n)(A) - U_{\ell(n)}(A)} \geq 1/2$, the suprenum over all
-  possible~$A$ cannot be smaller, so
-  $\Delta(G(U_n), U_{\ell(n)}) \geq 1/2$.
-\end{answer}
-
-\subsection{Expansion of a PRG}
-\label{sec:properties}
-
-From the definition, it is easy to see that the ``weakest'' PRG we
-could ask for would be one that stretches its input by just 1 bit,
-i.e., $\ell(n) = n+1$.  Is there an upper limit on how much a PRG can
-stretch?  The following theorem says that there is (effectively)
-\emph{no limit}: if you can stretch by even just 1 bit, then you can
-stretch by essentially any (polynomial) amount!
-
-\begin{theorem}
-  \label{thm:expansion}
-  Suppose there exists a PRG $G$ with expansion $\ell(n)=n+1$.  Then
-  for any polynomial $t(\cdot) = \poly(n)$, there exists a PRG
-  $G_t: \bit^n \to \bit^{t(n)}$.
-\end{theorem}
-
-\noindent
-We will prove this theorem in the next lecture.
-
-\begin{remark}
-  This theorem says something extremely strong.  Observe that the
-  image $\set{G_{t}(s) : s \in \bit^{n}}$ of $G_t$ is an extremely
-  small fraction $2^{n-t(n)}$ of its range set $\bit^{t(n)}$.  Yet no
-  computationally bounded algorithm can distinguish a random element
-  from this small subset, from a truly random one over the whole
-  space!
-\end{remark}
+In the next lecture, we will apply these tools to pseudorandom generators, which expand a short random seed into a longer pseudorandom string.
 
 \end{document}
 

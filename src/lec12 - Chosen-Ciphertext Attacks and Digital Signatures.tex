@@ -233,7 +233,7 @@ is public information.
 \begin{definition}
   \label{def:uf-cma-sig}
   We say that $\sig$ is \emph{(strongly) unforgeable under
-    chosen-message-attack} (UF-CMA-secure) if for every nuppt $\For$,
+    chosen-message-attack} (UF-CMA-secure) if for every PPT $\For$,
   \[ \advan_{\sig}(\For) := \Pr_{(\vk,\sk) \gets \siggen}
   \bracks*{\For^{\sigsign_{\sk}(\cdot)}(\vk) \text{ succeeds}} \leq
   \negl(n), \] where ``succeeds'' means that $\For$ outputs $(m' ,

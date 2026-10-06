@@ -39,8 +39,8 @@
     unbounded) $P^{*}$,
     \[ \Pr\left[ \out_{V}[ P^{*}(x) \leftrightarrow V(x) ] = 1 \right]
     \leq s. \]
-  \item \emph{Zero-knowledgeness}: for every nuppt (possibly cheating)
-    verifier $V^{*}$, there exists an nuppt simulator $\Sim$ such that
+  \item \emph{Zero-knowledgeness}: for every PPT (possibly cheating)
+    verifier $V^{*}$, there exists a PPT simulator $\Sim$ such that
     for all $x \in L$, \[ \view_{V^{*}}[P(x) \leftrightarrow V^{*}(x)]
     \approx \Sim(x). \]
   \end{enumerate}
@@ -71,12 +71,9 @@ proved in zero-knowledge.''
 
 \begin{theorem}
   \label{thm:zkp-np}
-  Assume that there exists a statistically binding / computationally
-  hiding commitment scheme, defined below.  In particular, such a
-  commitment scheme can be constructed from any one-way permutation,
-  or even any one-way function.  Then for any $\NP$-language $L$ (also
-  defined below), there is a zero-knowledge proof system (with
-  efficient prover) for $L$.  
+  Assume that there exists a statistically binding commitment scheme (defined below) that is computationally hiding against \emph{non-uniform} PPT distinguishers.
+  (In particular, such a commitment scheme can be constructed from a one-way permutation, or even a one-way function, secure against non-uniform PPT inverters.)
+  Then for any $\NP$-language~$L$ (also defined below), there is a zero-knowledge proof system with efficient prover for~$L$.
 \end{theorem}
 
 \subsection{Preliminaries}
@@ -287,8 +284,8 @@ The following claim is immediate by inspection:
 
 \begin{proof}
   Let $G \in \tcol$, and let $\pi$ be an arbitrary valid $3$-coloring
-  of $G$.  Let $V^{*}$ be an arbitrary nuppt cheating verifier.  We
-  need to show that there exists an nuppt simulator $\Sim$ such
+  of $G$.  Let $V^{*}$ be an arbitrary PPT cheating verifier.  We
+  need to show that there exists a PPT simulator $\Sim$ such
   that \[\view_{V^{*}}[P(G,\pi) \leftrightarrow V^{*}(G)] \compind
   \Sim(G). \] As usual, we will give a ``black-box'' simulator $\Sim$
   that uses $V^{*}$ only as an oracle.  Informally, the simulator
@@ -373,13 +370,10 @@ The following claim is immediate by inspection:
     would actually consider a sequence of ``sub-hybrids'' in which one
     color $k_{i}$ at a time is changed from its ``true'' value
     $\rho(\pi(i))$ (as in $H_{1}$) to its ``simulated'' value $1$ (as
-    in $H_{2}$).  We remark that the reduction from breaking the
-    commitment scheme to distinguishing adjacent sub-hybrids uses
-    \emph{non-uniformity} in an essential way, because to simulate the
-    entire view of $V^{*}$ (given a commitment to either
-    $\rho(\pi(i))$ or $1$), the simulator needs to have $G$ and $\pi$
-    ``hard-coded'' into it.  (This is a rather technical point, but is
-    an important one for a rigorous proof.)
+    in $H_{2}$).
+    This reduction uses the stronger hiding assumption in \cref{thm:zkp-np}: to simulate the other commitments, it is given~$G$ and~$\pi$ as polynomial-length advice.
+    A hypothetical distinguisher for the views can thereby be converted into a non-uniform distinguisher against the commitment scheme.
+    This advice is used only in the security reduction; the verifier~$V^{*}$ and the simulator $\Sim^{V^{*}}(G)$ remain uniform PPT algorithms.
 
   \item $H_{3}$ is the view of $V^{*}$ in an interaction with
     $\Sim(G)$.  It is easy to see that $H_{2}$ and $H_{3}$ are

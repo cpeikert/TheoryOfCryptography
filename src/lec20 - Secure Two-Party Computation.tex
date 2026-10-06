@@ -131,24 +131,19 @@ interesting and non-trivial.
     \out_{P_{i}}[P_{1}(x_{1}) \leftrightarrow P_{2}(x_{2})] =
     f(x_1,x_2). \]
 
-  \item \emph{Privacy}: there exist nuppt simulators $\Sim_1, \Sim_2$
+  \item \emph{Privacy}: there exist PPT simulators $\Sim_1, \Sim_2$
     such that for all $x_{1}, x_{2} \in \bit^{*}$ and all $i \in
     \set{1,2}$, \[ \view_{P_{i}}[P_{1}(x_{1}) \leftrightarrow
     P_{2}(x_{2})] \compind \Sim_{i}(x_{i}, f(x_{1}, x_{2})). \]
   \end{enumerate}
 \end{definition}
 
-A few remarks are in order.  First, privacy is \emph{per-instance}:
-the only knowledge leaked to a party by the protocol on inputs $x_{1},
-x_{2}$ is whatever can be inferred (efficiently) from the party's own
-input and the value of $f(x_{1}, x_{2})$.  For example, if the inputs
-are such that $f(x_{1}, x_{2})$ reveals nothing at all, then the
-execution of the protocol on those inputs should also reveal nothing;
-conversely, if the output reveals everything about both parties'
-inputs, then the protocol is allowed to leak everything as well.
-Second, any ``prior knowledge'' that the parties have about each
-others' inputs is captured by the non-uniformity of the simulator (and
-implicit distinguisher) in the definition of privacy.
+A few remarks are in order.
+First, privacy is \emph{per instance}: the only knowledge leaked to a party by the protocol on inputs $x_{1}, x_{2}$ is whatever can be inferred (efficiently) from the party's own input and the value of $f(x_{1}, x_{2})$.
+For example, if the inputs are such that $f(x_{1}, x_{2})$ reveals nothing at all, then the execution of the protocol on those inputs should also reveal nothing; conversely, if the output reveals everything about both parties' inputs, then the protocol is allowed to leak everything as well.
+To model additional prior knowledge, we can extend the definition by giving the distinguisher an auxiliary string~$z$ in both the real and simulated experiments.
+We would then require indistinguishability even given this information, for the allowed joint distributions of inputs and~$z$.
+This auxiliary information is not included in the definition above.
 
 \subsection{Definition for Randomized Functions}
 \label{sec:defin-rand-funct}
@@ -179,7 +174,7 @@ comparing two \emph{joint} distributions: the ``real world''
 distribution of the parties' outputs and the semi-honest party's view,
 versus the ``ideal world'' distribution of the function output and
 simulated view (again, for a \emph{single} randomized evaluation of
-$f$).  Formally, we require that there exist nuppt simulators
+$f$).  Formally, we require that there exist PPT simulators
 $\Sim_{1}$, $\Sim_{2}$ such that for all $x_{1}, x_{2}$ and all $i \in
 \set{1,2}$, \[ (\out_{P_{1}}, \out_{P_{2}},\view_{P_i})[P_1(x_1)
 \leftrightarrow P_2(x_2)] \compind (f(x_{1}, x_{2}; r),

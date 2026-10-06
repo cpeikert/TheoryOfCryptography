@@ -64,7 +64,7 @@ similarity to the information-theoretic statements above.)
 \begin{definition}
   \label{def:zk-skc}
   A shared-key cryptosystem $\skc$ for message space $\msgspace$ is
-  \emph{zero-knowledge} if there exists an nuppt \emph{simulator}
+  \emph{zero-knowledge} if there exists a PPT \emph{simulator}
   $\Sim$ such that for all $m \in \msgspace$, \[ \set{k \gets
     \skcgen(1^{n}) : \skcenc_{k}(m)} \compind \set{\Sim(1^{n})}. \]
 \end{definition}
@@ -76,26 +76,20 @@ one-time indistinguishability, which says that for all $m_{0}, m_{1}
 
 \begin{theorem}
   \label{thm:zk-iff-indist}
-  A shared-key cryptosystem $\skc$ is one-time indistinguishable if
-  and only if it is zero-knowledge.
+  A shared-key cryptosystem~$\skc$ is one-time indistinguishable if and only if it is zero-knowledge.
 \end{theorem}
 
 \begin{proof}
-  If $\skc$ is zero-knowledge, let $\Sim$ be the simulator guaranteed
-  by \cref{def:zk-skc}.  Then by hypothesis, for all $m_{0},
-  m_{1} \in \mathcal{M}$,
-  \[ \set{k \gets \skcgen(1^{n}): \skcenc_{k}(m_0)} \compind
-  \set{\Sim(1^{n})} \compind \set{k \gets \skcgen(1^{n}) :
-    \skcenc_{k}(m_1)}. \] One-time indistinguishability follows by the
-  hybrid lemma.
+  If $\skc$ is zero-knowledge, let $\Sim$ be the simulator guaranteed by \cref{def:zk-skc}.
+  Then by hypothesis, for all $m_{0}, m_{1} \in \mathcal{M}$,
+  \[ \set{k \gets \skcgen(1^{n}): \skcenc_{k}(m_0)} \compind \set{\Sim(1^{n})} \compind \set{k \gets \skcgen(1^{n}) : \skcenc_{k}(m_1)}.
+  \] One-time indistinguishability follows by the hybrid lemma.
 
-  If $\skc$ is one-time indistinguishable, let $m' \in \msgspace$
-  denote some arbitrary message, and define $\Sim(1^{n})$ to choose $k
-  \gets \skcgen(1^{n})$ and output $c \gets \skcenc_{k}(m')$.  Then by
-  one-time indistinguishability, for any $m \in \msgspace$ we have
-  \[ \set{k \gets \skcgen(1^{n}): \skcenc_{k}(m)} \compind \set{k
-    \gets \skcgen(1^{n}) : \skcenc_{k}(m')} \equiv
-  \set{\Sim(1^{n})}. \]
+  If $\skc$ is one-time indistinguishable, define $\Sim(1^{n})$ to choose an arbitrary fixed message $m' \in \msgspace$, choose $k \gets \skcgen(1^{n})$, and output $c \gets \skcenc_{k}(m')$.
+  This simulator is PPT\@.
+  By one-time indistinguishability, for any $m \in \msgspace$ we have
+  \[ \set{k \gets \skcgen(1^{n}): \skcenc_{k}(m)} \compind \set{k \gets \skcgen(1^{n}) : \skcenc_{k}(m')} \equiv \set{\Sim(1^{n})}.
+  \]
 \end{proof}
 
 \subsection{Why Zero Knowledge?}

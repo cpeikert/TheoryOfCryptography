@@ -37,7 +37,7 @@ Recall our formal definition of a one-way function:
     all $x \in \bit^{*}$.
   \item \emph{Hard to invert.}  An efficient algorithm inverts $f$ on
     a random input with only negligible probability.  Formally, for
-    any non-uniform PPT algorithm $\Inv$, the \emph{advantage} of
+    any PPT algorithm $\Inv$, the \emph{advantage} of
     $\Inv$ \[ \advan_{f}(\Inv) := \Pr_{x \gets \bit^{n}} \bracks*{
       \Inv(1^{n}, f(x)) \in f^{-1}(f(x)) } = \negl(n) \] is a
     negligible function (in the security parameter $n$).
@@ -143,7 +143,7 @@ plausible conjecture:
 
 \begin{conjecture}[Factoring Assumption]
   \label{conj:fact-primes-hard}
-  For every non-uniform PPT algorithm $\Adv$,
+  For every PPT algorithm $\Adv$,
   \[ \Pr_{p,q \gets \Pi_{n}} [\Adv(p \cdot q) = (p,q)] = \negl(n). \]
 \end{conjecture}
 
@@ -238,7 +238,7 @@ rare.  We would then have a $\delta$-\emph{weak} one-way function,
 where the ``hard to invert'' property from \cref{def:owf} is
 relaxed to the following:
 \begin{itemize}
-\item For any non-uniform PPT algorithm $\Inv$, \[ \advan_{f}(\Inv) :=
+\item For any PPT algorithm $\Inv$, \[ \advan_{f}(\Inv) :=
   \Pr_{x \gets \bit^{n}} \bracks*{\Inv(f(x)) \in f^{-1}(f(x))} \leq
   1-\delta, \] for some $\delta = \delta(n) = 1/\poly(n)$.
 \end{itemize}
@@ -266,9 +266,9 @@ have the following theorem:
 
 \begin{question}
   Does inverting~$f'(x_{1}, \ldots, x_{m})$ require
-  inverting~$f(x_{i})$ for all $i=1,\ldots,m$?  Since an nuPPT
+  inverting~$f(x_{i})$ for all $i=1,\ldots,m$?  Since a PPT
   algorithm can have advantage at most $1-\delta$ in inverting a
-  single~$f(x_{i})$, does this imply that an nuPPT algorithm can have
+  single~$f(x_{i})$, does this imply that a PPT algorithm can have
   advantage at most
   $(1-\delta)^{m} \leq (1-\delta)^{2n/\delta} \leq (1/e)^{2n} =
   \negl(n)$ in inverting~$f'$?
@@ -312,11 +312,11 @@ success probability is bounded by $(1-\delta)^{m}$.
 To give a correct proof of the theorem, we need to perform a
 \emph{reduction} from inverting~$f$ with advantage $> 1-\delta$ to
 inverting~$f'$ with some non-negligible advantage.  Unpacking this a
-bit, we want to prove the contrapositive: suppose there is some nuPPT
+bit, we want to prove the contrapositive: suppose there is some PPT
 adversary~$\Inv'$ that manages to break the (strong) one-wayness
 of~$f'$, i.e., it inverts with some non-negligible advantage
 $\advan_{f'}(\Inv') = \alpha = \alpha(n)$.  Then we will construct
-another nuPPT adversary~$\Inv$ that manages to break the $\delta$-weak
+another PPT adversary~$\Inv$ that manages to break the $\delta$-weak
 one-wayness of~$f$, i.e., it inverts~$f$ with advantage
 $\advan_{f}(\Inv) > 1-\delta$.  In doing so, we will use~$\Inv'$ as a
 ``black box,'' invoking it on inputs of our choice and using its
