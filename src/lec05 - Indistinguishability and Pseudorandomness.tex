@@ -260,30 +260,30 @@ It is thus a \emph{reduction} from distinguishing $\calX$ and~$\calY$ to disting
 \Cref{lem:composition} uses the same index~$n$ for both the source and target ensembles.
 In some applications, the output distribution at parameter~$n'$ instead depends on a source distribution at a different, related index~$n$.
 For example, we may define $X'_{2n}=\Sim(1^{n},X_{n})$ and $Y'_{2n}=\Sim(1^{n},Y_{n})$, and want to establish indistinguishability with respect to the parameter $n'=2n$.
-The following extension allows~$n'$ to be a function of~$n$, with its values ranging over an infinite subset~$I$ of~$\N$.
-For ensembles indexed by~$I$, we interpret negligibility and indistinguishability by letting~$n'$ tend to infinity within~$I$.
+The following extension allows both source and target parameters to range over infinite subsets of~$\N$, so we can also restrict the source ensembles to the parameter values used by a construction.
+For ensembles indexed by an infinite subset of~$\N$, we interpret negligibility and indistinguishability by letting the parameter tend to infinity within that subset.
 
 \begin{lemma}[Composition with security-parameter change]%
   \label{lem:composition-parameters}
-  Let $\calX = \set{X_{n}}$ and $\calY = \set{Y_{n}}$ be ensembles, and let~$\Sim$ be a PPT algorithm.
-  Let $n'=n'(n)$ be an injective map such that $1^{n'}$ is computable in polynomial time from $1^{n}$, and let $I=n'(\N)$.
-  Define $X'_{n'}=\Sim(1^{n},X_{n})$ and $Y'_{n'}=\Sim(1^{n},Y_{n})$, and let $\calX'=\set{X'_{n'}}_{n' \in I}$ and $\calY'=\set{Y'_{n'}}_{n' \in I}$.
-  For any distinguisher~$\Dist'$ (regardless of efficiency), the composed distinguisher $\Dist(1^{n},\cdot) := \Dist'(1^{n'},\Sim(1^{n},\cdot))$ has advantage
+  Let $I\subseteq\N$ be infinite, let $\calX = \set{X_{n}}_{n\in I}$ and $\calY = \set{Y_{n}}_{n\in I}$ be ensembles, and let~$\Sim$ be a PPT algorithm.
+  Let $n'=n'(n)$ be an injective map on~$I$ such that $1^{n'}$ is computable in polynomial time from $1^{n}$ for $n\in I$, and let $I'=n'(I)$.
+  Define $X'_{n'}=\Sim(1^{n},X_{n})$ and $Y'_{n'}=\Sim(1^{n},Y_{n})$, and let $\calX'=\set{X'_{n'}}_{n' \in I'}$ and $\calY'=\set{Y'_{n'}}_{n' \in I'}$.
+  For any distinguisher~$\Dist'$ (regardless of efficiency), the composed distinguisher $\Dist(1^{n},\cdot) := \Dist'(1^{n'},\Sim(1^{n},\cdot))$ has advantage, for every $n\in I$,
   \[
     \advan_{\calX,\calY}(\Dist)(n) = \advan_{\calX',\calY'}(\Dist')(n')\text.
   \]
   If~$\Dist'$ is PPT, then so is~$\Dist$.
-  In particular, if $\calX \compind \calY$, then $\calX' \compind \calY'$ on the target parameter set~$I$.
+  In particular, if $\calX \compind \calY$, then $\calX' \compind \calY'$ on the target parameter set~$I'$.
 \end{lemma}
 
 \begin{proof}
-  Injectivity ensures that $\calX',\calY'$ are well-defined and that $n'(n)\to\infty$ as $n\to\infty$; efficient computation of $1^{n'}$ from $1^{n}$ implies $n'=\poly(n)$.
+  Injectivity ensures that $\calX',\calY'$ are well-defined and that $n'(n)\to\infty$ as $n\to\infty$ within~$I$; efficient computation of $1^{n'}$ from $1^{n}$ implies $n'=\poly(n)$.
   The advantage equality follows by the same calculation as in \cref{lem:composition}, using independent randomness for~$\Sim$ and~$\Dist'$.
 
   Fix any PPT distinguisher~$\Dist'$.
   Then~$\Dist$ is PPT, because $1^{n'}$ is efficiently computable from $1^{n}$ and~$\Sim$ is PPT.
-  If $\calX \compind \calY$, then the advantage of~$\Dist$ is negligible in~$n$.
-  The change-of-parameter property from Lecture~2 then implies that the advantage of~$\Dist'$ is negligible in~$n'$ on~$I$, proving $\calX' \compind \calY'$.
+  If $\calX \compind \calY$, then the advantage of~$\Dist$ is negligible in~$n$ on~$I$.
+  The change-of-parameter property from Lecture~2 then implies that the advantage of~$\Dist'$ is negligible in~$n'$ on~$I'$, proving $\calX' \compind \calY'$.
 \end{proof}
 
 \begin{remark}
