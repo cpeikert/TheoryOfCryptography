@@ -115,7 +115,7 @@ application of any (randomized) procedure.
 \begin{lemma}
   Statistical distance is a metric; in particular, it satisfies the
   following three properties:
-  \begin{itemize}
+  \begin{itemize}[itemsep=0pt]
   \item Identity of indiscernibles: $\Delta(X,Y) = 0 \iff X = Y$
   \item Symmetry: $\Delta(X,Y) = \Delta(Y,X)$
   \item Subadditivity (triangle inequality):
@@ -141,11 +141,9 @@ are ``essentially the same,'' in an asymptotic sense.
 
 \begin{definition}
   \label{def:stat-ind}
-  Let $\calX = \set{X_{n}}_{n \in \N}$ and
-  $\calY = \set{Y_{n}}_{n \in \N}$ be sequences of probability
-  distributions, called \emph{ensembles}.  We say that $\calX$ and
-  $\calY$ are \emph{statistically indistinguishable}, written
-  $\calX \statind \calY$, if \[ \Delta(X_{n}, Y_{n}) = \negl(n). \]
+  Let $\calX = \set{X_{n}}$ and $\calY = \set{Y_{n}}$ be sequences of probability distributions, called \emph{ensembles}, indexed by security parameters $n\in\N$.\footnote{More generally, to accommodate restrictions on the allowed security parameters, both ensembles may be indexed by a common infinite subset of~$\N$.
+    In that case, all asymptotic statements refer to~$n$ tending to infinity within that subset.}
+  We say that $\calX$ and $\calY$ are \emph{statistically indistinguishable}, written $\calX \statind \calY$, if \[ \Delta(X_{n}, Y_{n}) = \negl(n)\text. \]
 \end{definition}
 
 \begin{example}
@@ -196,8 +194,10 @@ We may suppress the input $1^{n}$ and the argument~$n$ when they are clear from 
 \end{definition}
 
 The basic facts about statistical distance also carry over to computational indistinguishability, where we restrict all functions/tests to be \emph{efficient}.
-We call the analogue of \cref{lem:ipl} the \emph{composition lemma}, because it involves the composition of an arbitrary PPT procedure and distinguisher.
-We call the analogue of the triangle inequality the \emph{hybrid lemma}, because (as we will see soon) we usually invoke it on a sequence of ``hybrid'' distributions that interpolate step-by-step between two distributions we ultimately care about.
+We call the analogue of \cref{lem:ipl} the \emph{composition lemma} (see \cref{lem:composition}), because it involves the composition of an arbitrary PPT procedure and distinguisher.
+We call the analogue of the triangle inequality the \emph{hybrid lemma} (see \cref{lem:hybrid}), because we typically invoke it on a sequence of ``hybrid'' distributions that interpolate step-by-step between two distributions we ultimately care about.
+
+\subsubsection{Composition Lemma}
 
 \begin{lemma}[Composition lemma]
   \label{lem:composition}
@@ -251,45 +251,13 @@ It is thus a \emph{reduction} from distinguishing $\calX$ and~$\calY$ to disting
     \set{\overline{X_n}}
     =\set{\Sim(1^n,X_n)}
     \compind\set{\Sim(1^n,U_{\ell(n)})}
-    \equiv\set{U_{\ell(n)}}\text,
+    =\set{U_{\ell(n)}}\text,
   \]
   where the last equality of distributions holds because bitwise complementation is a permutation of $\bit^{\ell(n)}$.
   Thus $\set{\overline{X_n}}$ is pseudorandom.
 \end{answer}
 
-\Cref{lem:composition} uses the same index~$n$ for both the source and target ensembles.
-In some applications, the output distribution at parameter~$n'$ instead depends on a source distribution at a different, related index~$n$.
-For example, we may define $X'_{2n}=\Sim(1^{n},X_{n})$ and $Y'_{2n}=\Sim(1^{n},Y_{n})$, and want to establish indistinguishability with respect to the parameter $n'=2n$.
-The following extension allows both source and target parameters to range over infinite subsets of~$\N$, so we can also restrict the source ensembles to the parameter values used by a construction.
-For ensembles indexed by an infinite subset of~$\N$, we interpret negligibility and indistinguishability by letting the parameter tend to infinity within that subset.
-
-\begin{lemma}[Composition with security-parameter change]%
-  \label{lem:composition-parameters}
-  Let $I\subseteq\N$ be infinite, let $\calX = \set{X_{n}}_{n\in I}$ and $\calY = \set{Y_{n}}_{n\in I}$ be ensembles, and let~$\Sim$ be a PPT algorithm.
-  Let $n'=n'(n)$ be an injective map on~$I$ such that $1^{n'}$ is computable in polynomial time from $1^{n}$ for $n\in I$, and let $I'=n'(I)$.
-  Define $X'_{n'}=\Sim(1^{n},X_{n})$ and $Y'_{n'}=\Sim(1^{n},Y_{n})$, and let $\calX'=\set{X'_{n'}}_{n' \in I'}$ and $\calY'=\set{Y'_{n'}}_{n' \in I'}$.
-  For any distinguisher~$\Dist'$ (regardless of efficiency), the composed distinguisher $\Dist(1^{n},\cdot) := \Dist'(1^{n'},\Sim(1^{n},\cdot))$ has advantage, for every $n\in I$,
-  \[
-    \advan_{\calX,\calY}(\Dist)(n) = \advan_{\calX',\calY'}(\Dist')(n')\text.
-  \]
-  If~$\Dist'$ is PPT, then so is~$\Dist$.
-  In particular, if $\calX \compind \calY$, then $\calX' \compind \calY'$ on the target parameter set~$I'$.
-\end{lemma}
-
-\begin{proof}
-  Injectivity ensures that $\calX',\calY'$ are well-defined and that $n'(n)\to\infty$ as $n\to\infty$ within~$I$; efficient computation of $1^{n'}$ from $1^{n}$ implies $n'=\poly(n)$.
-  The advantage equality follows by the same calculation as in \cref{lem:composition}, using independent randomness for~$\Sim$ and~$\Dist'$.
-
-  Fix any PPT distinguisher~$\Dist'$.
-  Then~$\Dist$ is PPT, because $1^{n'}$ is efficiently computable from $1^{n}$ and~$\Sim$ is PPT.
-  If $\calX \compind \calY$, then the advantage of~$\Dist$ is negligible in~$n$ on~$I$.
-  The change-of-parameter property from Lecture~2 then implies that the advantage of~$\Dist'$ is negligible in~$n'$ on~$I'$, proving $\calX' \compind \calY'$.
-\end{proof}
-
-\begin{remark}
-  Both composition statements also hold for non-uniform PPT algorithms $\Dist'$ and~$\Sim$ if the source ensembles are indistinguishable against non-uniform PPT distinguishers.
-  The reduction's advice consists of the advice needed by the two algorithms at the corresponding parameters; its length remains polynomially bounded.
-\end{remark}
+\subsubsection{Hybrid Lemma}
 
 \begin{lemma}[Hybrid lemma]
   \label{lem:hybrid}
@@ -309,11 +277,9 @@ For ensembles indexed by an infinite subset of~$\N$, we interpret negligibility 
   \]
 \end{proof}
 
-\begin{remark}
-  Even though the intended goal of~$\Dist$ is to distinguish~$X^0$ from~$X^m$, the proof of \cref{lem:hybrid} analyzes the same distinguisher on every hybrid distribution~$X^i$.
-  This is legitimate because~$\Dist$ is just an algorithm, so we can analyze its behavior on any input distribution we like.
-  If~$\Dist$ has advantage~$\varepsilon$ between~$X^0$ and~$X^m$, the hybrid lemma guarantees that it has advantage at least $\varepsilon/m$ between some adjacent pair $X^{i-1}$ and~$X^i$.
-\end{remark}
+It is important to understand that even though the intended goal of~$\Dist$ is to distinguish~$X^0$ from~$X^m$, the proof of \cref{lem:hybrid} analyzes the same distinguisher on \emph{every} hybrid distribution~$X^i$.
+This is legitimate because~$\Dist$ is just an algorithm, so we can analyze its behavior on any input distribution we like.
+If~$\Dist$ has advantage~$\varepsilon$ in distinguishing between~$X^0$ and~$X^m$, the hybrid lemma guarantees that it has advantage at least $\varepsilon/m$ in distinguishing between some adjacent pair $X^{i-1}$ and~$X^i$.
 
 \begin{corollary}
   \label{cor:hybrid-constant}
@@ -334,10 +300,10 @@ For ensembles indexed by an infinite subset of~$\N$, we interpret negligibility 
 
 \paragraph{Polynomially many hybrid steps.}
 
-In many applications, the number of hybrid steps grows (polynomially) with the security parameter~$n$.
+In many applications, the number of hybrid steps grows polynomially with the security parameter~$n$.
 We cannot directly express this by replacing the constant~$m$ in \cref{cor:hybrid-constant} with a function $m(n)$, because~$n$ is in scope only within each ensemble.
-Instead, for each~$n$, we define a sequence of \emph{distributions} $H^0_n,\ldots,H^{m(n)}_n$; the initial and final distributions form the two ensembles $\calH^0:=\set{H^0_n}$ and $\calH^m:=\set{H^{m(n)}_n}$ that we want to prove are indistinguishable.
-The hybrid bound (\cref{lem:hybrid}) applies to each such sequence, but showing that it is negligible requires additional care: the sum of polynomially many \emph{different} negligible functions is not necessarily negligible.\footnote{For example, let $\nu_i(n)=1$ when $n=i$ and $\nu_i(n)=0$ otherwise.
+Instead, for each~$n$, we define a sequence of distributions $H^0_n,\ldots,H^{m(n)}_n$; the initial and final distributions form the two ensembles $\calH^0:=\set{H^0_n}$ and $\calH^m:=\set{H^{m(n)}_n}$ that we want to prove are indistinguishable.
+The hybrid bound (\cref{lem:hybrid}) applies to each such sequence, but bounding this sum by a negligible function requires additional care: the sum of polynomially many \emph{different} negligible functions is not necessarily negligible.\footnote{For example, let $\nu_i(n)=1$ when $n=i$ and $\nu_i(n)=0$ otherwise.
   Each~$\nu_i$ is negligible, but $\sum_{i=1}^n\nu_i(n)=1$ for every~$n$.}
 
 \begin{corollary}[Polynomially many hybrid steps]
@@ -375,12 +341,52 @@ The hybrid bound (\cref{lem:hybrid}) applies to each such sequence, but showing 
   Since~$\Dist'$ was arbitrary, we finally conclude that $\calH^0\compind\calH^m$, as claimed.
 \end{proof}
 
-We emphasize that in \cref{eq:hybrid-simulator-identities}, it is important that each~$\Sim_i$ maps~$X_n$ to the hybrid with the lower index $i-1$, and~$Y_n$ to the hybrid with the higher index~$i$.
-This consistent ordering makes the acceptance-probability differences telescope \emph{before} we take the absolute value.
-Taking the absolute value of each difference $p_{i-1}(n)-p_i(n)$ before summing would only \emph{upper}-bound the advantage of~$\Dist$ by the average advantage of~$\Dist'$ between adjacent hybrids.
-This would be the wrong direction: we need to upper-bound the advantage of~$\Dist'$ between~$\calH^0$ and~$\calH^m$ in terms of the advantage of~$\Dist$ between~$\calX$ and~$\calY$, which we know is negligible.
+What matters in \cref{eq:hybrid-simulator-identities} is that the mapping of $X_n,Y_n$ to the two adjacent hybrids has the same orientation for every~$i$.
+That is, mapping~$X_n$ to $H^i_n$ and~$Y_n$ to $H^{i-1}_n$ for every~$i$ would work equally well: it simply negates the telescoping sum, leaving its absolute value unchanged.
+Either consistent orientation makes the acceptance-probability differences telescope \emph{before} we take the absolute value.
+By contrast, averaging the absolute values of the differences $p_{i-1}(n)-p_i(n)$ would only \emph{upper}-bound the advantage of~$\Dist$ by the average advantage of~$\Dist'$ between adjacent hybrids.
+Such a bound goes in the wrong direction: we need to upper-bound the advantage of~$\Dist'$ between~$\calH^0$ and~$\calH^m$ in terms of the advantage of~$\Dist$ between~$\calX$ and~$\calY$, which we know is negligible.
 
-In the next lecture, we will apply these tools to pseudorandom generators, which expand a short random seed into a longer pseudorandom string.
+\subsubsection{Changing the Security Parameter}
+
+A cryptographic primitive evaluated at one security parameter may invoke another primitive at a different parameter.
+For example, in Lecture~3's hardness amplification, the direct product~$f^{(m)}$ has input length $n'=n\cdot m(n)$, but evaluates~$f$ on blocks of length~$n$.
+There we transferred a security guarantee expressed in~$n$ to one expressed in~$n'$.
+Here we ask the analogous question for computational indistinguishability: if two ensembles are indistinguishable at parameter~$n$, do they remain so when indexed by~$n'$?
+
+\begin{lemma}[Change of security parameter]
+  \label{lem:change-parameters}
+  Let $I\subseteq\N$ be infinite, and let $\calX = \set{X_{n}}_{n\in I}$ and $\calY = \set{Y_{n}}_{n\in I}$ be ensembles.
+  Let $n'=n'(n)$ be an injective map from~$I$ to~$\N$ such that $1^{n'}$ is computable in polynomial time from $1^{n}$ for $n\in I$, and let $I'=n'(I)$.
+  Define $X'_{n'(n)}=X_n$ and $Y'_{n'(n)}=Y_n$, and let $\calX'=\set{X'_{n'}}_{n' \in I'}$ and $\calY'=\set{Y'_{n'}}_{n' \in I'}$.
+  If $\calX \compind \calY$, then $\calX' \compind \calY'$ with respect to the security parameter $n'\in I'$.
+\end{lemma}
+
+\begin{proof}
+  Injectivity ensures that $\calX',\calY'$ are well-defined.
+  Fix any PPT distinguisher~$\Dist'$ for the relabeled ensembles, and define
+  \[
+    \Dist(1^n,z):=\Dist'(1^{n'(n)},z)\text.
+  \]
+  Then~$\Dist$ is PPT because $1^{n'(n)}$ is efficiently computable from $1^n$.
+  By construction, for every $n\in I$,
+  \[
+    \advan_{\calX,\calY}(\Dist)(n)
+    =\advan_{\calX',\calY'}(\Dist')(n'(n))\text.
+  \]
+  Because $\calX\compind\calY$, this common advantage is negligible in~$n$ for $n\in I$.
+  Efficient computation of $1^{n'}$ from $1^n$ implies $n'=\poly(n)$, and injectivity implies $n'(n)\to\infty$ as $n\to\infty$ within~$I$.
+  The change-of-parameter property from Lecture~2 therefore makes the advantage negligible in~$n'$ for $n'\in I'$.
+  Since~$\Dist'$ was arbitrary, $\calX'\compind\calY'$.
+\end{proof}
+
+\begin{remark}[Non-uniform adversaries]
+  The composition lemma (\cref{lem:composition}), hybrid lemma and its corollaries (\cref{lem:hybrid,cor:hybrid-constant,cor:hybrid-polynomial}), and change-of-parameter lemma (\cref{lem:change-parameters}) have non-uniform analogues.
+  In each, the indistinguishability hypotheses and conclusions alike are against non-uniform PPT distinguishers, and the simulators may also be non-uniform.
+  For composition, give the reduction both the simulator's and the distinguisher's advice; their combined length is still polynomial.
+  In the hybrid arguments, use the same advice on every hybrid distribution, so the same probability calculations apply.
+  For a change of parameter, the distinguisher's advice at~$n'$ has polynomial length in~$n$ because $n'=\poly(n)$.
+\end{remark}
 
 \end{document}
 

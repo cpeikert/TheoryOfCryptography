@@ -28,11 +28,11 @@
 
 \begin{enumerate}
 \item It is possible to construct a hard-core predicate for any
-  one-way function.  Let $f: \{0,1\}^{*} \rightarrow \{0,1\}^{*}$ be
-  any one-way function (or permutation).  We define $f'(r,x) =
-  (r,f(x))$ for $\len{r} = \len{x}$.  Then $f'$ is also a one way
-  function (or permutation, respectively), and $h(r,x) = \inner{r,x}
-  \bmod 2$ is a hard core predicate for $f'$.
+  one-way function.
+  Let $f: \bit^{*} \rightarrow \bit^{*}$ be any one-way function (or permutation).
+  We define $f'(r,x) = (r,f(x))$ for $\len{r} = \len{x}$.
+  Taking the total input length as the security parameter, $f'$ is also a one way function (or permutation, respectively), with the even positive integers as its allowed security parameters.
+  Moreover, $h(r,x) = \inner{r,x} \bmod 2$ is a hard core predicate for~$f'$.
 \item A pseudorandom generator exists under the assumption that a
   one-way permutation exists.  Formally, if $f$ is a OWP and $h$ is a
   hard-core predicate for $f$, then $G(s) = (f(s), h(s))$ is a PRG

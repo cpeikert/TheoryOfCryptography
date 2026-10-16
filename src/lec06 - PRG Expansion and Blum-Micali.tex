@@ -39,7 +39,7 @@ It is formalized as follows.
   A \emph{deterministic} function $G : \bit^{*} \to \bit^{*}$ is a \emph{pseudorandom generator} (PRG) with \emph{expansion} $\ell(n) > n$ if:
   \begin{itemize}
   \item $G$ can be evaluated by a polynomial-time algorithm,
-  \item $\len{G(x)} = \ell(\len{x}) > \len{x}$ for all $x \in \bit^{*}$, and
+  \item $\len{G(x)} = \ell(\len{x}) > \len{x}$ for all $x \in \bit^{*}$ (or more generally, whose length is an allowed security parameter), and
   \item the ensemble $\set{G(U_{n})}$ is pseudorandom, i.e., $\set{G(U_{n})} \compind \set{U_{\ell(n)}}$.
   \end{itemize}
 \end{definition}

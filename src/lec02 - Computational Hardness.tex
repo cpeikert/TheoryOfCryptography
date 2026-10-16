@@ -145,7 +145,7 @@ just keeping a message secret.
 
 To get there from here, there are many questions to which we must give
 precise mathematical answers.  here are just a few:
-\begin{itemize}
+\begin{itemize}[itemsep=0pt]
 \item How do we \emph{model} ``bounded computation''?
 \item What does it mean for a problem to be \emph{hard} for bounded
   computation?
@@ -171,6 +171,12 @@ Informally, we all know what an algorithm is: something that you can implement i
 As a formal mathematical object, an algorithm is a \emph{Turing machine}.
 In this course we will not need the formal definition too often, and the informal notion will usually suffice.
 
+% Keep the four computational-model paragraphs together with tighter heading spacing.
+\begingroup
+\makeatletter
+\renewcommand{\paragraph}{\@startsection{paragraph}{4}{\z@}%
+  {1.5ex \@plus .5ex \@minus .2ex}{-1em}{\normalfont\normalsize\bfseries}}
+\makeatother
 \paragraph{Running time.}
 
 The \emph{running time} of an algorithm on an input is the number of ``basic'' steps it performs before terminating.
@@ -199,11 +205,15 @@ Of course, an algorithm with running time $T(\ell)=\ell^{100}$ is not very usefu
 \paragraph{The security parameter.}
 
 To study how security scales, we index cryptographic schemes and experiments by a positive integer~$n$, called the \emph{security parameter}.
-Informally, it lets us specify ``how much'' security we want; it may determine quantities such as the key length, but need not equal the length of an algorithm's input.
+Informally, it lets us specify ``how much'' security we want; e.g., it typically determines quantities such as the key length.
 We give algorithms an additional input $1^n$, the all-$1$s string of length~$n$, so that they can use this parameter.
 We often suppress this input in notation, but it is implicitly available to all algorithms, including adversaries and reductions.
-The unary encoding of~$1^n$ allows a PPT algorithm to run for polynomially many steps in~$n$, regardless of the lengths of its other inputs.
+We encode the parameter in unary as~$1^n$ to allow a PPT algorithm to run for polynomially many steps in~$n$, regardless of the lengths of its other inputs.
 When the other inputs have length polynomially bounded in~$n$, polynomial time in the total input length is equivalent to polynomial time in~$n$.
+
+By default, the security parameter ranges over~$\N$.
+However, some constructions may be defined only for certain parameter values, such as even integers.
+In these cases we instead specify an infinite subset of~$\N$ as the allowed security parameters.
 
 \paragraph{Uniformity and advice.}
 
@@ -215,11 +225,14 @@ A non-uniform algorithm~$\Adv$ has a sequence of advice strings $w_1,w_2,\ldots\
 The advice may depend on~$n$, but not on the particular input or random coins, and need not be computable from~$n$.
 For a non-uniform PPT algorithm, the advice length is polynomially bounded in~$n$, and the running time is polynomial in the total input length.
 Security against non-uniform PPT adversaries is potentially stronger than security against PPT adversaries; we will explicitly identify any use of this stronger requirement.
+\par
+\endgroup
 
 \subsection{Asymptotics}
 \label{sec:asymptotics}
 
 We use asymptotic bounds to describe both computational resources and probabilities as the security parameter grows.
+When the allowed security parameters form a specified infinite subset of~$\N$, all asymptotic bounds and limits in the security parameter are taken as it tends to infinity within that subset.
 
 \paragraph{Polynomial and negligible bounds.}
 
