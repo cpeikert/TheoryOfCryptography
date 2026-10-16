@@ -230,48 +230,40 @@ exponentially small.\footnote{To be completely formal, in order to say
 \subsection{Weak OWFs and Hardness Amplification}
 \label{sec:hardn-ampl}
 
-The second way of dealing with the above difficulty of ``somewhere
-hard'' functions is more general, but also most costly and technically
-more complex.  Suppose we are not confident where the ``hard'' inputs
-to a OWF were likely to be, but we do believe that they aren't too
-rare.  We would then have a $\delta$-\emph{weak} one-way function,
-where the ``hard to invert'' property from \cref{def:owf} is
-relaxed to the following:
+The second way of dealing with the above difficulty of ``somewhere hard'' functions is more general, but also most costly and technically more complex.
+Suppose we are not confident where the ``hard'' inputs to a OWF are likely to be, but we do believe that they aren't too rare.
+We would then have a $\delta$-\emph{weak} one-way function, where the ``hard to invert'' property from \cref{def:owf} is relaxed to the following:
 \begin{itemize}
-\item For any PPT algorithm $\Inv$, \[ \advan_{f}(\Inv) :=
-  \Pr_{x \gets \bit^{n}} \bracks*{\Inv(f(x)) \in f^{-1}(f(x))} \leq
-  1-\delta, \] for some $\delta = \delta(n) = 1/\poly(n)$.
+\item For a specified $\delta = \delta(n) = 1/\poly(n)$, every PPT algorithm~$\Inv$ satisfies, for all sufficiently large allowed~$n$,
+  \[ \advan_{f}(\Inv) := \Pr_{x \gets \bit^{n}} \bracks*{\Inv(f(x)) \in f^{-1}(f(x))} \leq 1-\delta(n) \text. \]
 \end{itemize}
-The only change is that we have replaced the $\negl(n)$ success
-probability by $1-\delta$. (To contrast with the ``$\delta$-weak''
-nomenclature, we sometimes say that the original condition defines a
-\emph{strong} OWF.) This new definition allows for~$f$ to be easily
-invertible for a large fraction of inputs (e.g., all the even numbers,
-all those divisible by three, perfect squares, and the like), but not
-``almost everywhere:'' a $\delta$-fraction of the inputs remain hard.
+The only change is that we have replaced the $\negl(n)$ success probability by $1-\delta$.
+(To contrast with the ``$\delta$-weak'' nomenclature, we sometimes say that the original condition defines a \emph{strong} OWF.)
+This new definition allows for~$f$ to be easily invertible for a large fraction of inputs (e.g., all the even numbers, all those divisible by three, perfect squares, and the like), but every efficient inverter still fails with probability at least~$\delta$.
 
-Suppose that~$f$ is some arbitrary $\delta$-weak OWF.  Can we always
-get a (strong) OWF from it?  The answer is yes; this kind of result
-lies within the area called \emph{hardness amplification}.  For a
-function~$f$, define its $m$-wise \emph{direct product} as
-\[ f'(x_{1}, \ldots, x_{m}) = (f(x_{1}), \ldots, f(x_{m})), \] where
-we parse the input so that $\len{x_{1}} = \cdots = \len{x_{m}}$.  We
-have the following theorem:
+Suppose that~$f$ is some arbitrary $\delta$-weak OWF\@.
+Can we always get a (strong) OWF from it?
+The answer is yes; this kind of result lies within the area called \emph{hardness amplification}.
+For a function~$f$, define its $m$-wise \emph{direct product} as
+\[ f^{(m)}(x_{1}, \ldots, x_{m}) = (f(x_{1}), \ldots, f(x_{m}))\text, \] where we parse the input so that $\len{x_{1}} = \cdots = \len{x_{m}} = n$.
+We allow $m=m(n)$ to depend on~$n$ and write $f'=f^{(m)}$ for short when~$m$ is clear from context or its precise value is immaterial.
+The total input length $N=n \cdot m(n)$ is the security parameter for~$f'$.
+So, the allowed security parameters are precisely these lengths, as~$n$ ranges over~$\N$ (or, if applicable, the allowed security parameters of~$f$).
+To ensure that the total length determines how to parse the input efficiently, we require $m(n)$ to be positive integer-valued, nondecreasing, and polynomial-time computable from $1^n$.
+Then $nm(n)$ is strictly increasing, and the unique component length~$n$ can be recovered in polynomial time in~$N$ by trying lengths from~$1$ through~$N$.
+Thus~$f'$ is efficiently computable by parsing the input and evaluating~$f$ on each component.\footnote{If the allowed security parameters of~$f$ are all of~$\N$, we can extend~$f'$ to all input lengths: on an input of length $L\geq m(1)$, apply~$f'$ to the longest prefix of length $nm(n)$ and discard the remaining bits; for the finitely many shorter lengths, output the empty tuple.
+  If~$f'$ is one-way for its allowed input lengths and $m(n)$ is polynomially bounded, a generic input-truncation argument for OWFs shows that the extension is also one-way, since $nm(n)\leq L<(n+1)m(n+1)=\poly(n)$.}
 
 \begin{theorem}
   \label{thm:weak-strong-owf}
-  If $f$ is a $\delta$-weak one-way function, then $f'$ is a (strong)
-  one-way function for any $\poly(n)$-bounded $m \geq 2n/\delta$.
+  If $f$ is a $\delta$-weak one-way function, then for any such $\poly(n)$-bounded $m(n) \geq 2n/\delta(n)$, the direct product $f' = f^{(m)}$ is a (strong) one-way function for its allowed security parameters.
 \end{theorem}
 
+Such a choice of~$m$ exists because $1/\delta(n)=\poly(n)$, thus we can take $m(n)=Cn^k$ for sufficiently large positive integers $C,k$.
+
 \begin{question}
-  Does inverting~$f'(x_{1}, \ldots, x_{m})$ require
-  inverting~$f(x_{i})$ for all $i=1,\ldots,m$?  Since a PPT
-  algorithm can have advantage at most $1-\delta$ in inverting a
-  single~$f(x_{i})$, does this imply that a PPT algorithm can have
-  advantage at most
-  $(1-\delta)^{m} \leq (1-\delta)^{2n/\delta} \leq (1/e)^{2n} =
-  \negl(n)$ in inverting~$f'$?
+  Does inverting~$f'(x_{1}, \ldots, x_{m})$ require inverting~$f(x_{i})$ for all $i=1,\ldots,m$?
+  Since a PPT algorithm can have advantage at most $1-\delta$ in inverting a single~$f(x_{i})$, does this immediately imply that a PPT algorithm has advantage at most $(1-\delta)^{m} \leq (1-\delta)^{2n/\delta} \leq (1/e)^{2n} = \negl(n)$ in inverting~$f'$?
 \end{question}
 
 \begin{answer}
@@ -292,133 +284,95 @@ have the following theorem:
   \cref{thm:weak-strong-owf} for a rigorous argument.
 \end{answer}
 
-\paragraph{Proof idea:} The intuition here is that inverting~$f'$
-requires inverting~$f$ on~$m$ independently chosen values.  If each
-component is inverted independently with probability at most
-$1-\delta$, then the probability of inverting all of them should be at
-most
-\[ (1-\delta)^{m} \leq (1-\delta)^{2n/\delta} \leq (1/e)^{2n} =
-  \negl(n). \] Rigorously proving that this intuition is correct,
-however, turns out to be quite subtle.  The reason is that an
-adversary $\Inv'$ attacking~$f'$ does not have to treat each of the
-inversion subtasks $y_{1} = f(x_{1}), \ldots, y_{m} = f(x_{m})$
-independently.  For example, it might look at all of the $y_{i}$ at
-once, and either invert \emph{all} of them (with some non-negligible
-probability overall), or none of them.  So the individual events (that
-$\Inv'$ succeeds in the sub-task of inverting $y_{i} = f(x_{i})$) can
-be highly correlated, and we cannot simply say that the overall
-success probability is bounded by $(1-\delta)^{m}$.
+\paragraph{Proof idea.}
 
-To give a correct proof of the theorem, we need to perform a
-\emph{reduction} from inverting~$f$ with advantage $> 1-\delta$ to
-inverting~$f'$ with some non-negligible advantage.  Unpacking this a
-bit, we want to prove the contrapositive: suppose there is some PPT
-adversary~$\Inv'$ that manages to break the (strong) one-wayness
-of~$f'$, i.e., it inverts with some non-negligible advantage
-$\advan_{f'}(\Inv') = \alpha = \alpha(n)$.  Then we will construct
-another PPT adversary~$\Inv$ that manages to break the $\delta$-weak
-one-wayness of~$f$, i.e., it inverts~$f$ with advantage
-$\advan_{f}(\Inv) > 1-\delta$.  In doing so, we will use~$\Inv'$ as a
-``black box,'' invoking it on inputs of our choice and using its
-outputs in whatever way may be useful.  However, we cannot assume
-that~$\Inv'$ ``works'' in any particular way; we can only rely on the
-hypothesis that it violates the strong one-wayness of~$f'$.
+The intuition is that inverting~$f'$ requires inverting~$f$ on~$m$ independently chosen values.
+If each component is inverted independently with probability at most $1-\delta$, then the probability of inverting all of them should be at most
+\[ (1-\delta)^{m} \leq (1-\delta)^{2n/\delta} \leq 1/e^{2n} = \negl(n)\text. \]
+Rigorously proving that this intuition is correct, however, turns out to be quite subtle.
+The reason is that an adversary $\Inv'$ attacking~$f'$ does not have to treat each of the inversion subtasks $y_{1} = f(x_{1}), \ldots, y_{m} = f(x_{m})$ independently.
+For example, it might look at all of the $y_{i}$ at once, and either invert \emph{all} of them (with some non-negligible probability overall), or none of them.
+So the individual events (that $\Inv'$ succeeds in the sub-task of inverting $y_{i} = f(x_{i})$) can be highly correlated, and we cannot simply say that the overall success probability is bounded by $(1-\delta)^{m}$.
 
-The basic idea of the reduction is this: $\Inv$ is given $y = f(x)$
-and wants to use $\Inv'$ to invert~$y$.  An obvious first attempt is
-to ``plug in'' the value~$y$ as part of the output of~$f'$, i.e., to
-run $\Inv'$ on
-\[ y' = (y_{1} = y = f(x), y_{2} = f(x_{2}), \ldots, y_{m} = f(x_{m}))
-  = f'(x_{1} = x, x_{2}, \ldots, x_{m}) \] for some random
-$x_{2}, \ldots, x_{m}$ chosen by $\Inv$.  When $\Inv'$ produces a
-potential preimage $x'=(x'_{1},\ldots,x'_{m})$, then $\Inv$ just
-outputs $x'_{1}$ as its potential preimage of $y=f(x)$.  Notice that
-if~$\Inv'$ happens to invert~$y'$ successfully, then in particular
-$x_{1} \in f^{-1}(y)$, as required.
+We will show how to use any PPT inverter~$\Inv'$ for~$f'$ to construct a PPT inverter~$\Inv$ for~$f$, which ``amplifies'' the success probability $\alpha=\alpha(n)$ of~$\Inv'$.
+By the weak one-wayness of~$f$, however, no PPT inverter can succeed with probability greater than $1-\delta$ for infinitely many allowed parameters.
+Together, these facts will force~$\alpha$ to be negligible, as desired.
 
-Unfortunately, this simple idea does not quite work.  The problem is
-that~$\Inv'$ inverts only with non-negligible probability $\alpha$,
-whereas we need $\Inv$ to invert with (typically larger) probability
-$> 1-\delta$, to violate the weak one-wayness of~$f$.  We might hope
-to fix this problem by running~$\Inv'$ a large number of times, using
-the same $y_{1} = f(x)$ but \emph{fresh} random $x_{2}, \ldots, x_{m}$
-each time, expecting $\Inv'$ to successfully invert at least once.
-(Note that we can check whether~$\Inv'$ succeeded in inverting~$f'$ on
-a particular tuple, because~$f'$ is efficiently computable.)  This
-strategy is better, but still flawed: the problem is that the runs are
-\emph{not independent}, since we use the same $y_{1} = f(x)$ every
-time.  Indeed, $\Inv'$ might behave in a ``sneaky'' way to make this
-very strategy fail.  For example, $\Inv'$ might fix a certain
-$\alpha$-fraction of ``good'' values of $x_{1}$ for which it always
-inverts (ignoring $x_{2}, \ldots, x_{m}$), and fail for \emph{all}
-other values of $x_{1}$.  Notice that such $\Inv'$ has overall
-advantage $\alpha$, as required.  But no matter how many time we
-repeatedly run $\Inv'$ with $y_{1}=y=f(x)$, we will eventually succeed
-only if the original $x$ is ``good,'' which happens with probability
-only $\alpha$.
+The basic idea of the reduction is this: $\Inv$ is given $y = f(x)$ and wants to use $\Inv'$ to invert~$y$.
+An obvious first attempt is to ``plug in'' the value~$y$ as part of the output of~$f'$, e.g., to run $\Inv'$ on \[ y' = (y_{1} = y = f(x), y_{2} = f(x_{2}), \ldots, y_{m} = f(x_{m})) = f'(x_{1} = x, x_{2}, \ldots, x_{m}) \] for some random $x_{2}, \ldots, x_{m}$ chosen by $\Inv$.
+When $\Inv'$ outputs a candidate preimage $x'=(x'_{1},\ldots,x'_{m})$, our~$\Inv$ just outputs $x'_{1}$ as its candidate preimage of $y=f(x)$.
+Notice that if~$\Inv'$ happens to invert~$y'$ successfully, then in particular $x'_{1} \in f^{-1}(y)$, as required.
 
-A better reduction (which will turn out to work) just applies the
-above ``plug-and-repeat'' strategy for \emph{every} position
-$i = 1, \ldots, m$.  As it turns out, we can show that \emph{some}
-position must have a very large ($> 1-\delta/2$) fraction of ``good''
-$x_{i}$'s, for a suitable definition of good.  Conditioned on the~$x$
-from our given instance $y = f(x)$ being good, by repeatedly
-calling~$\Inv'$ a polynomial number of times (using fresh
-other~$x_{i}$ values each time), the probability that~$\Inv'$ inverts
-successfully in at least one call will be extremely close to 1, so our
-overall advantage in inverting~$f$ will be
-$\approx 1-\delta/2 > 1-\delta$, as desired.
+Unfortunately, this simple idea does not quite work.
+This gives~$\Inv$ success probability at least~$\alpha$, but we want to amplify its success probability toward~$1$.
+We might hope to fix this problem by running~$\Inv'$ a large number of times, using the same $y_{1} = f(x)$ but \emph{fresh} random $x_{2}, \ldots, x_{m}$ each time, expecting $\Inv'$ to successfully invert at least once.
+(Note that we can check whether~$\Inv'$ succeeded in inverting~$f'$ on a particular tuple, because~$f'$ is efficiently computable.)
+However, repetition does not necessarily increase the success probability: for a fixed challenge~$y$, the success probability of each attempt may be much smaller than~$\alpha$, or even zero.
+Indeed, $\Inv'$ might behave in a ``sneaky'' way to make this very strategy fail.
+For example, $\Inv'$ might have a certain fixed $\alpha$-fraction of ``good'' values of $x_{1}$ for which it always inverts (ignoring $x_{2}, \ldots, x_{m}$), and always fail for \emph{all} other values of $x_{1}$.
+Notice that such $\Inv'$ has overall advantage $\alpha$, as required.
+But no matter how many times we repeatedly run $\Inv'$ with $y_{1}=y=f(x)$, we will eventually succeed only if the original $x$ is ``good,'' which happens with probability only $\alpha$.
 
+A better reduction (which will turn out to work) just applies the above ``plug-and-repeat'' strategy for \emph{every} position $i = 1, \ldots, m$.
+As it turns out, unless~$\alpha$ is already exponentially small, \emph{some} position has a very large ($> 1-\delta/2$) fraction of ``good'' $x_{i}$s, for a suitable definition of good.
+Conditioned on the~$x$ from our given instance $y = f(x)$ being good, repeated calls to~$\Inv'$ with fresh randomness and fresh other components drive the probability of success toward~$1$.
+We will quantify how the number of repetitions depends on~$\alpha$, and use the weak one-wayness of~$f$ to bound~$\alpha$.
 We now give the formal proof.
 
 \begin{proof}[Proof of \cref{thm:weak-strong-owf}]
-  Because $m = \poly(n)$ by assumption (and because $2n/\delta = 2n
-  \cdot \poly(n) = \poly(n)$), if $f$ is efficiently computable, then
-  so is $f'$.  Now suppose that some efficient adversary $\Inv'$
-  violates the one-wayness of $f'$, with non-negligible advantage
-  $\alpha = \alpha(n) = \advan_{\Inv'}(f')$.  We wish to construct an
-  efficient adversary $\Inv$ that uses $\Inv'$ (efficiently) to
-  violate the $\delta$-weak one-wayness of $f$.
+  Fix any PPT inverter~$\Inv'$, and write $\alpha(n)$ for its advantage on~$f'$ at input length $N=nm(n)$.
+  Our goal is to show that $\alpha(n)=\negl(n)$.
+  We first analyze a fixed~$n$, suppressing the dependence of $\alpha,m,\delta$ on~$n$.
 
-  We first establish a crucial property of $\Inv'$ that will help us
-  obtain the desired reduction.  Define the ``good'' set for position
-  $i$ to be the set of all $x_{i}$ such that $\Inv'$ successfully
-  inverts with ``good enough'' probability, over the random choice of
-  all the remaining $x_{j}$.  Formally, \[ G_{i} = \set*{ x_{i}\;
-    :\; \Pr_{x_{j} \text{ for } j \neq i} \bracks*{ \Inv'(f'(x'))
-      \text{ succeeds} } \geq \frac{\alpha}{2m}}. \] Note that because
-  $\Inv'$ succeeds with at least $\alpha$ probability overall, it is
-  easy to see that $G_{i}$ is at least $(\alpha/2)$-dense for every
-  $i$.  However, we will show a very different fact: that $G_{i}$ is
-  at least $(1-\delta/2)$-dense for \emph{some} $i$.  (Note that
-  typically, $(1-\delta/2)$ is much larger than $\alpha$.)
+  To identify inputs on which repetition is effective, define the ``good'' set for position~$i$ by
+  \[
+    G_i=\set*{x_i : \Pr_{x_j\text{ for }j\neq i}\bracks*{\Inv'(f'(x_1,\ldots,x_m))\text{ succeeds}}\geq\frac{\alpha}{2m}}\text,
+  \]
+  where the other components are independent and uniform in $\bit^n$, and the probability also includes the random coins of~$\Inv'$.
 
   \begin{claim}
     \label{claim:good-dense}
-    For some $i$, we have $\frac{\abs{G_{i}}}{2^{n}} \geq
-    (1-\delta/2)$.
+    If $\alpha>1/2^{n-1}$, then some~$G_i$ has density greater than $1-\delta/2$ in $\bit^n$.
   \end{claim}
 
   \begin{proof}
-    Suppose not.  Then we have
-    \begin{align*}
-      \lefteqn{\Pr_{x'}[\Inv'(f'(x')) \text{ succeeds]}} \\
-      &\leq \Pr[\Inv' \text{ succeeds} \wedge \text{every } x_{i} \in
-      G_{i}] + \sum_{i=1}^{m} \Pr[\Inv' \text{ succeeds} \wedge
-      x_{i} \not\in G_{i}] & \text{(union bound)} \\
-      &\leq \Pr[\text{every } x_{i} \in G_{i}] + \sum_{i=1}^{m}
-      \Pr[\Inv' \text{ succeeds}\; |\; x_{i} \not\in
-      G_{i}] & \text{(probability)} \\
-      &< (1-\tfrac{\delta}{2})^{2n/\delta} + m \cdot \tfrac{\alpha}{2m}
-      & \text{(def \& size of $G_{i}$)} \\
-      &\leq 2^{-n} + \alpha/2 < \alpha,
-    \end{align*}
-    contradicting our assumption on $\Inv'$.
+    By a union bound and independence of the uniformly random components,
+    \[
+      \begin{aligned}
+        \alpha
+        &\leq \Pr[\text{every }x_i\in G_i]
+          +\sum_{i=1}^m\Pr[\Inv'\text{ succeeds and }x_i\notin G_i] \\
+        &\leq \prod_{i=1}^m\frac{\abs{G_i}}{2^n}+m\cdot\frac{\alpha}{2m}\text.
+      \end{aligned}
+    \]
+    Hence the product of the densities is at least $\alpha/2$, so at least one density is at least $\parens{\alpha/2}^{1/m}$.
+    This exceeds $1-\delta/2$, because
+    \[
+      \parens{1-\delta/2}^m\leq e^{-m\delta/2}\leq e^{-n}\leq 2^{-n}<\alpha/2\text.
+    \]
   \end{proof}
 
-  The remainder of the proof is a simple exercise, following the
-  ``plug-and-repeat'' strategy described above, and using
-  \cref{claim:good-dense}.
+  Our inverter $\Inv(1^{n}, y=f(x))$ tries every position~$i$, making some $t\geq1$ (to be determined below) independent attempts for each position.
+  In each attempt, it places~$y$ in position~$i$, samples the other components independently, and calls~$\Inv'$ with fresh random coins and security parameter $1^N$.
+  If the returned tuple is a valid preimage, $\Inv$ outputs its $i$th component; if all attempts fail, $\Inv$ reports failure.
+  Each attempt takes polynomial time in~$n$, including computing $1^N$ and running~$\Inv'$, since $N=\poly(n)$.
+  There are at most $mt$ attempts, so~$\Inv$ is PPT whenever~$t$ is polynomially bounded and efficiently computable.
+  (The algorithm~$\Inv$ does not need to know~$\alpha$ or the sets~$G_i$.)
+
+  Suppose $\alpha>1/2^{n-1}$, and take a position~$i$ supplied by \cref{claim:good-dense}.
+  With probability greater than $1-\delta/2$, the input~$x$ lies in~$G_i$.
+  For each such~$x$, all~$t$ attempts at this position fail with probability at most $\parens*{1-\alpha/(2m)}^t\leq e^{-t\alpha/(2m)}$.
+  Therefore,
+  \[
+    \advan_f(\Inv)(n)\geq 1-\frac{\delta}{2}-e^{-t\alpha/(2m)}\text.
+  \]
+
+  If $\alpha(n)$ were non-negligible, then $\alpha(n)\geq n^{-c}$ for some constant $c>0$ and infinitely many allowed~$n$.
+  Choose a polynomial repetition count $t(n)>2m(n)n^c\ln\parens{2/\delta(n)}$, which is possible because $m(n)$ and $1/\delta(n)$ are polynomially bounded.
+  For sufficiently large such~$n$, we have $\alpha(n)>1/2^{n-1}$ and $e^{-t\alpha/(2m)}<\delta/2$.
+  The above bound then makes the advantage of~$\Inv$ greater than $1-\delta$ for infinitely many allowed parameters, contradicting the weak one-wayness of~$f$.
+  Therefore, $\alpha(n)=\negl(n)$, as desired.
+  Finally, since $N=\poly(n)$ and $N\to\infty$ with~$n$, Lecture~2's change-of-parameter property makes the advantage of~$\Inv'$ negligible in~$N$, proving that~$f'$ is one-way.
 \end{proof}
 
 \end{document}
